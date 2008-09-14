@@ -24,8 +24,9 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.apache.axis2</groupId>
-        <artifactId>axis2-transports</artifactId>
+        <artifactId>axis2-transport</artifactId>
         <version>SNAPSHOT</version>
+        <relativePath>../parent/pom.xml</relativePath>
     </parent>
     <artifactId>axis2-transport-http</artifactId>
     <name>Transports - HTTP</name>
@@ -82,6 +83,7 @@
             <artifactId>commons-lang</artifactId>
         </dependency>
     </dependencies>
+    
     <build>
         <sourceDirectory>src</sourceDirectory>
         <testSourceDirectory>test</testSourceDirectory>
