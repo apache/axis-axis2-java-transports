@@ -66,6 +66,8 @@
                                             <fileset dir="modules/local/target/classes"/>
                                             <fileset dir="modules/tcp/target/classes"/>
                                             <fileset dir="modules/xmpp/target/classes"/>
+                                            <fileset dir="modules/base/target/classes"/>
+							  <fileset dir="modules/mail/target/classes"/>
                                         </jar>
                                     </tasks>
                                 </configuration>
@@ -101,6 +103,8 @@
                                             <fileset dir="modules/local/target/classes"/>
                                             <fileset dir="modules/tcp/target/classes"/>
                                             <fileset dir="modules/xmpp/target/classes"/>
+ 							  <fileset dir="modules/base/target/classes"/>
+							  <fileset dir="modules/mail/target/classes"/>
                                         </jar>
                                     </tasks>
                                 </configuration>
