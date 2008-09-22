@@ -16,11 +16,11 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.apache.synapse.transport.base.datagram;
+package org.apache.axis2.transport.base.datagram;
 
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.description.AxisService;
-import org.apache.synapse.transport.base.MetricsCollector;
+import org.apache.axis2.transport.base.MetricsCollector;
 
 /**
  * Endpoint description.

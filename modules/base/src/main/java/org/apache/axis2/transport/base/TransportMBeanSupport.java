@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.base;
+package org.apache.axis2.transport.base;
 
 import java.lang.management.ManagementFactory;
 
@@ -57,7 +57,7 @@ public class TransportMBeanSupport {
         }
         String jmxAgentName = System.getProperty("jmx.agent.name");
         if (jmxAgentName == null || "".equals(jmxAgentName)) {
-            jmxAgentName = "org.apache.synapse";
+            jmxAgentName = "org.apache.axis2";
         }
         String mbeanNameString = jmxAgentName + ":Type=Transport,ConnectorName=" + connectorName;
         try {

@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.mail;
+package org.apache.axis2.transport.mail;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
@@ -27,11 +27,11 @@ import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.TransportInDescription;
-import org.apache.synapse.transport.base.AbstractPollingTransportListener;
-import org.apache.synapse.transport.base.BaseConstants;
-import org.apache.synapse.transport.base.BaseUtils;
-import org.apache.synapse.transport.base.ManagementSupport;
-import org.apache.synapse.transport.base.ParamUtils;
+import org.apache.axis2.transport.base.AbstractPollingTransportListener;
+import org.apache.axis2.transport.base.BaseConstants;
+import org.apache.axis2.transport.base.BaseUtils;
+import org.apache.axis2.transport.base.ManagementSupport;
+import org.apache.axis2.transport.base.ParamUtils;
 
 import javax.mail.*;
 import javax.mail.internet.AddressException;

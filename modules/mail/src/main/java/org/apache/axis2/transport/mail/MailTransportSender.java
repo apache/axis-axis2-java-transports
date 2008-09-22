@@ -17,14 +17,14 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.mail;
+package org.apache.axis2.transport.mail;
 
-import org.apache.synapse.format.MessageFormatterEx;
-import org.apache.synapse.format.MessageFormatterExAdapter;
-import org.apache.synapse.transport.base.AbstractTransportSender;
-import org.apache.synapse.transport.base.BaseConstants;
-import org.apache.synapse.transport.base.BaseUtils;
-import org.apache.synapse.transport.base.ManagementSupport;
+import org.apache.axis2.format.MessageFormatterEx;
+import org.apache.axis2.format.MessageFormatterExAdapter;
+import org.apache.axis2.transport.base.AbstractTransportSender;
+import org.apache.axis2.transport.base.BaseConstants;
+import org.apache.axis2.transport.base.BaseUtils;
+import org.apache.axis2.transport.base.ManagementSupport;
 import org.apache.commons.logging.LogFactory;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;

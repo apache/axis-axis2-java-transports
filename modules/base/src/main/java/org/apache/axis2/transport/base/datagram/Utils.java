@@ -16,7 +16,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.apache.synapse.transport.base.datagram;
+package org.apache.axis2.transport.base.datagram;
 
 /**
  * Utility class with methods used by datagram transports.

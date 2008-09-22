@@ -29,7 +29,7 @@
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
     <artifactId>axis2-transport-http</artifactId>
-    <name>Transports - HTTP</name>
+    <name>Apache Axis2 - HTTP Transport</name>
     <description>This inclues all the available transports in Axis2</description>
     <dependencies>
         <dependency>
@@ -82,6 +82,11 @@
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-transport-base</artifactId>
+            <version>${axis2-transport-base.version}</version>
+        </dependency>
     </dependencies>
     
     <build>
@@ -103,4 +108,8 @@
             </resource>
         </resources>
     </build>
+
+    <properties>
+        <axis2-transport-base.version>SNAPSHOT</axis2-transport-base.version>
+    </properties>
 </project>

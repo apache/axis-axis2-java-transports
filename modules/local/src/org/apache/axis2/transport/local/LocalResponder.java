@@ -28,7 +28,7 @@ import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.handlers.AbstractHandler;
 import org.apache.axis2.transport.TransportSender;
 import org.apache.axis2.transport.TransportUtils;
-import org.apache.axis2.transport.http.HTTPTransportUtils;
+import org.apache.axis2.transport.base.BaseUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -69,8 +69,8 @@ public class LocalResponder extends AbstractHandler implements TransportSender {
 
         // Check for the REST behaviour, if you desire rest beahaviour
         // put a <parameter name="doREST" value="true"/> at the axis2.xml
-        msgContext.setDoingMTOM(HTTPTransportUtils.doWriteMTOM(msgContext));
-        msgContext.setDoingSwA(HTTPTransportUtils.doWriteSwA(msgContext));
+        msgContext.setDoingMTOM(BaseUtils.doWriteMTOM(msgContext));
+        msgContext.setDoingSwA(BaseUtils.doWriteSwA(msgContext));
 
         EndpointReference epr = null;
 

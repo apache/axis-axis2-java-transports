@@ -27,4 +27,4 @@
  * or because streaming a message would unnecessarily delay the processing of the
  * next available message (as in the case of a UNIX pipe).
  */
-package org.apache.synapse.transport.base.datagram;
+package org.apache.axis2.transport.base.datagram;

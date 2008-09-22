@@ -29,7 +29,7 @@
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
     <artifactId>axis2-transport-local</artifactId>
-    <name>Transports - Local</name>
+    <name>Apache Axis2 - Local Transport</name>
     <description>This inclues all the available transports in Axis2</description>
     <dependencies>
         <dependency>

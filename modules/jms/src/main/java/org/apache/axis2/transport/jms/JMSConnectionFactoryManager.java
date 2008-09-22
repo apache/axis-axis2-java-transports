@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.apache.synapse.transport.jms;
+package org.apache.axis2.transport.jms;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,7 +30,7 @@ import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.ParameterInclude;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.transport.base.threads.WorkerPool;
+import org.apache.axis2.transport.base.threads.WorkerPool;
 
 /**
  * Class managing a set of {@link JMSConnectionFactory} objects.

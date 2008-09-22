@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.base.threads;
+package org.apache.axis2.transport.base.threads;
 
 /**
  * Worker pool factory.

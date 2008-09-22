@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.mail;
+package org.apache.axis2.transport.mail;
 
 import javax.mail.Session;
 
@@ -88,6 +88,6 @@ public class MailConstants {
     public static final String MAIL_HEADER_REFERENCES  = "References";
 
     // Custom headers
-    /** @see org.apache.synapse.transport.mail.WSMimeMessage */
+    /** @see org.apache.axis2.transport.mail.WSMimeMessage */
     public static final String MAIL_HEADER_X_MESSAGE_ID= "X-Message-ID";
 }

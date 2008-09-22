@@ -29,7 +29,7 @@
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
     <artifactId>axis2-transport-tcp</artifactId>
-    <name>Transports - TCP</name>
+    <name>Apache Axis2 - TCP Transport</name>
     <description>This inclues all the available transports in Axis2</description>
     <dependencies>
         <dependency>

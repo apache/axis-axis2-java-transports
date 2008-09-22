@@ -32,6 +32,7 @@ import org.apache.axis2.transport.MessageFormatter;
 import org.apache.axis2.transport.OutTransportInfo;
 import org.apache.axis2.transport.TransportSender;
 import org.apache.axis2.transport.TransportUtils;
+import org.apache.axis2.transport.base.BaseUtils;
 import org.apache.axis2.transport.http.server.AxisHttpResponseImpl;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.httpclient.Header;
@@ -145,14 +146,14 @@ public class CommonsHTTPTransportSender extends AbstractHandler implements
         try {
             OMOutputFormat format = new OMOutputFormat();
             // if (!msgContext.isDoingMTOM())
-            msgContext.setDoingMTOM(HTTPTransportUtils.doWriteMTOM(msgContext));
-            msgContext.setDoingSwA(HTTPTransportUtils.doWriteSwA(msgContext));
-            msgContext.setDoingREST(HTTPTransportUtils.isDoingREST(msgContext));
+            msgContext.setDoingMTOM(BaseUtils.doWriteMTOM(msgContext));
+            msgContext.setDoingSwA(BaseUtils.doWriteSwA(msgContext));
+            msgContext.setDoingREST(BaseUtils.isDoingREST(msgContext));
             format.setSOAP11(msgContext.isSOAP11());
             format.setDoOptimize(msgContext.isDoingMTOM());
             format.setDoingSWA(msgContext.isDoingSwA());
-            format.setCharSetEncoding(HTTPTransportUtils
-                    .getCharSetEncoding(msgContext));
+            format.setCharSetEncoding(BaseUtils
+                .getCharSetEncoding(msgContext));
 
             Object mimeBoundaryProperty = msgContext
                     .getProperty(Constants.Configuration.MIME_BOUNDARY);

@@ -34,11 +34,13 @@
     <packaging>pom</packaging>
     <name>Axis2 Transport - Root</name>
     <modules>
+        <module>modules/base</module>
         <module>modules/http</module>
         <module>modules/tcp</module>
-        <module>modules/jms</module>
         <module>modules/local</module>
         <module>modules/xmpp</module>
+        <module>modules/mail</module>
+        <module>modules/jms</module>
     </modules>
     <profiles>
         <profile>

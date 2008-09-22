@@ -16,7 +16,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.apache.synapse.format;
+package org.apache.axis2.format;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,8 +33,8 @@ import org.apache.axis2.builder.Builder;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.Parameter;
 import org.apache.commons.io.IOUtils;
-import org.apache.synapse.transport.base.BaseConstants;
-import org.apache.synapse.transport.base.BaseUtils;
+import org.apache.axis2.transport.base.BaseConstants;
+import org.apache.axis2.transport.base.BaseUtils;
 
 /**
  * Message builder for binary payloads.

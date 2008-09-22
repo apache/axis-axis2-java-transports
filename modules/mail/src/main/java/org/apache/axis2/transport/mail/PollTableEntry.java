@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.mail;
+package org.apache.axis2.transport.mail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
 import org.apache.axis2.addressing.EndpointReference;
-import org.apache.synapse.transport.base.AbstractPollTableEntry;
+import org.apache.axis2.transport.base.AbstractPollTableEntry;
 
 /**
  * Holds information about an entry in the VFS transport poll table used by the

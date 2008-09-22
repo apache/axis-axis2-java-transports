@@ -16,7 +16,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.apache.synapse.format;
+package org.apache.axis2.format;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -33,7 +33,7 @@ import org.apache.axiom.om.OMText;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.util.URLTemplatingUtil;
-import org.apache.synapse.transport.base.BaseConstants;
+import org.apache.axis2.transport.base.BaseConstants;
 
 public class BinaryFormatter implements MessageFormatterEx {
     public byte[] getBytes(MessageContext messageContext, OMOutputFormat format) throws AxisFault {

@@ -17,9 +17,10 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.mail;
+package org.apache.axis2.transport.mail;
 
-import org.apache.synapse.transport.base.BaseUtils;
+import org.apache.axis2.transport.base.*;
+import org.apache.axis2.transport.base.BaseUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.axiom.soap.SOAP12Constants;

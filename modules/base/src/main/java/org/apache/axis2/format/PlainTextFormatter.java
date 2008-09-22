@@ -17,14 +17,14 @@
  *  under the License.
  */
 
-package org.apache.synapse.format;
+package org.apache.axis2.format;
 
 import org.apache.axis2.transport.http.util.URLTemplatingUtil;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.AxisFault;
 import org.apache.axiom.om.OMOutputFormat;
 import org.apache.axiom.om.OMElement;
-import org.apache.synapse.transport.base.BaseConstants;
+import org.apache.axis2.transport.base.BaseConstants;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;

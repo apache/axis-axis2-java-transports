@@ -16,7 +16,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.apache.synapse.transport.base.datagram;
+package org.apache.axis2.transport.base.datagram;
 
 public interface DatagramDispatcherCallback {
     void receive(DatagramEndpoint endpoint, byte[] data, int length);

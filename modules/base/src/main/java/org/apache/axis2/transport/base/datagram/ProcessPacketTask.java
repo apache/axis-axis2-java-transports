@@ -16,7 +16,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.apache.synapse.transport.base.datagram;
+package org.apache.axis2.transport.base.datagram;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -27,7 +27,7 @@ import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.transport.TransportUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.transport.base.MetricsCollector;
+import org.apache.axis2.transport.base.MetricsCollector;
 
 /**
  * Task encapsulating the processing of a datagram.

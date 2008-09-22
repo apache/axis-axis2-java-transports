@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.base;
+package org.apache.axis2.transport.base;
 
 /**
  * Collects metrics related to a transport that has metrics support enabled

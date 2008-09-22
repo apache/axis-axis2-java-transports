@@ -16,7 +16,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.apache.synapse.format;
+package org.apache.axis2.format;
 
 import java.io.OutputStream;
 import java.net.URL;

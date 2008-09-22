@@ -1,4 +1,4 @@
-package org.apache.synapse.transport.base;
+package org.apache.axis2.transport.base;
 
 import org.apache.axis2.AxisFault;
 

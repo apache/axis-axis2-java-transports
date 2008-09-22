@@ -16,7 +16,7 @@
 *  specific language governing permissions and limitations
 *  under the License.
 */
-package org.apache.synapse.transport.base;
+package org.apache.axis2.transport.base;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

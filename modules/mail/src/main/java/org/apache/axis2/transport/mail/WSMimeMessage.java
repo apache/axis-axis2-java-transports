@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.mail;
+package org.apache.axis2.transport.mail;
 
 import org.apache.axiom.om.util.UUIDGenerator;
 

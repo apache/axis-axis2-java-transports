@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.base;
+package org.apache.axis2.transport.base;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,11 +55,12 @@ import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.MessageFormatter;
 import org.apache.axis2.transport.TransportUtils;
-import org.apache.axis2.transport.http.HTTPTransportUtils;
+import org.apache.axis2.util.JavaUtils;
+import org.apache.axis2.context.OperationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.format.BinaryFormatter;
-import org.apache.synapse.format.PlainTextFormatter;
+import org.apache.axis2.format.BinaryFormatter;
+import org.apache.axis2.format.PlainTextFormatter;
 
 public abstract class BaseUtils {
 
@@ -132,14 +133,14 @@ public abstract class BaseUtils {
     public static OMOutputFormat getOMOutputFormat(MessageContext msgContext) {
 
         OMOutputFormat format = new OMOutputFormat();
-        msgContext.setDoingMTOM(HTTPTransportUtils.doWriteMTOM(msgContext));
-        msgContext.setDoingSwA(HTTPTransportUtils.doWriteSwA(msgContext));
-        msgContext.setDoingREST(HTTPTransportUtils.isDoingREST(msgContext));
+        msgContext.setDoingMTOM(doWriteMTOM(msgContext));
+        msgContext.setDoingSwA(doWriteSwA(msgContext));
+        msgContext.setDoingREST(isDoingREST(msgContext));
         format.setSOAP11(msgContext.isSOAP11());
         format.setDoOptimize(msgContext.isDoingMTOM());
         format.setDoingSWA(msgContext.isDoingSwA());
 
-        format.setCharSetEncoding(HTTPTransportUtils.getCharSetEncoding(msgContext));
+        format.setCharSetEncoding(getCharSetEncoding(msgContext));
         Object mimeBoundaryProperty = msgContext.getProperty(Constants.Configuration.MIME_BOUNDARY);
         if (mimeBoundaryProperty != null) {
             format.setMimeBoundary((String) mimeBoundaryProperty);
@@ -406,5 +407,131 @@ public abstract class BaseUtils {
             }
         }
         return false;
+    }
+
+    /**
+     * <p>
+     * Checks whether MTOM needs to be enabled for the message represented by
+     * the msgContext. We check value assigned to the "enableMTOM" property
+     * either using the config files (axis2.xml, services.xml) or
+     * programatically. Programatic configuration is given priority. If the
+     * given value is "optional", MTOM will be enabled only if the incoming
+     * message was an MTOM message.
+     * </p>
+     *
+     * @param msgContext the active MessageContext
+     * @return true if SwA needs to be enabled
+     */
+    public static boolean doWriteMTOM(MessageContext msgContext) {
+        boolean enableMTOM;
+        Object enableMTOMObject = null;
+        // First check the whether MTOM is enabled by the configuration
+        // (Eg:Axis2.xml, services.xml)
+        Parameter parameter = msgContext.getParameter(Constants.Configuration.ENABLE_MTOM);
+        if (parameter != null) {
+            enableMTOMObject = parameter.getValue();
+        }
+        // Check whether the configuration is overridden programatically..
+        // Priority given to programatically setting of the value
+        Object property = msgContext.getProperty(Constants.Configuration.ENABLE_MTOM);
+        if (property != null) {
+            enableMTOMObject = property;
+        }
+        enableMTOM = JavaUtils.isTrueExplicitly(enableMTOMObject);
+        // Handle the optional value for enableMTOM
+        // If the value for 'enableMTOM' is given as optional and if the request
+        // message was a MTOM message we sent out MTOM
+        if (!enableMTOM && msgContext.isDoingMTOM() && (enableMTOMObject instanceof String)) {
+            if (((String) enableMTOMObject).equalsIgnoreCase(Constants.VALUE_OPTIONAL)) {
+                enableMTOM = true;
+            }
+        }
+        return enableMTOM;
+    }
+
+    /**
+     * <p>
+     * Checks whether SOAP With Attachments (SwA) needs to be enabled for the
+     * message represented by the msgContext. We check value assigned to the
+     * "enableSwA" property either using the config files (axis2.xml,
+     * services.xml) or programatically. Programatic configuration is given
+     * priority. If the given value is "optional", SwA will be enabled only if
+     * the incoming message was SwA type.
+     * </p>
+     *
+     * @param msgContext the active MessageContext
+     * @return true if SwA needs to be enabled
+     */
+    public static boolean doWriteSwA(MessageContext msgContext) {
+        boolean enableSwA;
+        Object enableSwAObject = null;
+        // First check the whether SwA is enabled by the configuration
+        // (Eg:Axis2.xml, services.xml)
+        Parameter parameter = msgContext.getParameter(Constants.Configuration.ENABLE_SWA);
+        if (parameter != null) {
+            enableSwAObject = parameter.getValue();
+        }
+        // Check whether the configuration is overridden programatically..
+        // Priority given to programatically setting of the value
+        Object property = msgContext.getProperty(Constants.Configuration.ENABLE_SWA);
+        if (property != null) {
+            enableSwAObject = property;
+        }
+        enableSwA = JavaUtils.isTrueExplicitly(enableSwAObject);
+        // Handle the optional value for enableSwA
+        // If the value for 'enableSwA' is given as optional and if the request
+        // message was a SwA message we sent out SwA
+        if (!enableSwA && msgContext.isDoingSwA() && (enableSwAObject instanceof String)) {
+            if (((String) enableSwAObject).equalsIgnoreCase(Constants.VALUE_OPTIONAL)) {
+                enableSwA = true;
+            }
+        }
+        return enableSwA;
+    }
+
+    /**
+     * Utility method to query CharSetEncoding. First look in the
+     * MessageContext. If it's not there look in the OpContext. Use the defualt,
+     * if it's not given in either contexts.
+     *
+     * @param msgContext the active MessageContext
+     * @return String the CharSetEncoding
+     */
+    public static String getCharSetEncoding(MessageContext msgContext) {
+        String charSetEnc = (String) msgContext
+                .getProperty(Constants.Configuration.CHARACTER_SET_ENCODING);
+
+        if (charSetEnc == null) {
+            OperationContext opctx = msgContext.getOperationContext();
+            if (opctx != null) {
+                charSetEnc = (String) opctx
+                        .getProperty(Constants.Configuration.CHARACTER_SET_ENCODING);
+            }
+            /**
+             * If the char set enc is still not found use the default
+             */
+            if (charSetEnc == null) {
+                charSetEnc = MessageContext.DEFAULT_CHAR_SET_ENCODING;
+            }
+        }
+        return charSetEnc;
+    }
+
+    public static boolean isDoingREST(MessageContext msgContext) {
+        boolean enableREST = false;
+
+        // check whether isDoingRest is already true in the message context
+        if (msgContext.isDoingREST()) {
+            return true;
+        }
+
+        Object enableRESTProperty = msgContext.getProperty(Constants.Configuration.ENABLE_REST);
+        if (enableRESTProperty != null) {
+            enableREST = JavaUtils.isTrueExplicitly(enableRESTProperty);
+        }
+
+        msgContext.setDoingREST(enableREST);
+
+        return enableREST;
     }
 }

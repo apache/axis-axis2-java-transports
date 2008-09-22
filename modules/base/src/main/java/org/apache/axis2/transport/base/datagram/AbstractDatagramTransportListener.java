@@ -16,7 +16,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.apache.synapse.transport.base.datagram;
+package org.apache.axis2.transport.base.datagram;
 
 import java.io.IOException;
 import java.net.SocketException;
@@ -28,8 +28,8 @@ import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.TransportInDescription;
-import org.apache.synapse.transport.base.AbstractTransportListener;
-import org.apache.synapse.transport.base.ParamUtils;
+import org.apache.axis2.transport.base.AbstractTransportListener;
+import org.apache.axis2.transport.base.ParamUtils;
 
 public abstract class AbstractDatagramTransportListener<E extends DatagramEndpoint>
         extends AbstractTransportListener {
