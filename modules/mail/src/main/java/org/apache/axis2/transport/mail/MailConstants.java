@@ -90,4 +90,5 @@ public class MailConstants {
     // Custom headers
     /** @see org.apache.axis2.transport.mail.WSMimeMessage */
     public static final String MAIL_HEADER_X_MESSAGE_ID= "X-Message-ID";
+    
 }

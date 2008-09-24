@@ -21,15 +21,14 @@ package org.apache.axis2.transport.mail;
 
 import org.apache.axis2.format.MessageFormatterEx;
 import org.apache.axis2.format.MessageFormatterExAdapter;
-import org.apache.axis2.transport.base.AbstractTransportSender;
-import org.apache.axis2.transport.base.BaseConstants;
-import org.apache.axis2.transport.base.BaseUtils;
-import org.apache.axis2.transport.base.ManagementSupport;
+import org.apache.axis2.transport.base.*;
 import org.apache.commons.logging.LogFactory;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.description.Parameter;
+import org.apache.axis2.description.OutOnlyAxisOperation;
+import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.transport.OutTransportInfo;
@@ -43,12 +42,14 @@ import javax.activation.MailcapCommandMap;
 import javax.activation.CommandMap;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.io.IOException;
 
 /**
  * The mail transport sender sends mail using an SMTP server configuration defined
  * in the axis2.xml's transport sender definition
  */
+
 public class MailTransportSender extends AbstractTransportSender
     implements ManagementSupport {
 
@@ -135,6 +136,11 @@ public class MailTransportSender extends AbstractTransportSender
         CommandMap.setDefaultCommandMap(mc);
         
         session.setDebug(log.isTraceEnabled());
+
+        // set the synchronise callback table
+        if (cfgCtx.getProperty(BaseConstants.CALLBACK_TABLE) == null){
+            cfgCtx.setProperty(BaseConstants.CALLBACK_TABLE, new ConcurrentHashMap());
+        }
     }
 
     /**
@@ -181,7 +187,12 @@ public class MailTransportSender extends AbstractTransportSender
 
         if (mailOutInfo != null) {
             try {
-                sendMail(mailOutInfo, msgCtx);
+                String messageID = sendMail(mailOutInfo, msgCtx);
+                // this is important in axis2 client side if the mail transport uses anonymous addressing
+                // the sender have to wait util the response comes.
+                if (!msgCtx.getOptions().isUseSeparateListener() && !msgCtx.isServerSide()){
+                    waitForReply(msgCtx, messageID);
+                }
             } catch (MessagingException e) {
                 handleException("Error generating mail message", e);
             } catch (IOException e) {
@@ -192,13 +203,49 @@ public class MailTransportSender extends AbstractTransportSender
         }
     }
 
+    private void waitForReply(MessageContext msgContext, String mailMessageID) throws AxisFault {
+        // piggy back message constant is used to pass a piggy back
+        // message context in asnych model
+        if (msgContext.getAxisOperation() instanceof OutOnlyAxisOperation &&
+                (msgContext.getProperty(org.apache.axis2.Constants.PIGGYBACK_MESSAGE) == null)) {
+            return;
+        }
+
+        ConfigurationContext configContext = msgContext.getConfigurationContext();
+        // if the mail message listner has not started we need to start it
+        if (!configContext.getListenerManager().isListenerRunning(MailConstants.TRANSPORT_NAME)) {
+            TransportInDescription mailTo =
+                    configContext.getAxisConfiguration().getTransportIn(MailConstants.TRANSPORT_NAME);
+            if (mailTo == null) {
+                throw new AxisFault("Could not found the transport receiver for " + MailConstants.TRANSPORT_NAME);
+            }
+            configContext.getListenerManager().addListener(mailTo, false);
+        }
+
+        SynchronousCallback synchronousCallback = new SynchronousCallback(msgContext);
+        Map callBackMap = (Map) msgContext.getConfigurationContext().getProperty(BaseConstants.CALLBACK_TABLE);
+        callBackMap.put(mailMessageID, synchronousCallback);
+        synchronized (synchronousCallback) {
+            try {
+                synchronousCallback.wait(msgContext.getOptions().getTimeOutInMilliSeconds());
+            } catch (InterruptedException e) {
+                throw new AxisFault("Error occured while waiting ..", e);
+            }
+        }
+
+        if (!synchronousCallback.isComplete()){
+            throw new AxisFault("Timeout while waiting from a response");
+        }
+    }
+
     /**
      * Populate email with a SOAP formatted message
      * @param outInfo the out transport information holder
      * @param msgContext the message context that holds the message to be written
      * @throws AxisFault on error
+     * @return id of the send mail message
      */
-    private void sendMail(MailOutTransportInfo outInfo, MessageContext msgContext)
+    private String sendMail(MailOutTransportInfo outInfo, MessageContext msgContext)
         throws AxisFault, MessagingException, IOException {
 
         OMOutputFormat format = BaseUtils.getOMOutputFormat(msgContext);
@@ -428,5 +475,6 @@ public class MailTransportSender extends AbstractTransportSender
             handleException("Error creating mail message or sending it to the configured server", e);
             
         }
+        return message.getMessageID();
     }
 }

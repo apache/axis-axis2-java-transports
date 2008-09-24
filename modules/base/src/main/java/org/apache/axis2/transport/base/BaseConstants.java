@@ -85,4 +85,10 @@ public class BaseConstants {
      * The default poll interval in milliseconds.
      */
     public static final int DEFAULT_POLL_INTERVAL = 5 * 60 * 1000; // 5 mins by default
+
+    public static final String CALLBACK_TABLE = "callbackTable";
+    public static final String HEADER_IN_REPLY_TO = "In-Reply-To";
+
+    // this is an property required by axis2
+    public final static String MAIL_CONTENT_TYPE = "mail.contenttype";
 }

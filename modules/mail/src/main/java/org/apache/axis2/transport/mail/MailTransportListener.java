@@ -42,6 +42,7 @@ import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This mail transport lister implementation uses the base transport framework and is a polling
@@ -52,6 +53,7 @@ import java.util.*;
  * (e.g. with imap). When checking for new mail, the transport ignores messages already flaged as
  * SEEN and DELETED
  */
+
 public class MailTransportListener extends AbstractPollingTransportListener<PollTableEntry>
     implements ManagementSupport {
 
@@ -69,6 +71,11 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
     public void init(ConfigurationContext cfgCtx, TransportInDescription trpInDesc)
         throws AxisFault {
         super.init(cfgCtx, trpInDesc);
+
+        // set the synchronise callback table
+        if (cfgCtx.getProperty(BaseConstants.CALLBACK_TABLE) == null){
+            cfgCtx.setProperty(BaseConstants.CALLBACK_TABLE, new ConcurrentHashMap());
+        }
     }
 
     @Override
@@ -260,6 +267,11 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
             }
         } catch (MessagingException ignore) {}
 
+        // some times the mail server sends a special mail message which is not relavent
+        // in processing. ignore this message.
+        if ((trpHeaders.get("Status") != null) && (trpHeaders.get("Status").equals("RO"))){
+            return;
+        }
         // figure out content type of primary request. If the content type is specified, use it
         String contentType = entry.getContentType();
         if (BaseUtils.isBlank(contentType)) {
@@ -386,7 +398,7 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
      * @param message the email message to be moved or deleted
      */
     private void moveOrDeleteAfterProcessing(final PollTableEntry entry, Store store,
-        Folder folder, Message message) {
+                                             Folder folder, Message message) {
 
         String moveToFolder = null;
         try {
@@ -456,6 +468,7 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
                 }
             }
 
+
             entry.setContentType(
                 ParamUtils.getOptionalParam(service, MailConstants.TRANSPORT_MAIL_CONTENT_TYPE));
             entry.setReplyAddress(
@@ -493,7 +506,7 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
                 entry.setReconnectTimeout(Integer.parseInt(strReconnectTimeout) * 1000);
 
             return entry;
-            
+
         } catch (AxisFault axisFault) {
             String msg = "Error configuring the Mail transport for Service : " +
                 service.getName() + " :: " + axisFault.getMessage();

@@ -272,7 +272,19 @@ public abstract class AbstractTransportListener implements TransportListener {
         // send the message context through the axis engine
         try {
                 try {
-                    AxisEngine.receive(msgCtx);
+                    // check if an callback has register for this message
+                    Map callBackMap = (Map) msgCtx.getConfigurationContext().getProperty(BaseConstants.CALLBACK_TABLE);
+                    Object replyToMessageID = trpHeaders.get(BaseConstants.HEADER_IN_REPLY_TO);
+                    // if there is a call back register with this replyto ID then this has
+                    // to handle as a synchronized message
+                    if ((replyToMessageID != null) && (callBackMap.get(replyToMessageID) != null)) {
+                        SynchronousCallback synchronousCallback = (SynchronousCallback) callBackMap.get(replyToMessageID);
+                        synchronousCallback.setInMessageContext(msgCtx);
+                        callBackMap.remove(replyToMessageID);
+                    } else {
+                        AxisEngine.receive(msgCtx);
+                    }
+
                 } catch (AxisFault e) {
                     e.printStackTrace();
                     if (log.isDebugEnabled()) {
