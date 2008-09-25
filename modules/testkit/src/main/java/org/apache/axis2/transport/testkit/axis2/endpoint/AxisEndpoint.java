@@ -17,17 +17,17 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.axis2.endpoint;
+package org.apache.axis2.transport.testkit.axis2.endpoint;
 
 import java.net.URI;
 import java.util.UUID;
 
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
-import org.apache.synapse.transport.testkit.axis2.AxisServiceConfigurator;
-import org.apache.synapse.transport.testkit.channel.Channel;
-import org.apache.synapse.transport.testkit.name.Name;
-import org.apache.synapse.transport.testkit.server.Endpoint;
+import org.apache.axis2.transport.testkit.axis2.AxisServiceConfigurator;
+import org.apache.axis2.transport.testkit.channel.Channel;
+import org.apache.axis2.transport.testkit.name.Name;
+import org.apache.axis2.transport.testkit.server.Endpoint;
 
 @Name("axis")
 public abstract class AxisEndpoint implements Endpoint {

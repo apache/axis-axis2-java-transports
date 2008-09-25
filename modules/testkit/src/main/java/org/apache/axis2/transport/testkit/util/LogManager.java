@@ -17,18 +17,18 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.util;
+package org.apache.axis2.transport.testkit.util;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.apache.axis2.transport.testkit.tests.TransportTestCase;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.TTCCLayout;
 import org.apache.log4j.WriterAppender;
-import org.apache.synapse.transport.testkit.tests.TransportTestCase;
 
 public class LogManager {
     public static final LogManager INSTANCE = new LogManager();

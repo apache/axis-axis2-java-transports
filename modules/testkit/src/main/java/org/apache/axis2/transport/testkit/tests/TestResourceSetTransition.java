@@ -17,15 +17,15 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.tests;
+package org.apache.axis2.transport.testkit.tests;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.axis2.transport.testkit.tests.TestResourceSet.Status;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.transport.testkit.tests.TestResourceSet.Status;
 
 public class TestResourceSetTransition {
     private static final Log log = LogFactory.getLog(TestResourceSetTransition.class);

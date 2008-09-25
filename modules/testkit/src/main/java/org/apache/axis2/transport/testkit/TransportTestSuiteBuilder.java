@@ -17,9 +17,9 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit;
+package org.apache.axis2.transport.testkit;
 
-import static org.apache.synapse.transport.testkit.AdapterUtils.adapt;
+import static org.apache.axis2.transport.testkit.AdapterUtils.adapt;
 
 import java.text.ParseException;
 import java.util.Arrays;
@@ -29,25 +29,25 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.synapse.transport.testkit.channel.AsyncChannel;
-import org.apache.synapse.transport.testkit.channel.RequestResponseChannel;
-import org.apache.synapse.transport.testkit.client.AsyncTestClient;
-import org.apache.synapse.transport.testkit.client.RequestResponseTestClient;
-import org.apache.synapse.transport.testkit.message.AxisMessage;
-import org.apache.synapse.transport.testkit.message.MessageDecoder;
-import org.apache.synapse.transport.testkit.message.MessageEncoder;
-import org.apache.synapse.transport.testkit.message.RESTMessage;
-import org.apache.synapse.transport.testkit.message.XMLMessage;
-import org.apache.synapse.transport.testkit.message.RESTMessage.Parameter;
-import org.apache.synapse.transport.testkit.server.AsyncEndpoint;
-import org.apache.synapse.transport.testkit.server.Endpoint;
-import org.apache.synapse.transport.testkit.tests.async.BinaryTestCase;
-import org.apache.synapse.transport.testkit.tests.async.LargeSOAPAsyncMessageTestCase;
-import org.apache.synapse.transport.testkit.tests.async.RESTTestCase;
-import org.apache.synapse.transport.testkit.tests.async.SwATestCase;
-import org.apache.synapse.transport.testkit.tests.async.TextPlainTestCase;
-import org.apache.synapse.transport.testkit.tests.async.XMLAsyncMessageTestCase;
-import org.apache.synapse.transport.testkit.tests.echo.XMLRequestResponseMessageTestCase;
+import org.apache.axis2.transport.testkit.channel.AsyncChannel;
+import org.apache.axis2.transport.testkit.channel.RequestResponseChannel;
+import org.apache.axis2.transport.testkit.client.AsyncTestClient;
+import org.apache.axis2.transport.testkit.client.RequestResponseTestClient;
+import org.apache.axis2.transport.testkit.message.AxisMessage;
+import org.apache.axis2.transport.testkit.message.MessageDecoder;
+import org.apache.axis2.transport.testkit.message.MessageEncoder;
+import org.apache.axis2.transport.testkit.message.RESTMessage;
+import org.apache.axis2.transport.testkit.message.XMLMessage;
+import org.apache.axis2.transport.testkit.message.RESTMessage.Parameter;
+import org.apache.axis2.transport.testkit.server.AsyncEndpoint;
+import org.apache.axis2.transport.testkit.server.Endpoint;
+import org.apache.axis2.transport.testkit.tests.async.BinaryTestCase;
+import org.apache.axis2.transport.testkit.tests.async.LargeSOAPAsyncMessageTestCase;
+import org.apache.axis2.transport.testkit.tests.async.RESTTestCase;
+import org.apache.axis2.transport.testkit.tests.async.SwATestCase;
+import org.apache.axis2.transport.testkit.tests.async.TextPlainTestCase;
+import org.apache.axis2.transport.testkit.tests.async.XMLAsyncMessageTestCase;
+import org.apache.axis2.transport.testkit.tests.echo.XMLRequestResponseMessageTestCase;
 
 public class TransportTestSuiteBuilder {
     static class ResourceRelation<T> {

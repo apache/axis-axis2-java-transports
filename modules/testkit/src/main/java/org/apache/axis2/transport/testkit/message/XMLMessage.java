@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.message;
+package org.apache.axis2.transport.testkit.message;
 
 import javax.mail.internet.ContentType;
 import javax.mail.internet.ParseException;

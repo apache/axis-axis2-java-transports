@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.axis2.client;
+package org.apache.axis2.transport.testkit.axis2.client;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;

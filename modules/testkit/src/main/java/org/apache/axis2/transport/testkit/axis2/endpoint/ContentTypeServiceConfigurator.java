@@ -17,14 +17,14 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.axis2.endpoint;
+package org.apache.axis2.transport.testkit.axis2.endpoint;
 
 import javax.mail.internet.ContentType;
 
 import org.apache.axis2.description.AxisService;
-import org.apache.synapse.transport.testkit.axis2.AxisServiceConfigurator;
-import org.apache.synapse.transport.testkit.client.ClientOptions;
-import org.apache.synapse.transport.testkit.client.TestClient;
+import org.apache.axis2.transport.testkit.axis2.AxisServiceConfigurator;
+import org.apache.axis2.transport.testkit.client.ClientOptions;
+import org.apache.axis2.transport.testkit.client.TestClient;
 
 public class ContentTypeServiceConfigurator implements AxisServiceConfigurator {
     private final String parameterName;

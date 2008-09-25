@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.http;
+package org.apache.axis2.transport.testkit.http;
 
 import java.io.IOException;
 

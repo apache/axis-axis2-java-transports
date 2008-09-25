@@ -17,11 +17,11 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.client;
+package org.apache.axis2.transport.testkit.client;
 
 import javax.mail.internet.ContentType;
 
-import org.apache.synapse.transport.testkit.name.Key;
+import org.apache.axis2.transport.testkit.name.Key;
 
 @Key("client")
 public interface TestClient {

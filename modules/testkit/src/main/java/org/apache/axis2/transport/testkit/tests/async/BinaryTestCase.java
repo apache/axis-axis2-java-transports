@@ -17,17 +17,17 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.tests.async;
+package org.apache.axis2.transport.testkit.tests.async;
 
 import java.util.Arrays;
 import java.util.Random;
 
 import javax.mail.internet.ContentType;
 
-import org.apache.synapse.transport.testkit.channel.AsyncChannel;
-import org.apache.synapse.transport.testkit.client.AsyncTestClient;
-import org.apache.synapse.transport.testkit.name.Name;
-import org.apache.synapse.transport.testkit.server.AsyncEndpoint;
+import org.apache.axis2.transport.testkit.channel.AsyncChannel;
+import org.apache.axis2.transport.testkit.client.AsyncTestClient;
+import org.apache.axis2.transport.testkit.name.Name;
+import org.apache.axis2.transport.testkit.server.AsyncEndpoint;
 
 @Name("AsyncBinary")
 public class BinaryTestCase extends AsyncMessageTestCase<byte[]> {

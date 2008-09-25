@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.tests.async;
+package org.apache.axis2.transport.testkit.tests.async;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
@@ -32,11 +32,11 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.util.UUIDGenerator;
-import org.apache.synapse.transport.testkit.channel.AsyncChannel;
-import org.apache.synapse.transport.testkit.client.AsyncTestClient;
-import org.apache.synapse.transport.testkit.message.XMLMessage;
-import org.apache.synapse.transport.testkit.name.Name;
-import org.apache.synapse.transport.testkit.server.AsyncEndpoint;
+import org.apache.axis2.transport.testkit.channel.AsyncChannel;
+import org.apache.axis2.transport.testkit.client.AsyncTestClient;
+import org.apache.axis2.transport.testkit.message.XMLMessage;
+import org.apache.axis2.transport.testkit.name.Name;
+import org.apache.axis2.transport.testkit.server.AsyncEndpoint;
 
 @Name("AsyncSwA")
 public class SwATestCase extends AsyncMessageTestCase<XMLMessage> {

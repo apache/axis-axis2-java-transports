@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.axis2.client;
+package org.apache.axis2.transport.testkit.axis2.client;
 
 import javax.mail.internet.ContentType;
 import javax.xml.namespace.QName;
@@ -28,12 +28,12 @@ import org.apache.axis2.client.OperationClient;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.MessageContext;
-import org.apache.synapse.transport.testkit.channel.Channel;
-import org.apache.synapse.transport.testkit.client.ClientOptions;
-import org.apache.synapse.transport.testkit.client.TestClient;
-import org.apache.synapse.transport.testkit.message.AxisMessage;
-import org.apache.synapse.transport.testkit.name.Name;
-import org.apache.synapse.transport.testkit.util.ContentTypeUtil;
+import org.apache.axis2.transport.testkit.channel.Channel;
+import org.apache.axis2.transport.testkit.client.ClientOptions;
+import org.apache.axis2.transport.testkit.client.TestClient;
+import org.apache.axis2.transport.testkit.message.AxisMessage;
+import org.apache.axis2.transport.testkit.name.Name;
+import org.apache.axis2.transport.testkit.util.ContentTypeUtil;
 
 @Name("axis")
 public class AxisTestClient implements TestClient {

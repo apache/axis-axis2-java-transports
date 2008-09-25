@@ -17,11 +17,11 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.tests;
+package org.apache.axis2.transport.testkit.tests;
 
 import javax.mail.internet.ContentType;
 
-import org.apache.synapse.transport.testkit.client.ClientOptions;
+import org.apache.axis2.transport.testkit.client.ClientOptions;
 
 public class MessageTestCase extends TransportTestCase {
     protected final ClientOptions options;

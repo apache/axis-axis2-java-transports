@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.message;
+package org.apache.axis2.transport.testkit.message;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -41,7 +41,7 @@ import org.apache.axiom.om.util.StAXUtils;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.impl.builder.StAXSOAPModelBuilder;
 import org.apache.axis2.transport.base.BaseConstants;
-import org.apache.synapse.transport.testkit.message.RESTMessage.Parameter;
+import org.apache.axis2.transport.testkit.message.RESTMessage.Parameter;
 
 public interface MessageDecoder<T,U> {
     MessageDecoder<AxisMessage,byte[]> AXIS_TO_BYTE =

@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit;
+package org.apache.axis2.transport.testkit;
 
 import java.text.ParseException;
 import java.util.Enumeration;
@@ -29,13 +29,13 @@ import junit.framework.Test;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
+import org.apache.axis2.transport.testkit.filter.FilterExpression;
+import org.apache.axis2.transport.testkit.filter.FilterExpressionParser;
+import org.apache.axis2.transport.testkit.tests.TestResourceSet;
+import org.apache.axis2.transport.testkit.tests.TestResourceSetTransition;
+import org.apache.axis2.transport.testkit.tests.TransportTestCase;
+import org.apache.axis2.transport.testkit.util.LogManager;
 import org.apache.commons.lang.StringUtils;
-import org.apache.synapse.transport.testkit.filter.FilterExpression;
-import org.apache.synapse.transport.testkit.filter.FilterExpressionParser;
-import org.apache.synapse.transport.testkit.tests.TestResourceSet;
-import org.apache.synapse.transport.testkit.tests.TestResourceSetTransition;
-import org.apache.synapse.transport.testkit.tests.TransportTestCase;
-import org.apache.synapse.transport.testkit.util.LogManager;
 
 public class TransportTestSuite extends TestSuite {
     private final Class<?> testClass;

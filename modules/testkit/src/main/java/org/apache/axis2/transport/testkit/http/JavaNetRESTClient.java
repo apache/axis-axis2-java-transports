@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.http;
+package org.apache.axis2.transport.testkit.http;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -25,11 +25,11 @@ import java.net.URLConnection;
 
 import javax.mail.internet.ContentType;
 
+import org.apache.axis2.transport.testkit.client.AsyncTestClient;
+import org.apache.axis2.transport.testkit.client.ClientOptions;
+import org.apache.axis2.transport.testkit.message.RESTMessage;
+import org.apache.axis2.transport.testkit.name.Name;
 import org.apache.commons.io.IOUtils;
-import org.apache.synapse.transport.testkit.client.AsyncTestClient;
-import org.apache.synapse.transport.testkit.client.ClientOptions;
-import org.apache.synapse.transport.testkit.message.RESTMessage;
-import org.apache.synapse.transport.testkit.name.Name;
 
 @Name("java.net")
 public class JavaNetRESTClient implements AsyncTestClient<RESTMessage> {

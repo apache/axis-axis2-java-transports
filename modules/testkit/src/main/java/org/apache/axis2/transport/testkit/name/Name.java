@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.name;
+package org.apache.axis2.transport.testkit.name;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;

@@ -17,16 +17,16 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.tests;
+package org.apache.axis2.transport.testkit.tests;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.apache.synapse.transport.testkit.name.Key;
-import org.apache.synapse.transport.testkit.name.NameUtils;
-import org.apache.synapse.transport.testkit.util.LogManager;
+import org.apache.axis2.transport.testkit.name.Key;
+import org.apache.axis2.transport.testkit.name.NameUtils;
+import org.apache.axis2.transport.testkit.util.LogManager;
 
 @Key("test")
 public abstract class TransportTestCase extends TestCase {

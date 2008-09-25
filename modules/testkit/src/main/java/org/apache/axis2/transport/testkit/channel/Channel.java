@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.channel;
+package org.apache.axis2.transport.testkit.channel;
 
 import org.apache.axis2.addressing.EndpointReference;
 

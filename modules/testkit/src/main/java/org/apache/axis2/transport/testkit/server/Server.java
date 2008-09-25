@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.server;
+package org.apache.axis2.transport.testkit.server;
 
 public interface Server {
 //    public void addErrorListener(TransportErrorListener listener) {

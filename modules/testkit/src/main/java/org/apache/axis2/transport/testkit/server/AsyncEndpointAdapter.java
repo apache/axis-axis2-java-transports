@@ -17,13 +17,13 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.server;
+package org.apache.axis2.transport.testkit.server;
 
 import javax.mail.internet.ContentType;
 
-import org.apache.synapse.transport.testkit.Adapter;
-import org.apache.synapse.transport.testkit.message.IncomingMessage;
-import org.apache.synapse.transport.testkit.message.MessageDecoder;
+import org.apache.axis2.transport.testkit.Adapter;
+import org.apache.axis2.transport.testkit.message.IncomingMessage;
+import org.apache.axis2.transport.testkit.message.MessageDecoder;
 
 public class AsyncEndpointAdapter<M,N> implements AsyncEndpoint<M>, Adapter {
     private final AsyncEndpoint<N> target;

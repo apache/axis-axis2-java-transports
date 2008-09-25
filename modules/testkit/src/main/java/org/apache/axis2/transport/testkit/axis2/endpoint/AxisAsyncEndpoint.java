@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.axis2.endpoint;
+package org.apache.axis2.transport.testkit.axis2.endpoint;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -32,10 +32,10 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.InOnlyAxisOperation;
 import org.apache.axis2.engine.MessageReceiver;
-import org.apache.synapse.transport.testkit.axis2.MessageContextValidator;
-import org.apache.synapse.transport.testkit.message.AxisMessage;
-import org.apache.synapse.transport.testkit.message.IncomingMessage;
-import org.apache.synapse.transport.testkit.server.AsyncEndpoint;
+import org.apache.axis2.transport.testkit.axis2.MessageContextValidator;
+import org.apache.axis2.transport.testkit.message.AxisMessage;
+import org.apache.axis2.transport.testkit.message.IncomingMessage;
+import org.apache.axis2.transport.testkit.server.AsyncEndpoint;
 
 public class AxisAsyncEndpoint extends AxisEndpoint implements AsyncEndpoint<AxisMessage>, MessageReceiver /*, TransportErrorListener*/ {
     private interface Event {

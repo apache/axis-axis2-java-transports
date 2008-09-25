@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.axis2.client;
+package org.apache.axis2.transport.testkit.axis2.client;
 
 import javax.mail.internet.ContentType;
 
@@ -26,12 +26,12 @@ import junit.framework.Assert;
 import org.apache.axis2.client.OperationClient;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.transport.testkit.axis2.MessageContextValidator;
+import org.apache.axis2.transport.testkit.client.ClientOptions;
+import org.apache.axis2.transport.testkit.client.RequestResponseTestClient;
+import org.apache.axis2.transport.testkit.message.AxisMessage;
+import org.apache.axis2.transport.testkit.message.IncomingMessage;
 import org.apache.axis2.wsdl.WSDLConstants;
-import org.apache.synapse.transport.testkit.axis2.MessageContextValidator;
-import org.apache.synapse.transport.testkit.client.ClientOptions;
-import org.apache.synapse.transport.testkit.client.RequestResponseTestClient;
-import org.apache.synapse.transport.testkit.message.AxisMessage;
-import org.apache.synapse.transport.testkit.message.IncomingMessage;
 
 public class AxisRequestResponseTestClient extends AxisTestClient implements RequestResponseTestClient<AxisMessage,AxisMessage> {
     private MessageContextValidator[] validators;

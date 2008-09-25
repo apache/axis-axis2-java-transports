@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.axis2.client;
+package org.apache.axis2.transport.testkit.axis2.client;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,11 +26,11 @@ import javax.activation.DataSource;
 
 import org.apache.axiom.om.OMOutputFormat;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.transport.testkit.util.LogManager;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.transport.testkit.util.LogManager;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Around;

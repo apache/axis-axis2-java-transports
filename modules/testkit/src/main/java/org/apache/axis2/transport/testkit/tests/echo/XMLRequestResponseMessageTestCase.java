@@ -17,21 +17,21 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.tests.echo;
+package org.apache.axis2.transport.testkit.tests.echo;
 
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.apache.synapse.transport.testkit.MessageTestData;
-import org.apache.synapse.transport.testkit.channel.RequestResponseChannel;
-import org.apache.synapse.transport.testkit.client.RequestResponseTestClient;
-import org.apache.synapse.transport.testkit.message.XMLMessage;
-import org.apache.synapse.transport.testkit.name.Key;
-import org.apache.synapse.transport.testkit.name.Name;
-import org.apache.synapse.transport.testkit.name.Named;
-import org.apache.synapse.transport.testkit.server.Endpoint;
+import org.apache.axis2.transport.testkit.MessageTestData;
+import org.apache.axis2.transport.testkit.channel.RequestResponseChannel;
+import org.apache.axis2.transport.testkit.client.RequestResponseTestClient;
+import org.apache.axis2.transport.testkit.message.XMLMessage;
+import org.apache.axis2.transport.testkit.name.Key;
+import org.apache.axis2.transport.testkit.name.Name;
+import org.apache.axis2.transport.testkit.name.Named;
+import org.apache.axis2.transport.testkit.server.Endpoint;
 
 @Name("EchoXML")
 public class XMLRequestResponseMessageTestCase extends RequestResponseMessageTestCase<XMLMessage,XMLMessage> {

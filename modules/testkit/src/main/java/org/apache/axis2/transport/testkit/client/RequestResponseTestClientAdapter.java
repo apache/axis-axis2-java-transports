@@ -17,14 +17,14 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.client;
+package org.apache.axis2.transport.testkit.client;
 
 import javax.mail.internet.ContentType;
 
-import org.apache.synapse.transport.testkit.Adapter;
-import org.apache.synapse.transport.testkit.message.IncomingMessage;
-import org.apache.synapse.transport.testkit.message.MessageDecoder;
-import org.apache.synapse.transport.testkit.message.MessageEncoder;
+import org.apache.axis2.transport.testkit.Adapter;
+import org.apache.axis2.transport.testkit.message.IncomingMessage;
+import org.apache.axis2.transport.testkit.message.MessageDecoder;
+import org.apache.axis2.transport.testkit.message.MessageEncoder;
 
 public class RequestResponseTestClientAdapter<M,N,O,P> implements RequestResponseTestClient<M,O>, Adapter {
     private final RequestResponseTestClient<N,P> target;

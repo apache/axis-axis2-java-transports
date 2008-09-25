@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.tests;
+package org.apache.axis2.transport.testkit.tests;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -27,8 +27,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.axis2.transport.testkit.Adapter;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.synapse.transport.testkit.Adapter;
 
 public class TestResource {
     private enum Status { UNRESOLVED, RESOLVED, SETUP, RECYCLED };

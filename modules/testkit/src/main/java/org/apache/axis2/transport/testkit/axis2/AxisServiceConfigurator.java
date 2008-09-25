@@ -17,8 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.axis2;
-
+package org.apache.axis2.transport.testkit.axis2;
 
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;

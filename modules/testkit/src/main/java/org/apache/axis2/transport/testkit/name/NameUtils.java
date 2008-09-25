@@ -17,14 +17,14 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.name;
+package org.apache.axis2.transport.testkit.name;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.synapse.transport.testkit.Adapter;
+import org.apache.axis2.transport.testkit.Adapter;
 
 public class NameUtils {
     public static Map<String,String> getNameComponents(Object object) {

@@ -17,9 +17,9 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.server;
+package org.apache.axis2.transport.testkit.server;
 
-import org.apache.synapse.transport.testkit.name.Key;
+import org.apache.axis2.transport.testkit.name.Key;
 
 @Key("endpoint")
 public interface Endpoint {

@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.http;
+package org.apache.axis2.transport.testkit.http;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -28,9 +28,9 @@ import java.util.Enumeration;
 import javax.mail.internet.ContentType;
 import javax.mail.internet.ParseException;
 
+import org.apache.axis2.transport.testkit.message.IncomingMessage;
+import org.apache.axis2.transport.testkit.util.LogManager;
 import org.apache.commons.io.IOUtils;
-import org.apache.synapse.transport.testkit.message.IncomingMessage;
-import org.apache.synapse.transport.testkit.util.LogManager;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpRequest;
 

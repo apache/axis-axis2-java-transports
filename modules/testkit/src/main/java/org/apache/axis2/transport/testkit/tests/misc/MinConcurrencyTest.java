@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.tests.misc;
+package org.apache.axis2.transport.testkit.tests.misc;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -34,16 +34,16 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.InOnlyAxisOperation;
 import org.apache.axis2.engine.MessageReceiver;
-import org.apache.synapse.transport.testkit.axis2.client.AxisAsyncTestClient;
-import org.apache.synapse.transport.testkit.axis2.client.AxisTestClientContext;
-import org.apache.synapse.transport.testkit.axis2.endpoint.AxisEndpoint;
-import org.apache.synapse.transport.testkit.axis2.endpoint.AxisServer;
-import org.apache.synapse.transport.testkit.channel.AsyncChannel;
-import org.apache.synapse.transport.testkit.client.ClientOptions;
-import org.apache.synapse.transport.testkit.message.AxisMessage;
-import org.apache.synapse.transport.testkit.name.Name;
-import org.apache.synapse.transport.testkit.tests.TestResourceSet;
-import org.apache.synapse.transport.testkit.tests.TransportTestCase;
+import org.apache.axis2.transport.testkit.axis2.client.AxisAsyncTestClient;
+import org.apache.axis2.transport.testkit.axis2.client.AxisTestClientContext;
+import org.apache.axis2.transport.testkit.axis2.endpoint.AxisEndpoint;
+import org.apache.axis2.transport.testkit.axis2.endpoint.AxisServer;
+import org.apache.axis2.transport.testkit.channel.AsyncChannel;
+import org.apache.axis2.transport.testkit.client.ClientOptions;
+import org.apache.axis2.transport.testkit.message.AxisMessage;
+import org.apache.axis2.transport.testkit.name.Name;
+import org.apache.axis2.transport.testkit.tests.TestResourceSet;
+import org.apache.axis2.transport.testkit.tests.TransportTestCase;
 
 /**
  * Generic test case to check whether a transport listener processes messages with the expected

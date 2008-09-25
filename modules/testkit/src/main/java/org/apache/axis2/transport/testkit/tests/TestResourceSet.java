@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.tests;
+package org.apache.axis2.transport.testkit.tests;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;

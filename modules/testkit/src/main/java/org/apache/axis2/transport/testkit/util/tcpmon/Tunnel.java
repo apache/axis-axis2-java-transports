@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.util.tcpmon;
+package org.apache.axis2.transport.testkit.util.tcpmon;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

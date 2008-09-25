@@ -35,6 +35,7 @@
     <name>Axis2 Transport - Root</name>
     <modules>
         <module>modules/base</module>
+        <module>modules/testkit</module>
         <module>modules/http</module>
         <module>modules/tcp</module>
         <module>modules/local</module>

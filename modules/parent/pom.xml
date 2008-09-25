@@ -253,6 +253,13 @@
                 <artifactId>commons-lang</artifactId>
                 <version>2.3</version>
             </dependency>
+            
+            <!-- Dependencies used in the unit tests -->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>3.8.2</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>

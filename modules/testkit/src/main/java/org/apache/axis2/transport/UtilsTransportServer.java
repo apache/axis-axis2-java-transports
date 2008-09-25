@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport;
+package org.apache.axis2.transport;
 
 import java.io.File;
 import java.util.List;

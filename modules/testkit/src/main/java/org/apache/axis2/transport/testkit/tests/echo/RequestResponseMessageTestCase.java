@@ -17,14 +17,14 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.tests.echo;
+package org.apache.axis2.transport.testkit.tests.echo;
 
 import javax.mail.internet.ContentType;
 
-import org.apache.synapse.transport.testkit.channel.RequestResponseChannel;
-import org.apache.synapse.transport.testkit.client.RequestResponseTestClient;
-import org.apache.synapse.transport.testkit.server.Endpoint;
-import org.apache.synapse.transport.testkit.tests.MessageTestCase;
+import org.apache.axis2.transport.testkit.channel.RequestResponseChannel;
+import org.apache.axis2.transport.testkit.client.RequestResponseTestClient;
+import org.apache.axis2.transport.testkit.server.Endpoint;
+import org.apache.axis2.transport.testkit.tests.MessageTestCase;
 
 public abstract class RequestResponseMessageTestCase<M,N> extends MessageTestCase {
     private final RequestResponseTestClient<M,N> client;

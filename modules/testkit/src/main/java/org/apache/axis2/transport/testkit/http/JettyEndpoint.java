@@ -17,11 +17,11 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.http;
+package org.apache.axis2.transport.testkit.http;
 
 import java.io.IOException;
 
-import org.apache.synapse.transport.testkit.server.Endpoint;
+import org.apache.axis2.transport.testkit.server.Endpoint;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpHandler;
 import org.mortbay.http.HttpRequest;

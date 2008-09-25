@@ -17,9 +17,9 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit;
+package org.apache.axis2.transport.testkit;
 
-import org.apache.synapse.transport.testkit.name.Key;
+import org.apache.axis2.transport.testkit.name.Key;
 
 public class MessageTestData {
     private final String name;

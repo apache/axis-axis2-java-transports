@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit;
+package org.apache.axis2.transport.testkit;
 
 public interface Adapter {
     Object getTarget();

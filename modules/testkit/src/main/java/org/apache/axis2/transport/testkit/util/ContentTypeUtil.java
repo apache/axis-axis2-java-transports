@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.util;
+package org.apache.axis2.transport.testkit.util;
 
 import java.util.Enumeration;
 

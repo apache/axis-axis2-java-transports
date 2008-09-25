@@ -17,16 +17,16 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.http;
+package org.apache.axis2.transport.testkit.http;
 
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.synapse.transport.testkit.message.IncomingMessage;
-import org.apache.synapse.transport.testkit.message.RESTMessage;
-import org.apache.synapse.transport.testkit.message.RESTMessage.Parameter;
+import org.apache.axis2.transport.testkit.message.IncomingMessage;
+import org.apache.axis2.transport.testkit.message.RESTMessage;
+import org.apache.axis2.transport.testkit.message.RESTMessage.Parameter;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpRequest;
 

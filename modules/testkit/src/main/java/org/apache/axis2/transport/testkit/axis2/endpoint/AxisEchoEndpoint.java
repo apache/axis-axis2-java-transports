@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.axis2.endpoint;
+package org.apache.axis2.transport.testkit.axis2.endpoint;
 
 import javax.xml.namespace.QName;
 

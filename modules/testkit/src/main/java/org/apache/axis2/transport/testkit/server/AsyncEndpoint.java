@@ -17,9 +17,9 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.server;
+package org.apache.axis2.transport.testkit.server;
 
-import org.apache.synapse.transport.testkit.message.IncomingMessage;
+import org.apache.axis2.transport.testkit.message.IncomingMessage;
 
 public interface AsyncEndpoint<M> extends Endpoint {
     /**

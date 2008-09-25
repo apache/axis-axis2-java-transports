@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.synapse.transport.testkit.filter;
+package org.apache.axis2.transport.testkit.filter;
 
 import java.text.ParseException;
 import java.util.List;
