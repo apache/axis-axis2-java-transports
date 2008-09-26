@@ -34,6 +34,7 @@
     <packaging>pom</packaging>
     <name>Axis2 Transport - Root</name>
     <modules>
+        <module>modules/parent</module>
         <module>modules/base</module>
         <module>modules/testkit</module>
         <module>modules/http</module>
