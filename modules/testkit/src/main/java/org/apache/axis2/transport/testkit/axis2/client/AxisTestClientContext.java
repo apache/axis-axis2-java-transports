@@ -19,14 +19,13 @@
 
 package org.apache.axis2.transport.testkit.axis2.client;
 
-import java.io.File;
-
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.format.BinaryFormatter;
 import org.apache.axis2.format.PlainTextFormatter;
+import org.apache.axis2.transport.CustomAxisConfigurator;
 import org.apache.axis2.transport.testkit.axis2.TransportDescriptionFactory;
 
 public class AxisTestClientContext {
@@ -39,9 +38,7 @@ public class AxisTestClientContext {
     
     @SuppressWarnings("unused")
     private void setUp(TransportDescriptionFactory tdf) throws Exception {
-        cfgCtx =
-            ConfigurationContextFactory.createConfigurationContextFromFileSystem(
-                    new File("target/test_rep").getAbsolutePath());
+        cfgCtx = ConfigurationContextFactory.createConfigurationContext(new CustomAxisConfigurator());
         AxisConfiguration axisCfg = cfgCtx.getAxisConfiguration();
 
         trpOutDesc = tdf.createTransportOutDescription();

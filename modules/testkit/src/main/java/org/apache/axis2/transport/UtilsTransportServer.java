@@ -19,7 +19,6 @@
 
 package org.apache.axis2.transport;
 
-import java.io.File;
 import java.util.List;
 
 import javax.xml.namespace.QName;
@@ -51,11 +50,8 @@ public class UtilsTransportServer {
     private final ConfigurationContext cfgCtx;
 
     public UtilsTransportServer() throws AxisFault {
-        // Create a configuration context using the test repository in target/test_rep. This
-        // repository is set up using maven-dependency-plugin (see pom.xml) to contain the
-        // addressing module which can be engaged using the enableAddressing method.
         cfgCtx = ConfigurationContextFactory.
-            createConfigurationContextFromFileSystem(new File("target/test_rep").getAbsolutePath());
+                    createConfigurationContext(new CustomAxisConfigurator());
         AxisConfiguration axisConfiguration = cfgCtx.getAxisConfiguration();
 
         // remove http transport
