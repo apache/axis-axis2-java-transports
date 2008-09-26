@@ -217,7 +217,7 @@ public class MailTransportSender extends AbstractTransportSender
             TransportInDescription mailTo =
                     configContext.getAxisConfiguration().getTransportIn(MailConstants.TRANSPORT_NAME);
             if (mailTo == null) {
-                throw new AxisFault("Could not found the transport receiver for " + MailConstants.TRANSPORT_NAME);
+                handleException("Could not found the transport receiver for " + MailConstants.TRANSPORT_NAME);
             }
             configContext.getListenerManager().addListener(mailTo, false);
         }
@@ -229,12 +229,14 @@ public class MailTransportSender extends AbstractTransportSender
             try {
                 synchronousCallback.wait(msgContext.getOptions().getTimeOutInMilliSeconds());
             } catch (InterruptedException e) {
-                throw new AxisFault("Error occured while waiting ..", e);
+                handleException("Error occured while waiting ..", e);
             }
         }
 
         if (!synchronousCallback.isComplete()){
-            throw new AxisFault("Timeout while waiting from a response");
+            // when timeout occurs remove this entry.
+            callBackMap.remove(mailMessageID);
+            handleException("Timeout while waiting for a response");
         }
     }
 
