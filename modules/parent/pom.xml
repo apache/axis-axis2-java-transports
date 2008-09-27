@@ -319,17 +319,6 @@
             <artifactId>commons-logging</artifactId>
 
         </dependency>
-
-        <!-- Smack Jabber client libraries to be included -->
-        <dependency>
-            <groupId>org.igniterealtime</groupId>
-            <artifactId>smack</artifactId>
-
-        </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-        </dependency>
     </dependencies>
 
     <reporting>

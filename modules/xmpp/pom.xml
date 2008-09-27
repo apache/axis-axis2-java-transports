@@ -84,6 +84,21 @@
 <artifactId>commons-lang</artifactId>
             </dependency>
     </dependencies>
+    <repositories>
+        <repository>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </snapshots>
+            <id>apache-ws-snapshots2</id>
+            <name>Apache ws.zones - 2</name>
+            <url>http://ws.zones.apache.org/repository2</url>
+        </repository>
+    </repositories>
     <build>
         <sourceDirectory>src</sourceDirectory>
         <testSourceDirectory>test</testSourceDirectory>
