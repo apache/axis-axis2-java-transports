@@ -35,7 +35,7 @@ public class HttpChannel implements AsyncChannel, RequestResponseChannel {
     private void setUp() throws Exception {
         serviceName = "TestService-" + UUID.randomUUID();
         tunnel = new Tunnel(new InetSocketAddress("127.0.0.1", 8280));
-        new Thread(tunnel).start();
+        tunnel.start();
     }
     
     @SuppressWarnings("unused")

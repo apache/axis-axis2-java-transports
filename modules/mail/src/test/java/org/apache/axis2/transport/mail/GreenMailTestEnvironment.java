@@ -20,6 +20,7 @@
 package org.apache.axis2.transport.mail;
 
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,6 +32,7 @@ import org.apache.axis2.transport.testkit.name.Key;
 import org.apache.axis2.transport.testkit.name.Name;
 import org.apache.axis2.transport.testkit.util.LogManager;
 import org.apache.axis2.transport.testkit.util.ServerUtil;
+import org.apache.axis2.transport.testkit.util.tcpmon.Tunnel;
 
 import com.icegreen.greenmail.store.FolderListener;
 import com.icegreen.greenmail.store.MailFolder;
@@ -54,6 +56,7 @@ public class GreenMailTestEnvironment extends MailTestEnvironment {
     private final ServerSetup storeServerSetup;
     private LogManager logManager;
     private GreenMail greenMail;
+    private Tunnel smtpTunnel;
     private int accountNumber;
     private List<Account> unallocatedAccounts;
 
@@ -73,6 +76,8 @@ public class GreenMailTestEnvironment extends MailTestEnvironment {
         this.logManager = logManager;
         greenMail = new GreenMail(new ServerSetup[] { SMTP, storeServerSetup });
         greenMail.start();
+        smtpTunnel = new Tunnel(new InetSocketAddress("127.0.0.1", 7025));
+        smtpTunnel.start();
         unallocatedAccounts = new LinkedList<Account>();
         ServerUtil.waitForServer(SMTP.getPort());
         ServerUtil.waitForServer(storeServerSetup.getPort());
@@ -143,7 +148,7 @@ public class GreenMailTestEnvironment extends MailTestEnvironment {
     public Map<String,String> getOutProperties() {
         Map<String,String> props = new HashMap<String,String>();
         props.put("mail.smtp.host", "localhost");
-        props.put("mail.smtp.port", String.valueOf(SMTP.getPort()));
+        props.put("mail.smtp.port", String.valueOf(smtpTunnel.getPort()));
         return props;
     }
 }

@@ -22,30 +22,41 @@ package org.apache.axis2.transport.testkit.util.tcpmon;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-public class Tunnel {
-    private final ServerSocket serverSocket;
-    private final InetSocketAddress target;
-    private ExecutorService executorService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+public class Acceptor implements Runnable {
+    private static final Log log = LogFactory.getLog(Acceptor.class);
     
-    public Tunnel(InetSocketAddress target) throws IOException {
-        serverSocket = new ServerSocket(0);
+    private final ServerSocket serverSocket;
+    private final ExecutorService executorService;
+    private final InetSocketAddress target;
+    
+    public Acceptor(ServerSocket serverSocket, ExecutorService executorService, InetSocketAddress target) {
+        this.serverSocket = serverSocket;
+        this.executorService = executorService;
         this.target = target;
     }
-    
-    public int getPort() {
-        return serverSocket.getLocalPort();
+
+    public void run() {
+        while (true) {
+            Socket socket;
+            try {
+                socket = serverSocket.accept();
+            } catch (IOException ex) {
+                break;
+            }
+            try {
+                Socket targetSocket = new Socket(target.getAddress(), target.getPort());
+                executorService.execute(new Relay("SENT", socket.getInputStream(), targetSocket.getOutputStream()));
+                executorService.execute(new Relay("RECEIVED", targetSocket.getInputStream(), socket.getOutputStream()));
+            } catch (IOException ex) {
+                log.error(ex);
+            }
+        }
     }
-    
-    public void start() {
-        executorService = Executors.newCachedThreadPool();
-        executorService.execute(new Acceptor(serverSocket, executorService, target));
-    }
-    
-    public void stop() throws IOException {
-        serverSocket.close();
-        executorService.shutdown();
-    }
+
 }
