@@ -21,13 +21,13 @@ package org.apache.axis2.transport.jms;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.transport.testkit.axis2.client.AxisTestClientSetup;
+import org.apache.axis2.transport.testkit.axis2.client.AxisTestClientConfigurator;
 import org.apache.axis2.transport.testkit.name.Key;
 
-public class JMSAxisTestClientSetup implements AxisTestClientSetup {
+public class JMSAxisTestClientConfigurator implements AxisTestClientConfigurator {
     private final String jmsMessageType;
     
-    public JMSAxisTestClientSetup(String jmsMessageType) {
+    public JMSAxisTestClientConfigurator(String jmsMessageType) {
         this.jmsMessageType = jmsMessageType;
     }
 

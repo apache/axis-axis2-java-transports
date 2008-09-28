@@ -21,7 +21,7 @@ package org.apache.axis2.transport.testkit.server;
 
 import org.apache.axis2.transport.testkit.message.IncomingMessage;
 
-public interface AsyncEndpoint<M> extends Endpoint {
+public interface AsyncEndpoint<M> extends TestEndpoint {
     /**
      * Discard any pending messages.
      */

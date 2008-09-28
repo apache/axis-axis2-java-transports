@@ -27,7 +27,7 @@ import org.apache.axis2.transport.testkit.TransportTestSuiteBuilder;
 import org.apache.axis2.transport.testkit.axis2.TransportDescriptionFactory;
 import org.apache.axis2.transport.testkit.axis2.client.AxisAsyncTestClient;
 import org.apache.axis2.transport.testkit.axis2.client.AxisRequestResponseTestClient;
-import org.apache.axis2.transport.testkit.axis2.client.AxisTestClientSetup;
+import org.apache.axis2.transport.testkit.axis2.client.AxisTestClientConfigurator;
 import org.apache.axis2.transport.testkit.axis2.endpoint.AxisAsyncEndpoint;
 import org.apache.axis2.transport.testkit.axis2.endpoint.AxisEchoEndpoint;
 import org.apache.axis2.transport.testkit.channel.AsyncChannel;
@@ -37,7 +37,7 @@ public class HttpTransportTestSuiteBuilder {
     private final TransportTestSuite suite;
     private final TransportDescriptionFactory tdf;
     
-    private final List<AxisTestClientSetup> axisTestClientSetups = new LinkedList<AxisTestClientSetup>();
+    private final List<AxisTestClientConfigurator> axisTestClientConfigurators = new LinkedList<AxisTestClientConfigurator>();
     
     public HttpTransportTestSuiteBuilder(TransportTestSuite suite,
             TransportDescriptionFactory tdf) {
@@ -45,8 +45,8 @@ public class HttpTransportTestSuiteBuilder {
         this.tdf = tdf;
     }
     
-    public void addAxisTestClientSetup(AxisTestClientSetup setup) {
-        axisTestClientSetups.add(setup);
+    public void addAxisTestClientConfigurator(AxisTestClientConfigurator configurator) {
+        axisTestClientConfigurators.add(configurator);
     }
     
     public void build() {
@@ -59,11 +59,11 @@ public class HttpTransportTestSuiteBuilder {
         builder.addAsyncChannel(channel);
         
         builder.addByteArrayAsyncTestClient(new JavaNetClient());
-        if (axisTestClientSetups.isEmpty()) {
+        if (axisTestClientConfigurators.isEmpty()) {
             builder.addAxisAsyncTestClient(new AxisAsyncTestClient());
         } else {
-            for (AxisTestClientSetup setup : axisTestClientSetups) {
-                builder.addAxisAsyncTestClient(new AxisAsyncTestClient(), setup);
+            for (AxisTestClientConfigurator configurator : axisTestClientConfigurators) {
+                builder.addAxisAsyncTestClient(new AxisAsyncTestClient(), configurator);
             }
         }
         builder.addRESTAsyncTestClient(new JavaNetRESTClient());

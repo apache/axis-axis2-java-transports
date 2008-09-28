@@ -22,5 +22,5 @@ package org.apache.axis2.transport.testkit.server;
 import org.apache.axis2.transport.testkit.name.Key;
 
 @Key("endpoint")
-public interface Endpoint {
+public interface TestEndpoint {
 }

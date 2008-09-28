@@ -30,13 +30,13 @@ import org.apache.axis2.transport.TransportListener;
 import org.apache.axis2.transport.UtilsTransportServer;
 import org.apache.axis2.transport.testkit.axis2.TransportDescriptionFactory;
 
-public class AxisServer {
-    public static final AxisServer INSTANCE = new AxisServer();
+public class AxisTestEndpointContext {
+    public static final AxisTestEndpointContext INSTANCE = new AxisTestEndpointContext();
     
     private TransportListener listener;
     private UtilsTransportServer server;
     
-    private AxisServer() {}
+    private AxisTestEndpointContext() {}
     
     @SuppressWarnings("unused")
     private void setUp(TransportDescriptionFactory tdf) throws Exception {

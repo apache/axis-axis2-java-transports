@@ -27,16 +27,16 @@ import org.apache.axis2.description.AxisService;
 import org.apache.axis2.transport.testkit.axis2.AxisServiceConfigurator;
 import org.apache.axis2.transport.testkit.channel.Channel;
 import org.apache.axis2.transport.testkit.name.Name;
-import org.apache.axis2.transport.testkit.server.Endpoint;
+import org.apache.axis2.transport.testkit.server.TestEndpoint;
 
 @Name("axis")
-public abstract class AxisEndpoint implements Endpoint {
-    private AxisServer server;
+public abstract class AxisTestEndpoint implements TestEndpoint {
+    private AxisTestEndpointContext context;
     private AxisService service;
     
     @SuppressWarnings("unused")
-    private void setUp(AxisServer server, Channel channel, AxisServiceConfigurator[] configurators) throws Exception {
-        this.server = server;
+    private void setUp(AxisTestEndpointContext context, Channel channel, AxisServiceConfigurator[] configurators) throws Exception {
+        this.context = context;
         String path = new URI(channel.getEndpointReference().getAddress()).getPath();
         String serviceName;
         if (path != null && path.startsWith(Channel.CONTEXT_PATH + "/")) {
@@ -53,13 +53,13 @@ public abstract class AxisEndpoint implements Endpoint {
                 configurator.setupService(service, false);
             }
         }
-        server.getAxisConfiguration().addService(service);
+        context.getAxisConfiguration().addService(service);
     }
     
     @SuppressWarnings("unused")
     private void tearDown() throws Exception {
-        server.getAxisConfiguration().removeService(service.getName());
-        server = null;
+        context.getAxisConfiguration().removeService(service.getName());
+        context = null;
         service = null;
     }
     

@@ -22,6 +22,6 @@ package org.apache.axis2.transport.testkit.axis2.client;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 
-public interface AxisTestClientSetup {
+public interface AxisTestClientConfigurator {
     void setupRequestMessageContext(MessageContext msgContext) throws AxisFault;
 }

@@ -24,11 +24,11 @@ import javax.jms.Destination;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
-import org.apache.axis2.transport.testkit.axis2.client.AxisTestClientSetup;
+import org.apache.axis2.transport.testkit.axis2.client.AxisTestClientConfigurator;
 import org.apache.axis2.transport.testkit.channel.RequestResponseChannel;
 import org.apache.axis2.transport.testkit.name.Key;
 
-public class JMSRequestResponseChannel extends JMSChannel implements RequestResponseChannel, AxisTestClientSetup {
+public class JMSRequestResponseChannel extends JMSChannel implements RequestResponseChannel, AxisTestClientConfigurator {
     private final String replyDestinationType;
     private String replyDestinationName;
     private String replyJndiName;

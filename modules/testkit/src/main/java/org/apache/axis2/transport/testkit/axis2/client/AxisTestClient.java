@@ -37,13 +37,13 @@ import org.apache.axis2.transport.testkit.util.ContentTypeUtil;
 
 @Name("axis")
 public class AxisTestClient implements TestClient {
-    private AxisTestClientSetup[] setups;
+    private AxisTestClientConfigurator[] configurators;
     protected ServiceClient serviceClient;
     protected Options axisOptions;
     
     @SuppressWarnings("unused")
-    private void setUp(AxisTestClientContext context, Channel channel, AxisTestClientSetup[] setups) throws Exception {
-        this.setups = setups;
+    private void setUp(AxisTestClientContext context, Channel channel, AxisTestClientConfigurator[] configurators) throws Exception {
+        this.configurators = configurators;
         serviceClient = new ServiceClient(context.getConfigurationContext(), null);
         axisOptions = new Options();
         axisOptions.setTo(channel.getEndpointReference());
@@ -53,7 +53,7 @@ public class AxisTestClient implements TestClient {
     @SuppressWarnings("unused")
     private void tearDown() throws Exception {
         serviceClient.cleanup();
-        setups = null;
+        configurators = null;
         serviceClient = null;
         axisOptions = null;
     }
@@ -79,8 +79,8 @@ public class AxisTestClient implements TestClient {
             mc.setDoingSwA(true);
             mc.setProperty(Constants.Configuration.ENABLE_SWA, true);
         }
-        for (AxisTestClientSetup setup : setups) {
-            setup.setupRequestMessageContext(mc);
+        for (AxisTestClientConfigurator configurator : configurators) {
+            configurator.setupRequestMessageContext(mc);
         }
         mc.setProperty(Constants.Configuration.CHARACTER_SET_ENCODING, options.getCharset());
         mc.setServiceContext(serviceClient.getServiceContext());

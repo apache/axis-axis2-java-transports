@@ -27,7 +27,7 @@ import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.InOutAxisOperation;
 import org.apache.axis2.receivers.AbstractInOutMessageReceiver;
 
-public class AxisEchoEndpoint extends AxisEndpoint {
+public class AxisEchoEndpoint extends AxisTestEndpoint {
     @Override
     protected AxisOperation createOperation() {
         AxisOperation operation = new InOutAxisOperation(new QName("echo"));

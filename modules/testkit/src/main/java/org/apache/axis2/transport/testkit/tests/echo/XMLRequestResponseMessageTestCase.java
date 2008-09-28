@@ -31,14 +31,14 @@ import org.apache.axis2.transport.testkit.message.XMLMessage;
 import org.apache.axis2.transport.testkit.name.Key;
 import org.apache.axis2.transport.testkit.name.Name;
 import org.apache.axis2.transport.testkit.name.Named;
-import org.apache.axis2.transport.testkit.server.Endpoint;
+import org.apache.axis2.transport.testkit.server.TestEndpoint;
 
 @Name("EchoXML")
 public class XMLRequestResponseMessageTestCase extends RequestResponseMessageTestCase<XMLMessage,XMLMessage> {
     private final XMLMessage.Type xmlMessageType;
     private final MessageTestData data;
     
-    public XMLRequestResponseMessageTestCase(RequestResponseChannel channel, RequestResponseTestClient<XMLMessage,XMLMessage> client, Endpoint endpoint, XMLMessage.Type xmlMessageType, MessageTestData data, Object... resources) {
+    public XMLRequestResponseMessageTestCase(RequestResponseChannel channel, RequestResponseTestClient<XMLMessage,XMLMessage> client, TestEndpoint endpoint, XMLMessage.Type xmlMessageType, MessageTestData data, Object... resources) {
         super(channel, client, endpoint, xmlMessageType.getContentType(), data.getCharset(), resources);
         this.xmlMessageType = xmlMessageType;
         this.data = data;

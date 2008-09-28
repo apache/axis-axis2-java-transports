@@ -36,8 +36,8 @@ import org.apache.axis2.description.InOnlyAxisOperation;
 import org.apache.axis2.engine.MessageReceiver;
 import org.apache.axis2.transport.testkit.axis2.client.AxisAsyncTestClient;
 import org.apache.axis2.transport.testkit.axis2.client.AxisTestClientContext;
-import org.apache.axis2.transport.testkit.axis2.endpoint.AxisEndpoint;
-import org.apache.axis2.transport.testkit.axis2.endpoint.AxisServer;
+import org.apache.axis2.transport.testkit.axis2.endpoint.AxisTestEndpoint;
+import org.apache.axis2.transport.testkit.axis2.endpoint.AxisTestEndpointContext;
 import org.apache.axis2.transport.testkit.channel.AsyncChannel;
 import org.apache.axis2.transport.testkit.client.ClientOptions;
 import org.apache.axis2.transport.testkit.message.AxisMessage;
@@ -65,8 +65,8 @@ public class MinConcurrencyTest extends TransportTestCase {
     public MinConcurrencyTest(AsyncChannel[] channels, int messages,
             boolean preloadMessages, Object... resources) {
         super(resources);
-        addResource(AxisServer.INSTANCE);
         addResource(AxisTestClientContext.INSTANCE);
+        addResource(AxisTestEndpointContext.INSTANCE);
         this.channels = channels;
         this.messages = messages;
         this.preloadMessages = preloadMessages;
@@ -103,7 +103,7 @@ public class MinConcurrencyTest extends TransportTestCase {
                 clientResourceSets[i] = clientResourceSet;
                 
                 TestResourceSet endpointResourceSet = new TestResourceSet(clientResourceSet);
-                endpointResourceSet.addResource(new AxisEndpoint() {
+                endpointResourceSet.addResource(new AxisTestEndpoint() {
                     @Override
                     protected AxisOperation createOperation() {
                         AxisOperation operation = new InOnlyAxisOperation(new QName("in"));

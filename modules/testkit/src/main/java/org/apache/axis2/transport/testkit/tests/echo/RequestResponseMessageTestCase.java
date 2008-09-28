@@ -23,14 +23,14 @@ import javax.mail.internet.ContentType;
 
 import org.apache.axis2.transport.testkit.channel.RequestResponseChannel;
 import org.apache.axis2.transport.testkit.client.RequestResponseTestClient;
-import org.apache.axis2.transport.testkit.server.Endpoint;
+import org.apache.axis2.transport.testkit.server.TestEndpoint;
 import org.apache.axis2.transport.testkit.tests.MessageTestCase;
 
 public abstract class RequestResponseMessageTestCase<M,N> extends MessageTestCase {
     private final RequestResponseTestClient<M,N> client;
 
     // TODO: maybe we don't need an explicit RequestResponseChannel
-    public RequestResponseMessageTestCase(RequestResponseChannel channel, RequestResponseTestClient<M,N> client, Endpoint endpoint, ContentType contentType, String charset, Object... resources) {
+    public RequestResponseMessageTestCase(RequestResponseChannel channel, RequestResponseTestClient<M,N> client, TestEndpoint endpoint, ContentType contentType, String charset, Object... resources) {
         super(contentType, charset, resources);
         this.client = client;
         addResource(channel);

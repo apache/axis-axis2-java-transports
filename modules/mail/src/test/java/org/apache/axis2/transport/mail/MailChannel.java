@@ -29,11 +29,11 @@ import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.transport.testkit.axis2.AxisServiceConfigurator;
-import org.apache.axis2.transport.testkit.axis2.client.AxisTestClientSetup;
+import org.apache.axis2.transport.testkit.axis2.client.AxisTestClientConfigurator;
 import org.apache.axis2.transport.testkit.channel.AsyncChannel;
 import org.apache.axis2.transport.testkit.channel.RequestResponseChannel;
 
-public class MailChannel implements AsyncChannel, RequestResponseChannel, AxisTestClientSetup, AxisServiceConfigurator {
+public class MailChannel implements AsyncChannel, RequestResponseChannel, AxisTestClientConfigurator, AxisServiceConfigurator {
     private MailTestEnvironment env;
     private MailTestEnvironment.Account sender;
     private MailTestEnvironment.Account recipient;

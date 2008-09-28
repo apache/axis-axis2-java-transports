@@ -21,13 +21,13 @@ package org.apache.axis2.transport.mail;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.transport.testkit.axis2.client.AxisTestClientSetup;
+import org.apache.axis2.transport.testkit.axis2.client.AxisTestClientConfigurator;
 import org.apache.axis2.transport.testkit.name.Key;
 
-public class MailAxisTestClientSetup implements AxisTestClientSetup {
+public class MailAxisTestClientConfigurator implements AxisTestClientConfigurator {
     private final String transportFormat;
     
-    public MailAxisTestClientSetup(String transportFormat) {
+    public MailAxisTestClientConfigurator(String transportFormat) {
         this.transportFormat = transportFormat;
     }
 

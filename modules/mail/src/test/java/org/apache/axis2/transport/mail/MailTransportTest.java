@@ -29,9 +29,9 @@ import org.apache.axis2.transport.testkit.axis2.endpoint.AxisAsyncEndpoint;
 import org.apache.axis2.transport.testkit.axis2.endpoint.AxisEchoEndpoint;
 import org.apache.axis2.transport.testkit.tests.misc.MinConcurrencyTest;
 
-public class MailTransportListenerTest extends TestCase {
+public class MailTransportTest extends TestCase {
     public static TestSuite suite() throws Exception {
-        TransportTestSuite suite = new TransportTestSuite(MailTransportListenerTest.class);
+        TransportTestSuite suite = new TransportTestSuite(MailTransportTest.class);
         
         // TODO: these test don't work; need more analysis why this is so
         suite.addExclude("(&(messageType=SOAP12)(data=Latin1))");
@@ -54,8 +54,8 @@ public class MailTransportListenerTest extends TestCase {
         
         builder.addAsyncChannel(channel);
         
-        builder.addAxisAsyncTestClient(new AxisAsyncTestClient(), new MailAxisTestClientSetup(MailConstants.TRANSPORT_FORMAT_TEXT));
-        builder.addAxisAsyncTestClient(new AxisAsyncTestClient(), new MailAxisTestClientSetup(MailConstants.TRANSPORT_FORMAT_MP));
+        builder.addAxisAsyncTestClient(new AxisAsyncTestClient(), new MailAxisTestClientConfigurator(MailConstants.TRANSPORT_FORMAT_TEXT));
+        builder.addAxisAsyncTestClient(new AxisAsyncTestClient(), new MailAxisTestClientConfigurator(MailConstants.TRANSPORT_FORMAT_MP));
         builder.addByteArrayAsyncTestClient(new MailAsyncClient(new FlatLayout()));
         builder.addByteArrayAsyncTestClient(new MailAsyncClient(new MultipartLayout()));
         

@@ -28,7 +28,7 @@ import org.apache.axis2.transport.testkit.TransportTestSuite;
 import org.apache.axis2.transport.testkit.TransportTestSuiteBuilder;
 import org.apache.axis2.transport.testkit.axis2.client.AxisAsyncTestClient;
 import org.apache.axis2.transport.testkit.axis2.client.AxisRequestResponseTestClient;
-import org.apache.axis2.transport.testkit.axis2.client.AxisTestClientSetup;
+import org.apache.axis2.transport.testkit.axis2.client.AxisTestClientConfigurator;
 import org.apache.axis2.transport.testkit.axis2.endpoint.AxisAsyncEndpoint;
 import org.apache.axis2.transport.testkit.axis2.endpoint.AxisEchoEndpoint;
 import org.apache.axis2.transport.testkit.channel.AsyncChannel;
@@ -68,8 +68,8 @@ public class JMSTransportTest extends TestCase {
         builder.addAsyncChannel(new JMSAsyncChannel(JMSConstants.DESTINATION_TYPE_TOPIC, ContentTypeMode.TRANSPORT));
         
         builder.addAxisAsyncTestClient(new AxisAsyncTestClient());
-        builder.addAxisAsyncTestClient(new AxisAsyncTestClient(), new JMSAxisTestClientSetup(JMSConstants.JMS_BYTE_MESSAGE));
-        builder.addAxisAsyncTestClient(new AxisAsyncTestClient(), new JMSAxisTestClientSetup(JMSConstants.JMS_TEXT_MESSAGE));
+        builder.addAxisAsyncTestClient(new AxisAsyncTestClient(), new JMSAxisTestClientConfigurator(JMSConstants.JMS_BYTE_MESSAGE));
+        builder.addAxisAsyncTestClient(new AxisAsyncTestClient(), new JMSAxisTestClientConfigurator(JMSConstants.JMS_TEXT_MESSAGE));
         builder.addByteArrayAsyncTestClient(new JMSAsyncClient<byte[]>(JMSBytesMessageFactory.INSTANCE));
         builder.addStringAsyncTestClient(new JMSAsyncClient<String>(JMSTextMessageFactory.INSTANCE));
         
@@ -78,13 +78,13 @@ public class JMSTransportTest extends TestCase {
         builder.addRequestResponseChannel(new JMSRequestResponseChannel(JMSConstants.DESTINATION_TYPE_QUEUE, JMSConstants.DESTINATION_TYPE_QUEUE, ContentTypeMode.TRANSPORT));
         builder.addRequestResponseChannel(new JMSRequestResponseChannel(JMSConstants.DESTINATION_TYPE_TOPIC, JMSConstants.DESTINATION_TYPE_TOPIC, ContentTypeMode.TRANSPORT));
         
-        AxisTestClientSetup timeoutSetup = new AxisTestClientSetup() {
+        AxisTestClientConfigurator timeoutConfigurator = new AxisTestClientConfigurator() {
             public void setupRequestMessageContext(MessageContext msgContext) throws AxisFault {
                 msgContext.setProperty(JMSConstants.JMS_WAIT_REPLY, "5000");
             }
         };
         
-        builder.addAxisRequestResponseTestClient(new AxisRequestResponseTestClient(), timeoutSetup);
+        builder.addAxisRequestResponseTestClient(new AxisRequestResponseTestClient(), timeoutConfigurator);
         builder.addStringRequestResponseTestClient(new JMSRequestResponseClient<String>(JMSTextMessageFactory.INSTANCE));
         
         builder.addEchoEndpoint(new MockEchoEndpoint());

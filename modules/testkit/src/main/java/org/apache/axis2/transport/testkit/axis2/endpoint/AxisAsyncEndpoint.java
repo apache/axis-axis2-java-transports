@@ -37,7 +37,7 @@ import org.apache.axis2.transport.testkit.message.AxisMessage;
 import org.apache.axis2.transport.testkit.message.IncomingMessage;
 import org.apache.axis2.transport.testkit.server.AsyncEndpoint;
 
-public class AxisAsyncEndpoint extends AxisEndpoint implements AsyncEndpoint<AxisMessage>, MessageReceiver /*, TransportErrorListener*/ {
+public class AxisAsyncEndpoint extends AxisTestEndpoint implements AsyncEndpoint<AxisMessage>, MessageReceiver /*, TransportErrorListener*/ {
     private interface Event {
         IncomingMessage<AxisMessage> process() throws Throwable;
     }
