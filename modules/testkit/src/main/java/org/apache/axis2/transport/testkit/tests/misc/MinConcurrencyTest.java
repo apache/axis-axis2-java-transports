@@ -62,10 +62,10 @@ public class MinConcurrencyTest extends TransportTestCase {
     private final int messages;
     private final boolean preloadMessages;
     
-    public MinConcurrencyTest(AxisServer server, AsyncChannel[] channels, int messages,
+    public MinConcurrencyTest(AsyncChannel[] channels, int messages,
             boolean preloadMessages, Object... resources) {
         super(resources);
-        addResource(server);
+        addResource(AxisServer.INSTANCE);
         addResource(AxisTestClientContext.INSTANCE);
         this.channels = channels;
         this.messages = messages;

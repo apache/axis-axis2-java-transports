@@ -31,7 +31,6 @@ import org.apache.axis2.transport.testkit.axis2.client.AxisRequestResponseTestCl
 import org.apache.axis2.transport.testkit.axis2.client.AxisTestClientSetup;
 import org.apache.axis2.transport.testkit.axis2.endpoint.AxisAsyncEndpoint;
 import org.apache.axis2.transport.testkit.axis2.endpoint.AxisEchoEndpoint;
-import org.apache.axis2.transport.testkit.axis2.endpoint.AxisServer;
 import org.apache.axis2.transport.testkit.channel.AsyncChannel;
 import org.apache.axis2.transport.testkit.tests.misc.MinConcurrencyTest;
 
@@ -92,7 +91,7 @@ public class JMSTransportTest extends TestCase {
         builder.addEchoEndpoint(new AxisEchoEndpoint());
         
         for (JMSTestEnvironment env : new JMSTestEnvironment[] { new QpidTestEnvironment(), new ActiveMQTestEnvironment() }) {
-            suite.addTest(new MinConcurrencyTest(AxisServer.INSTANCE, new AsyncChannel[] {
+            suite.addTest(new MinConcurrencyTest(new AsyncChannel[] {
                     new JMSAsyncChannel("endpoint1", JMSConstants.DESTINATION_TYPE_QUEUE, ContentTypeMode.TRANSPORT),
                     new JMSAsyncChannel("endpoint2", JMSConstants.DESTINATION_TYPE_QUEUE, ContentTypeMode.TRANSPORT) },
                     2, false, env, new JMSTransportDescriptionFactory(false, false)));

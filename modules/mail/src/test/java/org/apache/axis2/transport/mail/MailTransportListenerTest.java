@@ -27,7 +27,6 @@ import org.apache.axis2.transport.testkit.TransportTestSuiteBuilder;
 import org.apache.axis2.transport.testkit.axis2.client.AxisAsyncTestClient;
 import org.apache.axis2.transport.testkit.axis2.endpoint.AxisAsyncEndpoint;
 import org.apache.axis2.transport.testkit.axis2.endpoint.AxisEchoEndpoint;
-import org.apache.axis2.transport.testkit.axis2.endpoint.AxisServer;
 import org.apache.axis2.transport.testkit.tests.misc.MinConcurrencyTest;
 
 public class MailTransportListenerTest extends TestCase {
@@ -71,7 +70,7 @@ public class MailTransportListenerTest extends TestCase {
         
         builder.build();
         
-        suite.addTest(new MinConcurrencyTest(AxisServer.INSTANCE, new MailChannel[] { new MailChannel(), new MailChannel() }, 2, true, new GreenMailTestEnvironment("pop3")));
+        suite.addTest(new MinConcurrencyTest(new MailChannel[] { new MailChannel(), new MailChannel() }, 2, true, new GreenMailTestEnvironment("pop3")));
         return suite;
     }
 }

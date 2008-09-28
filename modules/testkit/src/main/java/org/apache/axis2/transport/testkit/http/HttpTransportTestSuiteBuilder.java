@@ -30,7 +30,6 @@ import org.apache.axis2.transport.testkit.axis2.client.AxisRequestResponseTestCl
 import org.apache.axis2.transport.testkit.axis2.client.AxisTestClientSetup;
 import org.apache.axis2.transport.testkit.axis2.endpoint.AxisAsyncEndpoint;
 import org.apache.axis2.transport.testkit.axis2.endpoint.AxisEchoEndpoint;
-import org.apache.axis2.transport.testkit.axis2.endpoint.AxisServer;
 import org.apache.axis2.transport.testkit.channel.AsyncChannel;
 import org.apache.axis2.transport.testkit.tests.misc.MinConcurrencyTest;
 
@@ -82,6 +81,6 @@ public class HttpTransportTestSuiteBuilder {
         
         builder.build();
         
-        suite.addTest(new MinConcurrencyTest(AxisServer.INSTANCE, new AsyncChannel[] { new HttpChannel(), new HttpChannel() }, 2, false, tdf));
+        suite.addTest(new MinConcurrencyTest(new AsyncChannel[] { new HttpChannel(), new HttpChannel() }, 2, false, tdf));
     }
 }

@@ -29,9 +29,8 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.TransportListener;
 import org.apache.axis2.transport.UtilsTransportServer;
 import org.apache.axis2.transport.testkit.axis2.TransportDescriptionFactory;
-import org.apache.axis2.transport.testkit.server.Server;
 
-public class AxisServer implements Server {
+public class AxisServer {
     public static final AxisServer INSTANCE = new AxisServer();
     
     private TransportListener listener;
