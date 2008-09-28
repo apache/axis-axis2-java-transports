@@ -17,30 +17,24 @@
  *  under the License.
  */
 
-package org.apache.axis2.transport.testkit.axis2;
+package org.apache.axis2.transport.testkit.axis2.client;
 
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.description.TransportOutDescription;
-import org.apache.axis2.transport.testkit.axis2.client.AxisTestClientContextConfigurator;
-import org.apache.axis2.transport.testkit.axis2.endpoint.AxisTestEndpointContextConfigurator;
 
-/**
- * Resource used to create the {@link TransportInDescription} and
- * {@link TransportOutDescription} objects for a transport under test.
- * <p>
- * Note that this resource is used on both client and server side.
- * If the transport needs different configurations on client and server side,
- * use {@link AxisTestClientContextConfigurator} and/or
- * {@link AxisTestEndpointContextConfigurator}.
- */
-public interface TransportDescriptionFactory {
-    TransportOutDescription createTransportOutDescription() throws Exception;
+public interface AxisTestClientContextConfigurator {
+    /**
+     * Determine whether a transport listener is required on client side.
+     * 
+     * @return true if a transport listener instance is required
+     */
+    boolean isTransportListenerRequired();
     
     /**
-     * Create a TransportInDescription for the transport under test.
+     * Setup the transport on client side.
      * 
-     * @return the transport description
-     * @throws Exception
+     * @param trpInDesc
+     * @param trpOutDesc
      */
-    TransportInDescription createTransportInDescription() throws Exception;
+    void setupTransport(TransportInDescription trpInDesc, TransportOutDescription trpOutDesc);
 }

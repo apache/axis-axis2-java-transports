@@ -30,6 +30,18 @@ import org.apache.axis2.transport.TransportListener;
 import org.apache.axis2.transport.UtilsTransportServer;
 import org.apache.axis2.transport.testkit.axis2.TransportDescriptionFactory;
 
+/**
+ * Resource maintaining the {@link ConfigurationContext} for {@link AxisTestEndpoint}
+ * instances. This class provides the Axis2 server environment.
+ * <p>
+ * Dependencies:
+ * <dl>
+ *   <dt>{@link TransportDescriptionFactory} (1)</dt>
+ *   <dd>Used to create transport descriptions.</dd>
+ *   <dt>{@link AxisTestEndpointContextConfigurator} (0..*)</dt>
+ *   <dd>Used to configure the transport.</dd>
+ * </dl>
+ */
 public class AxisTestEndpointContext {
     public static final AxisTestEndpointContext INSTANCE = new AxisTestEndpointContext();
     
@@ -39,7 +51,7 @@ public class AxisTestEndpointContext {
     private AxisTestEndpointContext() {}
     
     @SuppressWarnings("unused")
-    private void setUp(TransportDescriptionFactory tdf) throws Exception {
+    private void setUp(TransportDescriptionFactory tdf, AxisTestEndpointContextConfigurator[] configurators) throws Exception {
         
         server = new UtilsTransportServer();
         
@@ -47,6 +59,10 @@ public class AxisTestEndpointContext {
         TransportInDescription trpInDesc = tdf.createTransportInDescription();
         listener = trpInDesc.getReceiver();
         server.addTransport(trpInDesc, trpOutDesc);
+        
+        for (AxisTestEndpointContextConfigurator configurator : configurators) {
+            configurator.setupTransport(trpInDesc, trpOutDesc);
+        }
         
         ConfigurationContext cfgCtx = server.getConfigurationContext();
         

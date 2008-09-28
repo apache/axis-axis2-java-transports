@@ -21,33 +21,80 @@ package org.apache.axis2.transport.testkit.axis2.client;
 
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
+import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.axis2.engine.ListenerManager;
 import org.apache.axis2.transport.CustomAxisConfigurator;
 import org.apache.axis2.transport.testkit.axis2.TransportDescriptionFactory;
 
+/**
+ * Resource maintaining the {@link ConfigurationContext} for {@link AxisTestClient}
+ * instances.
+ * <p>
+ * Dependencies:
+ * <dl>
+ *   <dt>{@link TransportDescriptionFactory} (1)</dt>
+ *   <dd>Used to create transport descriptions.</dd>
+ *   <dt>{@link AxisTestClientContextConfigurator} (0..*)</dt>
+ *   <dd>Used to determine whether a transport listener is required and to
+ *       configure the transport.</dd>
+ * </dl>
+ */
 public class AxisTestClientContext {
     public static final AxisTestClientContext INSTANCE = new AxisTestClientContext();
     
     private TransportOutDescription trpOutDesc;
     private ConfigurationContext cfgCtx;
+    private ListenerManager listenerManager;
     
     private AxisTestClientContext() {}
     
     @SuppressWarnings("unused")
-    private void setUp(TransportDescriptionFactory tdf) throws Exception {
+    private void setUp(TransportDescriptionFactory tdf, AxisTestClientContextConfigurator[] configurators) throws Exception {
         cfgCtx = ConfigurationContextFactory.createConfigurationContext(new CustomAxisConfigurator());
         AxisConfiguration axisCfg = cfgCtx.getAxisConfiguration();
 
         trpOutDesc = tdf.createTransportOutDescription();
         axisCfg.addTransportOut(trpOutDesc);
         trpOutDesc.getSender().init(cfgCtx, trpOutDesc);
+        
+        boolean useListener = false;
+        for (AxisTestClientContextConfigurator configurator : configurators) {
+            if (configurator.isTransportListenerRequired()) {
+                useListener = true;
+                break;
+            }
+        }
+        
+        TransportInDescription trpInDesc;
+        if (useListener) {
+            trpInDesc = tdf.createTransportInDescription();
+        } else {
+            trpInDesc = null;
+        }
+        
+        for (AxisTestClientContextConfigurator configurator : configurators) {
+            configurator.setupTransport(trpInDesc, trpOutDesc);
+        }
+        
+        if (useListener) {
+            listenerManager = new ListenerManager();
+            listenerManager.init(cfgCtx);
+            cfgCtx.setTransportManager(listenerManager);
+            listenerManager.addListener(trpInDesc, false);
+            listenerManager.start();
+        }
     }
     
     @SuppressWarnings("unused")
     private void tearDown() throws Exception {
         trpOutDesc.getSender().stop();
         trpOutDesc = null;
+        if (listenerManager != null) {
+            listenerManager.stop();
+            listenerManager = null;
+        }
         cfgCtx.terminate();
         cfgCtx = null;
     }
