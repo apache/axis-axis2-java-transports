@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements. See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership. The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License. You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied. See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<document>
+    <properties>
+        <title>JMS transport</title>
+    </properties>
+    <body>
+        <section name="Transport configuration">
+            <p>Sample axis2.xml:</p>
+<pre><![CDATA[
+    <transportReceiver name="jms" class="org.apache.axis2.transport.jms.JMSListener">
+        <parameter name="myTopicConnectionFactory" locked="false">                      
+            <parameter name="java.naming.factory.initial" locked="false">org.apache.activemq.jndi.ActiveMQInitialContextFactory</parameter>
+            <parameter name="java.naming.provider.url" locked="false">tcp://localhost:61616</parameter>         
+            <parameter name="transport.jms.ConnectionFactoryJNDIName" locked="false">TopicConnectionFactory</parameter>
+        </parameter>
+        <parameter name="myQueueConnectionFactory" locked="false">
+            <parameter name="java.naming.factory.initial" locked="false">org.apache.activemq.jndi.ActiveMQInitialContextFactory</parameter>
+            <parameter name="java.naming.provider.url" locked="false">tcp://localhost:61616</parameter>         
+            <parameter name="transport.jms.ConnectionFactoryJNDIName" locked="false">QueueConnectionFactory</parameter>
+        </parameter>
+        <parameter name="default" locked="false">                       
+            <parameter name="java.naming.factory.initial" locked="false">org.apache.activemq.jndi.ActiveMQInitialContextFactory</parameter>
+            <parameter name="java.naming.provider.url" locked="false">tcp://localhost:61616</parameter>         
+            <parameter name="transport.jms.ConnectionFactoryJNDIName" locked="false">QueueConnectionFactory</parameter>
+        </parameter>
+    </transportReceiver>
+]]></pre>
+            <p>If a connection factory named "default" (as shown above) is defined, this would be used for services which does
+            not explicitly specify the connection factory that should be used. The services.xml of a service should indicate
+            the connection factory and the destination name to be associated with. If a destination is not specified, the
+            implementation would create a JMS Queue with the service name. The JMS destination should ideally be created
+            and administered through the JMS provider utilities.</p>
+        </section>
+        <section name="Service configuration">
+            <table class="bodyTable">
+                <tr>
+                  <th>
+                    Parameter
+                  </th>
+                  <th>
+                    Require
+                  </th>
+                  <th>
+                    Description
+                  </th>
+                </tr>
+                <tr>
+                  <td>
+                    transport.jms.ConnectionFactory
+                  </td>
+                  <td>
+                    Optional
+                  </td>
+                  <td>
+                    The JMS connection factory definition (from axis2.xml) to be used to
+                    listen for messages for this service
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    transport.jms.Destination
+                  </td>
+                  <td>
+                    Optional
+                  </td>
+                  <td>
+                    The JMS destination name (Defaults to a Queue with the service name)
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    transport.jms.DestinationType
+                  </td>
+                  <td>
+                    Optional
+                  </td>
+                  <td>
+                    The JMS destination type. Accept values 'queue' or 'topic' (default:
+                    queue)
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    transport.jms.ReplyDestination
+                  </td>
+                  <td>
+                    Optional
+                  </td>
+                  <td>
+                    The destination where a reply will be posted
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    transport.jms.Wrapper
+                  </td>
+                  <td>
+                    Optional
+                  </td>
+                  <td>
+                    The wrapper element for the JMS message
+                  </td>
+                </tr>
+            </table>
+            <p>Sample services.xml:</p>
+<pre><![CDATA[
+<service name="echo">
+        <transports>
+                ....
+            <transport>jms</transport>
+        </transports>
+    ...
+    <parameter name="transport.jms.ConnectionFactory" locked="true">myTopicConnectionFactory</parameter>
+    <parameter name="transport.jms.Destination" locked="true">dynamicTopics/something.TestTopic</parameter>
+</service>
+]]></pre>
+        </section>
+        <section name="Endpoint references">
+<pre>    
+jms-epr = "jms:/" jms-dest [ "?" param  *( [ "&amp;" param ] ) ]
+param = param-name "=" param-value
+</pre>
+
+            <table class="bodyTable">
+                <tr>
+                    <th>Parameter</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>transport.jms.ConnectionFactoryJNDIName</td>
+                    <td></td>
+                </tr>  
+                <tr>
+                    <td>transport.jms.DestinationType</td>
+                    <td></td>
+                </tr>  
+                <tr>
+                    <td>transport.jms.ReplyDestination</td>
+                    <td></td>
+                </tr>  
+                <tr>
+                    <td>transport.jms.ReplyDestinationType</td>
+                    <td></td>
+                </tr>  
+                <tr>
+                    <td>java.naming.factory.initial</td>
+                    <td></td>
+                </tr>  
+                <tr>
+                    <td>java.naming.provider.url</td>
+                    <td></td>
+                </tr>  
+                <tr>
+                    <td>java.naming.security.principal</td>
+                    <td></td>
+                </tr>  
+                <tr>
+                    <td>java.naming.security.credentials</td>
+                    <td></td>
+                </tr>
+            </table>
+        </section>
+    </body>
+</document>
