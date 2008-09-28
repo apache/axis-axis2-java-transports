@@ -35,8 +35,6 @@ import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.ListenerManager;
-import org.apache.axis2.format.BinaryBuilder;
-import org.apache.axis2.format.PlainTextBuilder;
 import org.apache.axis2.receivers.RawXMLINOnlyMessageReceiver;
 import org.apache.axis2.receivers.RawXMLINOutMessageReceiver;
 import org.apache.axis2.wsdl.WSDLConstants;
@@ -52,15 +50,7 @@ public class UtilsTransportServer {
     public UtilsTransportServer() throws AxisFault {
         cfgCtx = ConfigurationContextFactory.
                     createConfigurationContext(new CustomAxisConfigurator());
-        AxisConfiguration axisConfiguration = cfgCtx.getAxisConfiguration();
 
-        // remove http transport
-        axisConfiguration.getTransportsIn().remove("http");
-        
-        // add default builders known by Synapse but not by Axis2
-        axisConfiguration.addMessageBuilder("text/plain", new PlainTextBuilder());
-        axisConfiguration.addMessageBuilder("application/octet-stream", new BinaryBuilder());
-        
         // create listener manager
         listnMgr = new ListenerManager();
         listnMgr.init(cfgCtx);

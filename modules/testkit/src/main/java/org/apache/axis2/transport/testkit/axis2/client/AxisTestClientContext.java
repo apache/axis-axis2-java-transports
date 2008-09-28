@@ -23,8 +23,6 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.engine.AxisConfiguration;
-import org.apache.axis2.format.BinaryFormatter;
-import org.apache.axis2.format.PlainTextFormatter;
 import org.apache.axis2.transport.CustomAxisConfigurator;
 import org.apache.axis2.transport.testkit.axis2.TransportDescriptionFactory;
 
@@ -44,9 +42,6 @@ public class AxisTestClientContext {
         trpOutDesc = tdf.createTransportOutDescription();
         axisCfg.addTransportOut(trpOutDesc);
         trpOutDesc.getSender().init(cfgCtx, trpOutDesc);
-        
-        axisCfg.addMessageFormatter("text/plain", new PlainTextFormatter());
-        axisCfg.addMessageFormatter("application/octet-stream", new BinaryFormatter());
     }
     
     @SuppressWarnings("unused")

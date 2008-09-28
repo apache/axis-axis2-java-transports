@@ -106,6 +106,10 @@
                          class="org.apache.axis2.transport.http.SOAPMessageFormatter"/>
         <messageFormatter contentType="application/soap+xml"
                          class="org.apache.axis2.transport.http.SOAPMessageFormatter"/>
+        <messageFormatter contentType="text/plain"
+                         class="org.apache.axis2.format.PlainTextFormatter"/>
+        <messageFormatter contentType="application/octet-stream"
+                         class="org.apache.axis2.format.BinaryFormatter"/>
     </messageFormatters>
 
     <!-- ================================================= -->
@@ -118,6 +122,10 @@
                          class="org.apache.axis2.builder.ApplicationXMLBuilder"/>
         <messageBuilder contentType="application/x-www-form-urlencoded"
                          class="org.apache.axis2.builder.XFormURLEncodedBuilder"/>
+        <messageBuilder contentType="text/plain"
+                         class="org.apache.axis2.format.PlainTextBuilder"/>
+        <messageBuilder contentType="application/octet-stream"
+                         class="org.apache.axis2.format.BinaryBuilder"/>
         <!--Left commented because it adds the depandancy of servlet-api to other modules.
         Please uncomment to Receive messages in multipart/form-data format-->
         <!--<messageBuilder contentType="multipart/form-data"-->
