@@ -267,12 +267,14 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
             }
         } catch (MessagingException ignore) {}
 
+        // FIXME: we should already skip these messages in the checkMail method
         // some times the mail server sends a special mail message which is not relavent
         // in processing. ignore this message.
         if ((trpHeaders.get("Status") != null) && (trpHeaders.get("Status").equals("RO"))){
             return;
         }
         // figure out content type of primary request. If the content type is specified, use it
+        // FIXME: shouldn't the content type always be specified by the message?
         String contentType = entry.getContentType();
         if (BaseUtils.isBlank(contentType)) {
 
@@ -471,6 +473,7 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
 
             entry.setContentType(
                 ParamUtils.getOptionalParam(service, MailConstants.TRANSPORT_MAIL_CONTENT_TYPE));
+            // FIXME: the value of the transport.mail.ReplyAddress parameter is never used
             entry.setReplyAddress(
                 ParamUtils.getOptionalParam(service, MailConstants.TRANSPORT_MAIL_REPLY_ADDRESS));
 

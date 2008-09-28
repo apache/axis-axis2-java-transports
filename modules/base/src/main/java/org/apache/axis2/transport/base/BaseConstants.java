@@ -90,5 +90,6 @@ public class BaseConstants {
     public static final String HEADER_IN_REPLY_TO = "In-Reply-To";
 
     // this is an property required by axis2
+    // FIXME: where is this required in Axis2?
     public final static String MAIL_CONTENT_TYPE = "mail.contenttype";
 }

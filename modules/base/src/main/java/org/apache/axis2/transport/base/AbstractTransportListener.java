@@ -274,6 +274,7 @@ public abstract class AbstractTransportListener implements TransportListener {
                 try {
                     // check if an callback has register for this message
                     Map callBackMap = (Map) msgCtx.getConfigurationContext().getProperty(BaseConstants.CALLBACK_TABLE);
+                    // FIXME: transport headers are protocol specific; the correlation ID should be passed as argument to this method
                     Object replyToMessageID = trpHeaders.get(BaseConstants.HEADER_IN_REPLY_TO);
                     // if there is a call back register with this replyto ID then this has
                     // to handle as a synchronized message

@@ -56,6 +56,7 @@ public class PollTableEntry extends AbstractPollTableEntry {
     /** The mail folder from which to check mail */
     private String folder;
     /** X-Service-Path custom header */
+    // FIXME: this value of this property is never set nor retrieved
     private String xServicePath;
     /** Content-Type to use for the message */
     private String contentType;
