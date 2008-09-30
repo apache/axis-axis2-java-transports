@@ -220,7 +220,8 @@ public abstract class AbstractHTTPSender {
             if (contentEncoding.getValue().
                     equalsIgnoreCase(HTTPConstants.COMPRESSION_GZIP)) {
                 in = new GZIPInputStream(in);
-            } else {
+                // If the content-encoding is identity we can basically ignore it.
+            } else if (!"identity".equalsIgnoreCase(contentEncoding.getValue())) {
                 throw new AxisFault("HTTP :" + "unsupported content-encoding of '"
                         + contentEncoding.getValue() + "' found");
             }
