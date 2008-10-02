@@ -195,6 +195,8 @@ public class ProxyConfiguration {
             throw new AxisFault(ProxyConfiguration.class.getName() +
                                     " Minimum proxy credentials are not set");
         }
+        
+        httpClient.getParams().setAuthenticationPreemptive(true);
         httpClient.getState().setProxyCredentials(AuthScope.ANY, proxyCred);
         config.setProxy(this.getProxyHost(), this.getProxyPort());
     }
