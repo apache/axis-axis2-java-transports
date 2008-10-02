@@ -32,6 +32,7 @@
     <version>SNAPSHOT</version>
     <packaging>pom</packaging>
     <description>Axis2 Transport</description>
+    <name>Apache Axis2 - Transport - Parent</name>
     <url>http://ws.apache.org/commons/transport/</url>
     <issueManagement>
         <system>JIRA</system>

@@ -32,17 +32,17 @@
     <artifactId>axis2-transports</artifactId>
     <version>SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Axis2 Transport - Root</name>
+    <name>Apache Axis2 - Transport - Root</name>
     <modules>
         <module>modules/parent</module>
         <module>modules/base</module>
-        <module>modules/testkit</module>
         <module>modules/http</module>
         <module>modules/tcp</module>
         <module>modules/local</module>
         <module>modules/xmpp</module>
         <module>modules/mail</module>
         <module>modules/jms</module>
+        <module>modules/testkit</module>
     </modules>
     <profiles>
         <profile>

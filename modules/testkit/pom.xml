@@ -29,9 +29,9 @@
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
     <artifactId>axis2-transport-testkit</artifactId>
-    <name>Apache Axis2 - Transport test kit</name>
+    <name>Apache Axis2 - Transport - testkit</name>
     <description>Framework to build test suites for Axis2 transports</description>
-    
+
     <dependencies>
         <dependency>
             <groupId>org.apache.axis2</groupId>
@@ -71,7 +71,7 @@
             <version>5.1.10</version>
         </dependency>
     </dependencies>
-    
+
     <build>
         <resources>
             <resource>
@@ -81,22 +81,19 @@
                 <directory>target/generated-resources</directory>
             </resource>
         </resources>
+        <testResources>
+            <testResource>
+                <directory>test-resources</directory>
+            </testResource>
+        </testResources>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.5</source>
-                    <target>1.5</target>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>2.0</version>
                 <executions>
                     <execution>
-                        <id>copy</id>
+                        <id>copy-1</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>copy</goal>
@@ -109,12 +106,47 @@
                                     <artifactId>addressing</artifactId>
                                     <version>${axis2.version}</version>
                                     <type>mar</type>
-                                    <outputDirectory>target/generated-resources/org/apache/axis2/transport/repo/modules</outputDirectory>
+                                    <outputDirectory>
+                                        target/generated-resources/org/apache/axis2/transport/repo/modules
+                                    </outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-2</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <stripVersion>true</stripVersion>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.aspectj</groupId>
+                                    <artifactId>aspectjweaver</artifactId>
+                                    <outputDirectory>target/lib</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <argLine>-javaagent:target/lib/aspectjweaver.jar -Xms64m -Xmx128m</argLine>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>
+                </configuration>
             </plugin>
         </plugins>
     </build>

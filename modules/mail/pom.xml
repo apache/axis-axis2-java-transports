@@ -32,7 +32,7 @@
 
     <groupId>org.apache.axis2</groupId>
     <artifactId>axis2-transport-mail</artifactId>
-    <name>Apache Axis2 - Mail Transport</name>
+    <name>Apache Axis2 - Transport - Mail</name>
     <description>Apache Axis2 - Mail Transport</description>
     <packaging>jar</packaging>
 

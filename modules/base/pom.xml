@@ -32,7 +32,7 @@
 
     <groupId>org.apache.axis2</groupId>
     <artifactId>axis2-transport-base</artifactId>
-    <name>Apache Axis2 - Base Transport</name>
+    <name> Apache Axis2 - Transport - Base</name>
     <description>Apache Axis2 - Base Transport</description>
     <packaging>jar</packaging>
 
