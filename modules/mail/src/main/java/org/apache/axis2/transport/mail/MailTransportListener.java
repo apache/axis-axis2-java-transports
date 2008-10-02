@@ -329,9 +329,9 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
             outInfo.setTargetAddresses((InternetAddress[]) message.getFrom());
         } else {
             // does the service specify a default reply address ?
-            Parameter param = service.getParameter(MailConstants.TRANSPORT_MAIL_REPLY_ADDRESS);
-            if (param != null && param.getValue() != null) {
-                outInfo.setTargetAddresses(InternetAddress.parse((String) param.getValue()));
+            InternetAddress replyAddress = entry.getReplyAddress();
+            if (replyAddress != null) {
+                outInfo.setTargetAddresses(new InternetAddress[] { replyAddress });
             }
         }
 
@@ -473,7 +473,6 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
 
             entry.setContentType(
                 ParamUtils.getOptionalParam(service, MailConstants.TRANSPORT_MAIL_CONTENT_TYPE));
-            // FIXME: the value of the transport.mail.ReplyAddress parameter is never used
             entry.setReplyAddress(
                 ParamUtils.getOptionalParam(service, MailConstants.TRANSPORT_MAIL_REPLY_ADDRESS));
 

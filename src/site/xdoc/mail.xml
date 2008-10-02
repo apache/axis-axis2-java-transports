@@ -90,7 +90,8 @@
                 <tr>
                     <td>transport.mail.ReplyAddress</td>
                     <td>No</td>
-                    <td>[FIXME: this parameter is recognized but actually never used]</td>
+                    <td>The reply-to address to be used when no From or Reply-To header is present in the
+                    request message.</td>
                 </tr>
                 <tr>
                     <td>transport.mail.PreserveHeaders, transport.mail.RemoveHeaders</td>
