@@ -20,18 +20,30 @@
 package org.apache.axis2.transport.testkit.http;
 
 import java.io.IOException;
+import java.util.Map;
 
+import junit.framework.Assert;
+
+import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.transport.testkit.axis2.MessageContextValidator;
 import org.apache.commons.io.IOUtils;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 
-public class JettyEchoEndpoint extends JettyEndpoint {
+public class JettyEchoEndpoint extends JettyEndpoint implements MessageContextValidator {
     @Override
     protected void handle(String pathParams, HttpRequest request,
             HttpResponse response) throws HttpException, IOException {
         
         response.setContentType(request.getContentType());
+        response.addField("X-Test-Header", "test value");
         IOUtils.copy(request.getInputStream(), response.getOutputStream());
+    }
+
+    public void validate(MessageContext msgContext, boolean isResponse) throws Exception {
+        Map<?,?> trpHeaders = (Map<?,?>)msgContext.getProperty(MessageContext.TRANSPORT_HEADERS);
+        Assert.assertNotNull(trpHeaders);
+        Assert.assertEquals("test value", trpHeaders.get("X-Test-Header"));
     }
 }
