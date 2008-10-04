@@ -72,14 +72,7 @@ public class MailChannel implements AsyncChannel, RequestResponseChannel, AxisTe
     }
 
     public void setupService(AxisService service, boolean isClientSide) throws Exception {
-        MailTestEnvironment.Account account = isClientSide ? sender : recipient;
-        service.addParameter("transport.mail.Protocol", env.getProtocol());
-        service.addParameter("transport.mail.Address", account.getAddress());
-        service.addParameter("transport.PollInterval", "50ms");
-        
-        for (Map.Entry<String,String> prop : env.getInProperties(account).entrySet()) {
-            service.addParameter(prop.getKey(), prop.getValue());
-        }
+        env.setupPoll(service, isClientSide ? sender : recipient);
     }
 
     public void setupRequestMessageContext(MessageContext msgContext) {

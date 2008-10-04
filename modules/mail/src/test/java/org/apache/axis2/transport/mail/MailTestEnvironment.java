@@ -21,7 +21,9 @@ package org.apache.axis2.transport.mail;
 
 import java.util.Map;
 
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.Parameter;
+import org.apache.axis2.description.ParameterInclude;
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.transport.testkit.axis2.TransportDescriptionFactory;
@@ -76,5 +78,14 @@ public abstract class MailTestEnvironment implements TransportDescriptionFactory
             trpOutDesc.addParameter(new Parameter(prop.getKey(), prop.getValue()));
         }
         return trpOutDesc;
+    }
+    
+    public void setupPoll(ParameterInclude params, Account account) throws AxisFault {
+        params.addParameter(new Parameter("transport.mail.Protocol", getProtocol()));
+        params.addParameter(new Parameter("transport.mail.Address", account.getAddress()));
+        params.addParameter(new Parameter("transport.PollInterval", "50ms"));
+        for (Map.Entry<String,String> prop : getInProperties(account).entrySet()) {
+            params.addParameter(new Parameter(prop.getKey(), prop.getValue()));
+        }
     }
 }

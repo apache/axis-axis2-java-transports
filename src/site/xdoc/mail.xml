@@ -40,8 +40,9 @@
         &lt;parameter name="mail.smtp.from"&gt;synapse.demo.0@gmail.com&lt;/parameter&gt;
     &lt;/transportSender&gt;</pre>
         </section>
-        <section name="Service configuration">
-            <p>In order receive messages using the mail transport, a service must be configured with a set of parameters
+        <section name="Endpoint configuration">
+            <p>Endpoints can be configured both at the transport level and at the service level. In order receive messages using
+            the mail transport, the listener or the service must be configured with a set of parameters
             to access the corresponding mailbox account. All service parameters starting with <tt>mail.</tt> are
             interpreted as JavaMail environment properties. The most relevant are <tt>mail.<em>&lt;protocol&gt;</em>.host</tt>
             and <tt>mail.<em>&lt;protocol&gt;</em>.user</tt>, where <tt><em>&lt;protocol&gt;</em></tt> is typically <tt>pop3</tt>

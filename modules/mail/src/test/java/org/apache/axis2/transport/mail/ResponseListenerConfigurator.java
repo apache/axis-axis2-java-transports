@@ -17,24 +17,35 @@
  *  under the License.
  */
 
-package org.apache.axis2.transport.testkit.axis2.client;
+package org.apache.axis2.transport.mail;
 
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.description.TransportOutDescription;
+import org.apache.axis2.transport.testkit.axis2.client.AxisTestClientContextConfigurator;
 
-public interface AxisTestClientContextConfigurator {
-    /**
-     * Determine whether a transport listener is required on client side.
-     * 
-     * @return true if a transport listener instance is required
-     */
-    boolean isTransportListenerRequired();
+public class ResponseListenerConfigurator implements AxisTestClientContextConfigurator {
+    private MailTestEnvironment env;
+    private MailTestEnvironment.Account sender;
     
-    /**
-     * Setup the transport on client side.
-     * 
-     * @param trpInDesc
-     * @param trpOutDesc
-     */
-    void setupTransport(TransportInDescription trpInDesc, TransportOutDescription trpOutDesc) throws Exception;
+    @SuppressWarnings("unused")
+    private void setUp(MailTestEnvironment env, MailChannel channel) {
+        this.env = env;
+        sender = channel.getSender();
+    }
+    
+    @SuppressWarnings("unused")
+    private void tearDown() {
+        env = null;
+        sender = null;
+    }
+    
+    public boolean isTransportListenerRequired() {
+        return true;
+    }
+
+    public void setupTransport(TransportInDescription trpInDesc,
+            TransportOutDescription trpOutDesc) throws Exception{
+        
+        env.setupPoll(trpInDesc, sender);
+    }
 }

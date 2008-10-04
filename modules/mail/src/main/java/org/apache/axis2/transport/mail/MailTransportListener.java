@@ -26,6 +26,7 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
+import org.apache.axis2.description.ParameterInclude;
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.transport.base.AbstractPollingTransportListener;
 import org.apache.axis2.transport.base.BaseConstants;
@@ -298,21 +299,23 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
         }
 
         org.apache.axis2.context.MessageContext msgContext = createMessageContext();
-        // set to bypass dispatching if we know the service - we already should!
-        AxisService service = cfgCtx.getAxisConfiguration().getService(entry.getServiceName());
-        msgContext.setAxisService(service);
-
-        // find the operation for the message, or default to one
-        Parameter operationParam = service.getParameter(BaseConstants.OPERATION_PARAM);
-        QName operationQName = (
-            operationParam != null ?
-                BaseUtils.getQNameFromString(operationParam.getValue()) :
-                BaseConstants.DEFAULT_OPERATION);
-
-        AxisOperation operation = service.getOperation(operationQName);
-        if (operation != null) {
-            msgContext.setAxisOperation(operation);
-            msgContext.setSoapAction("urn:" + operation.getName().getLocalPart());
+        
+        if (entry.getServiceName() != null) {
+            AxisService service = cfgCtx.getAxisConfiguration().getService(entry.getServiceName());
+            msgContext.setAxisService(service);
+    
+            // find the operation for the message, or default to one
+            Parameter operationParam = service.getParameter(BaseConstants.OPERATION_PARAM);
+            QName operationQName = (
+                operationParam != null ?
+                    BaseUtils.getQNameFromString(operationParam.getValue()) :
+                    BaseConstants.DEFAULT_OPERATION);
+    
+            AxisOperation operation = service.getOperation(operationQName);
+            if (operation != null) {
+                msgContext.setAxisOperation(operation);
+                msgContext.setSoapAction("urn:" + operation.getName().getLocalPart());
+            }
         }
 
         InternetAddress[] fromAddress = (InternetAddress[]) message.getReplyTo();
@@ -444,14 +447,21 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
     }
 
     @Override
-    protected PollTableEntry createPollTableEntry(AxisService service) {
+    protected PollTableEntry createPollTableEntry(ParameterInclude paramIncl) throws AxisFault {
+        String address =
+            ParamUtils.getOptionalParam(paramIncl, MailConstants.TRANSPORT_MAIL_ADDRESS);
+        if (address == null) {
+            return null;
+        } else {
+            PollTableEntry entry = new PollTableEntry();
+            try {
+                entry.setEmailAddress(address);
+            } catch (AddressException e) {
+                throw new AxisFault("Invalid email address specified by '" +
+                        MailConstants.TRANSPORT_MAIL_ADDRESS + "' parameter :: " + e.getMessage());
+            }
 
-        PollTableEntry entry = new PollTableEntry();
-        try {
-            entry.setEmailAddress(
-                ParamUtils.getRequiredParam(service, MailConstants.TRANSPORT_MAIL_ADDRESS));
-
-            List<Parameter> params = service.getParameters();
+            List<Parameter> params = paramIncl.getParameters();
             for (Parameter p : params) {
                 if (p.getName().startsWith("mail.")) {
                     entry.addProperty(p.getName(), (String) p.getValue());
@@ -472,54 +482,48 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
 
 
             entry.setContentType(
-                ParamUtils.getOptionalParam(service, MailConstants.TRANSPORT_MAIL_CONTENT_TYPE));
-            entry.setReplyAddress(
-                ParamUtils.getOptionalParam(service, MailConstants.TRANSPORT_MAIL_REPLY_ADDRESS));
+                ParamUtils.getOptionalParam(paramIncl, MailConstants.TRANSPORT_MAIL_CONTENT_TYPE));
+            try {
+                entry.setReplyAddress(
+                    ParamUtils.getOptionalParam(paramIncl, MailConstants.TRANSPORT_MAIL_REPLY_ADDRESS));
+            } catch (AddressException e) {
+                throw new AxisFault("Invalid email address specified by '" +
+                        MailConstants.TRANSPORT_MAIL_REPLY_ADDRESS + "' parameter :: " +
+                        e.getMessage());
+            }
 
             entry.addPreserveHeaders(
-                ParamUtils.getOptionalParam(service, MailConstants.TRANSPORT_MAIL_PRESERVE_HEADERS));
+                ParamUtils.getOptionalParam(paramIncl, MailConstants.TRANSPORT_MAIL_PRESERVE_HEADERS));
             entry.addRemoveHeaders(
-                ParamUtils.getOptionalParam(service, MailConstants.TRANSPORT_MAIL_REMOVE_HEADERS));
+                ParamUtils.getOptionalParam(paramIncl, MailConstants.TRANSPORT_MAIL_REMOVE_HEADERS));
 
             String option = ParamUtils.getOptionalParam(
-                service, MailConstants.TRANSPORT_MAIL_ACTION_AFTER_PROCESS);
+                paramIncl, MailConstants.TRANSPORT_MAIL_ACTION_AFTER_PROCESS);
             entry.setActionAfterProcess(
                 MOVE.equals(option) ? PollTableEntry.MOVE : PollTableEntry.DELETE);
             option = ParamUtils.getOptionalParam(
-                service, MailConstants.TRANSPORT_MAIL_ACTION_AFTER_FAILURE);
+                paramIncl, MailConstants.TRANSPORT_MAIL_ACTION_AFTER_FAILURE);
             entry.setActionAfterFailure(
                 MOVE.equals(option) ? PollTableEntry.MOVE : PollTableEntry.DELETE);
 
             String moveFolderAfterProcess = ParamUtils.getOptionalParam(
-                service, MailConstants.TRANSPORT_MAIL_MOVE_AFTER_PROCESS);
+                paramIncl, MailConstants.TRANSPORT_MAIL_MOVE_AFTER_PROCESS);
             entry.setMoveAfterProcess(moveFolderAfterProcess);
             String modeFolderAfterFailure = ParamUtils.getOptionalParam(
-                service, MailConstants.TRANSPORT_MAIL_MOVE_AFTER_FAILURE);
+                paramIncl, MailConstants.TRANSPORT_MAIL_MOVE_AFTER_FAILURE);
             entry.setMoveAfterFailure(modeFolderAfterFailure);
 
             String strMaxRetryCount = ParamUtils.getOptionalParam(
-                service, MailConstants.MAX_RETRY_COUNT);
+                paramIncl, MailConstants.MAX_RETRY_COUNT);
             if (strMaxRetryCount != null)
                 entry.setMaxRetryCount(Integer.parseInt(strMaxRetryCount));
 
             String strReconnectTimeout = ParamUtils.getOptionalParam(
-                service, MailConstants.RECONNECT_TIMEOUT);
+                paramIncl, MailConstants.RECONNECT_TIMEOUT);
             if (strReconnectTimeout != null)
                 entry.setReconnectTimeout(Integer.parseInt(strReconnectTimeout) * 1000);
 
             return entry;
-
-        } catch (AxisFault axisFault) {
-            String msg = "Error configuring the Mail transport for Service : " +
-                service.getName() + " :: " + axisFault.getMessage();
-            log.warn(msg);
-            return null;
-        } catch (AddressException e) {
-            String msg = "Error configuring the Mail transport for Service : " +
-                " Invalid email address specified by '" + MailConstants.TRANSPORT_MAIL_ADDRESS +
-                "'parameter for service : " + service.getName() + " :: " + e.getMessage();
-            log.warn(msg);
-            return null;
         }
     }
 }

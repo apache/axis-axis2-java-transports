@@ -93,6 +93,7 @@ public class AxisTestClientContext {
         trpOutDesc = null;
         if (listenerManager != null) {
             listenerManager.stop();
+            listenerManager.destroy();
             listenerManager = null;
         }
         cfgCtx.terminate();

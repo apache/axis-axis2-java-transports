@@ -25,6 +25,7 @@ import junit.framework.TestSuite;
 import org.apache.axis2.transport.testkit.TransportTestSuite;
 import org.apache.axis2.transport.testkit.TransportTestSuiteBuilder;
 import org.apache.axis2.transport.testkit.axis2.client.AxisAsyncTestClient;
+import org.apache.axis2.transport.testkit.axis2.client.AxisRequestResponseTestClient;
 import org.apache.axis2.transport.testkit.axis2.endpoint.AxisAsyncEndpoint;
 import org.apache.axis2.transport.testkit.axis2.endpoint.AxisEchoEndpoint;
 import org.apache.axis2.transport.testkit.tests.misc.MinConcurrencyTest;
@@ -63,6 +64,7 @@ public class MailTransportTest extends TestCase {
         
         builder.addRequestResponseChannel(channel);
         
+        builder.addAxisRequestResponseTestClient(new AxisRequestResponseTestClient(), new ResponseListenerConfigurator());
         builder.addByteArrayRequestResponseTestClient(new MailRequestResponseClient(new FlatLayout()));
         builder.addByteArrayRequestResponseTestClient(new MailRequestResponseClient(new MultipartLayout()));
         
