@@ -43,6 +43,7 @@
         <module>modules/mail</module>
         <module>modules/jms</module>
         <module>modules/testkit</module>
+        <module>modules/tests</module>
     </modules>
     <profiles>
         <profile>
@@ -113,6 +114,45 @@
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>cobertura</id>
+            <dependencies>
+                <dependency>
+                    <groupId>net.sourceforge.cobertura</groupId>
+                    <artifactId>cobertura</artifactId>
+                    <version>1.9</version>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>site</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <tasks>
+                                        <taskdef classpathref="maven.runtime.classpath" resource="tasks.properties"/>
+                                        <mkdir dir="${project.build.directory}/site/cobertura" />
+                                        <cobertura-report format="html"
+                                                          datafile="target/cobertura.ser"
+                                                          destdir="${project.build.directory}/cobertura">
+                                            <fileset dir="modules/base/src/main/java"/>
+                                            <fileset dir="modules/http/src"/>
+                                            <fileset dir="modules/jms/src/main/java"/>
+                                            <fileset dir="modules/mail/src/main/java"/>
+                                        </cobertura-report>
+                                    </tasks>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
