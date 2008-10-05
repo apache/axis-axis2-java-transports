@@ -181,8 +181,15 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
                     }
 
                     for (int i = 0; i < total; i++) {
-
-                        if (messages[i].isSet(Flags.Flag.SEEN)) {
+                        String[] status = messages[i].getHeader("Status");
+                        if (status != null && status.length == 1 && status[0].equals("RO")) {
+                            // some times the mail server sends a special mail message which is not relavent
+                            // in processing. ignore this message.
+                            if (log.isDebugEnabled()) {
+                                log.debug("Skipping message # : " + i + " : " +
+                                        messages[i].getSubject() + " - Status: RO");
+                            }
+                        } else if (messages[i].isSet(Flags.Flag.SEEN)) {
                             if (log.isDebugEnabled()) {
                                 log.debug("Skipping message # : " + i + " : " +
                                     messages[i].getSubject() + " - already marked SEEN");
@@ -250,12 +257,6 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
         // populate transport headers using the mail headers
         Map trpHeaders = getTransportHeaders(message, entry);
 
-        // FIXME: we should already skip these messages in the checkMail method
-        // some times the mail server sends a special mail message which is not relavent
-        // in processing. ignore this message.
-        if ((trpHeaders.get("Status") != null) && (trpHeaders.get("Status").equals("RO"))){
-            return;
-        }
         // figure out content type of primary request. If the content type is specified, use it
         // FIXME: shouldn't the content type always be specified by the message?
         String contentType = entry.getContentType();
