@@ -71,9 +71,8 @@ public class MailRequestResponseClient extends MailClient implements RequestResp
         Assert.assertNotNull("No response received", reply);
         Assert.assertEquals(channel.getSender().getAddress(),
                             ((InternetAddress)reply.getRecipients(Message.RecipientType.TO)[0]).getAddress());
-        // TODO: enable this once the corresponding bug in the mail transport is corrected
-//        Assert.assertEquals(channel.getRecipient().getAddress(),
-//                            ((InternetAddress)reply.getFrom()[0]).getAddress());
+        Assert.assertEquals(channel.getRecipient().getAddress(),
+                            ((InternetAddress)reply.getFrom()[0]).getAddress());
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         reply.getDataHandler().writeTo(baos);
         return new IncomingMessage<byte[]>(new ContentType(reply.getContentType()), baos.toByteArray());

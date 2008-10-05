@@ -43,7 +43,11 @@ public class MailMessageContextValidator extends Assert implements MessageContex
         String from = (String)trpHeaders.get(MailConstants.MAIL_HEADER_FROM);
         String to = (String)trpHeaders.get(MailConstants.MAIL_HEADER_TO);
         if (isResponse) {
-            // TODO: enable this once the corresponding bug in the mail transport is corrected
+            // TODO: The transport headers in the response message context are not set correctly.
+            //       There are two issues:
+            //        * SynchronousCallback doesn't propagate the transport headers
+            //        * OutInAxisOperation#send(MessageContext) overwrites the TRANSPORT_HEADERS
+            //          property with the value from the request message context.
 //            assertEquals(channel.getSender().getAddress(), to);
 //            assertEquals(channel.getRecipient().getAddress(), from);
         } else {

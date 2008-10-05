@@ -318,12 +318,7 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
             }
         }
 
-        InternetAddress[] fromAddress = (InternetAddress[]) message.getReplyTo();
-        if (fromAddress == null) {
-            fromAddress = (InternetAddress[]) message.getFrom();
-        }
-
-        MailOutTransportInfo outInfo = new MailOutTransportInfo(fromAddress[0]);
+        MailOutTransportInfo outInfo = new MailOutTransportInfo(entry.getEmailAddress());
 
         // determine reply address
         if (message.getReplyTo() != null) {
