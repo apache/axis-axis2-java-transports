@@ -39,6 +39,25 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <!-- Add axis2-kernel as an explicit dependency and exclude the
+                 Geronimo implementations of JavaMail and activation. They
+                 don't work well with the mail transport. -->
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-kernel</artifactId>
+            <version>${pom.version}</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-javamail_1.4_spec</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-activation_1.1_spec</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-transport-testkit</artifactId>
             <version>${pom.version}</version>
