@@ -19,6 +19,7 @@
 
 package org.apache.axis2.transport.mail;
 
+import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.EndpointReference;
@@ -29,6 +30,8 @@ import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.ParameterInclude;
 import org.apache.axis2.description.TransportInDescription;
+import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.axis2.transport.TransportUtils;
 import org.apache.axis2.transport.base.AbstractPollingTransportListener;
 import org.apache.axis2.transport.base.BaseConstants;
 import org.apache.axis2.transport.base.BaseUtils;
@@ -41,13 +44,18 @@ import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.ContentType;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.ParseException;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -257,21 +265,24 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
         // populate transport headers using the mail headers
         Map trpHeaders = getTransportHeaders(message, entry);
 
-        // figure out content type of primary request. If the content type is specified, use it
-        // FIXME: shouldn't the content type always be specified by the message?
+        // Allow the content type to be overridden by configuration.
         String contentType = entry.getContentType();
-        if (BaseUtils.isBlank(contentType)) {
-
-            Object content = message.getContent();
-            if (content instanceof Multipart) {
-                contentType = message.getContentType();
-            } else if (content instanceof String) {
-                contentType = message.getContentType();
-            } else if (content instanceof InputStream) {
-                contentType = MailConstants.APPLICATION_BINARY;
-            }
+        Part messagePart;
+        if (contentType != null) {
+            messagePart = message;
+        } else {
+            messagePart = getMessagePart(message, cfgCtx.getAxisConfiguration());
+            contentType = messagePart.getContentType();
         }
-
+        
+        // FIXME: remove this ugly hack when Axis2 has learned that content types are case insensitive...
+        int idx = contentType.indexOf(';');
+        if (idx == -1) {
+            contentType = contentType.toLowerCase();
+        } else {
+            contentType = contentType.substring(0, idx).toLowerCase() + contentType.substring(idx);
+        }
+        
         // if the content type was not found, we have an error
         if (contentType == null) {
             processFailure("Unable to determine Content-type for message : " +
@@ -283,6 +294,17 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
 
         MessageContext msgContext = createMessageContext(entry);
 
+        // Extract the charset encoding from the configured content type and
+        // set the CHARACTER_SET_ENCODING property as e.g. SOAPBuilder relies on this.
+        String charSetEnc;
+        try {
+            charSetEnc = new ContentType(contentType).getParameter("charset");
+        } catch (ParseException ex) {
+            // ignore
+            charSetEnc = null;
+        }
+        msgContext.setProperty(Constants.Configuration.CHARACTER_SET_ENCODING, charSetEnc);
+        
         MailOutTransportInfo outInfo = buildOutTransportInfo(message, entry);
 
         // save out transport information
@@ -299,23 +321,32 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
         msgContext.setMessageID(outInfo.getRequestMessageID());
 
         // set the message payload to the message context
-        MailUtils.getInstace().setSOAPEnvelope(message, msgContext, contentType);
-
-        String soapAction = (String) trpHeaders.get(BaseConstants.SOAPACTION);
-        if (soapAction == null && message.getSubject() != null &&
-            message.getSubject().startsWith(BaseConstants.SOAPACTION)) {
-            soapAction = message.getSubject().substring(BaseConstants.SOAPACTION.length());
-            if (soapAction.startsWith(":")) {
-                soapAction = soapAction.substring(1).trim();
+        InputStream in = messagePart.getInputStream();
+        try {
+            try {
+                msgContext.setEnvelope(TransportUtils.createSOAPMessage(msgContext, in, contentType));
+            } catch (XMLStreamException ex) {
+                handleException("Error parsing message", ex);
             }
-        }
 
-        handleIncomingMessage(
-            msgContext,
-            trpHeaders,
-            soapAction,
-            contentType
-        );
+            String soapAction = (String) trpHeaders.get(BaseConstants.SOAPACTION);
+            if (soapAction == null && message.getSubject() != null &&
+                message.getSubject().startsWith(BaseConstants.SOAPACTION)) {
+                soapAction = message.getSubject().substring(BaseConstants.SOAPACTION.length());
+                if (soapAction.startsWith(":")) {
+                    soapAction = soapAction.substring(1).trim();
+                }
+            }
+    
+            handleIncomingMessage(
+                msgContext,
+                trpHeaders,
+                soapAction,
+                contentType
+            );
+        } finally {
+            in.close();
+        }
 
         if (log.isDebugEnabled()) {
             log.debug("Processed message : " + message.getMessageNumber() +
@@ -356,6 +387,47 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
             }
         } catch (MessagingException ignore) {}
         return trpHeaders;
+    }
+    
+    /**
+     * Extract the part from the mail that contains the message to be processed.
+     * This method supports multipart/mixed messages that contain a text/plain
+     * part alongside the message.
+     * 
+     * @param message
+     * @return
+     * @throws MessagingException
+     * @throws IOException 
+     */
+    private Part getMessagePart(Message message, AxisConfiguration axisCfg)
+            throws MessagingException, IOException {
+        
+        ContentType contentType = new ContentType(message.getContentType());
+        if (contentType.getBaseType().equalsIgnoreCase("multipart/mixed")) {
+            Multipart multipart = (Multipart)message.getContent();
+            Part textMainPart = null;
+            for (int i=0; i<multipart.getCount(); i++) {
+                MimeBodyPart bodyPart = (MimeBodyPart)multipart.getBodyPart(i);
+                ContentType partContentType = new ContentType(bodyPart.getContentType());
+                if (axisCfg.getMessageBuilder(partContentType.getBaseType()) != null) {
+                    if (partContentType.getBaseType().equalsIgnoreCase("text/plain")) {
+                        // If it's a text/plain part, remember it. We will return
+                        // it later if we don't find something more interesting.
+                        textMainPart = bodyPart;
+                    } else {
+                        return bodyPart;
+                    }
+                }
+            }
+            if (textMainPart != null) {
+                return textMainPart;
+            } else {
+                // We have nothing else to return!
+                return message;
+            }
+        } else {
+            return message;
+        }
     }
 
     // TODO: the same code is used by other transports; the method should be moved to Abstract(Polling)TransportListener

@@ -34,15 +34,13 @@ public class MailTransportTest extends TestCase {
     public static TestSuite suite() throws Exception {
         TransportTestSuite suite = new TransportTestSuite(MailTransportTest.class);
         
-        // TODO: these test don't work; need more analysis why this is so
-        suite.addExclude("(&(messageType=SOAP12)(data=Latin1))");
-        suite.addExclude("(&(messageType=POX)(data=Latin1))");
-        suite.addExclude("(&(layout=multipart)(data=Latin1))");
-        suite.addExclude("(&(layout=multipart)(messageType=POX))");
+        // SwA doesn't work because attachments are sent with "Content-Transfer-Encoding: binary"
+        // and mail servers don't like that.
+        // TODO: this could be fixed with the enhancement introduced by WSCOMMONS-390
         suite.addExclude("(test=AsyncSwA)");
-        suite.addExclude("(test=AsyncBinary)");
-        suite.addExclude("(&(test=AsyncTextPlain)(!(data=ASCII)))");
-        suite.addExclude("(&(test=EchoXML)(messageType=SOAP12))");
+        // There seems to be a problem with Sun's IMAP client or GreenMail's IMAP server
+        // in this particular case:
+        suite.addExclude("(&(protocol=imap)(|(test=AsyncSwA)(&(test=EchoXML)(messageType=SOAP12))))");
         // SYNAPSE-434
         suite.addExclude("(test=MinConcurrency)");
         
