@@ -487,6 +487,9 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
                         e.getMessage());
             }
 
+            entry.setFolder(
+                ParamUtils.getOptionalParam(paramIncl, MailConstants.TRANSPORT_MAIL_FOLDER));
+
             entry.addPreserveHeaders(
                 ParamUtils.getOptionalParam(paramIncl, MailConstants.TRANSPORT_MAIL_PRESERVE_HEADERS));
             entry.addRemoveHeaders(

@@ -95,6 +95,11 @@
                     request message.</td>
                 </tr>
                 <tr>
+                    <td>transport.mail.Folder</td>
+                    <td>No</td>
+                    <td>The folder to read messages from. Defaults to <tt>INBOX</tt>.</td>
+                </tr>
+                <tr>
                     <td>transport.mail.PreserveHeaders, transport.mail.RemoveHeaders</td>
                     <td>No</td>
                     <td>These two properties control which MIME headers of the received message will be stored
