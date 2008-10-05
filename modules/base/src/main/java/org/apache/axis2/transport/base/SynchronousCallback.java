@@ -54,6 +54,7 @@ public class SynchronousCallback {
                     msgCtx.setServerSide(false);
                     msgCtx.setProperty(BaseConstants.MAIL_CONTENT_TYPE,
                             inMessageContext.getProperty(BaseConstants.MAIL_CONTENT_TYPE));
+                    // FIXME: this class must not be transport dependent since it is used by AbstractTransportListener
                     msgCtx.setIncomingTransportName(org.apache.axis2.Constants.TRANSPORT_MAIL);
                     msgCtx.setEnvelope(inMessageContext.getEnvelope());
 
@@ -80,6 +81,7 @@ public class SynchronousCallback {
                 msgCtx.setServerSide(false);
                 msgCtx.setProperty(BaseConstants.MAIL_CONTENT_TYPE,
                         inMessageContext.getProperty(BaseConstants.MAIL_CONTENT_TYPE));
+                // FIXME: this class must not be transport dependent since it is used by AbstractTransportListener
                 msgCtx.setIncomingTransportName(org.apache.axis2.Constants.TRANSPORT_MAIL);
                 msgCtx.setEnvelope(inMessageContext.getEnvelope());
 
