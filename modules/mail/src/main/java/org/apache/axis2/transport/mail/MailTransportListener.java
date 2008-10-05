@@ -23,6 +23,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
@@ -34,7 +35,14 @@ import org.apache.axis2.transport.base.BaseUtils;
 import org.apache.axis2.transport.base.ManagementSupport;
 import org.apache.axis2.transport.base.ParamUtils;
 
-import javax.mail.*;
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.Header;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Session;
+import javax.mail.Store;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -237,36 +245,10 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
     private void processMail(Message message, PollTableEntry entry)
         throws MessagingException, IOException {
 
-        if (message instanceof MimeMessage) {
-            MimeMessage mimeMessage = (MimeMessage) message;
-            if (mimeMessage.getContent() instanceof Multipart) {
-                Multipart mp = (Multipart) mimeMessage.getContent();
-                for (int i=0; i<mp.getCount(); i++) {
-                    MimeBodyPart mbp = (MimeBodyPart) mp.getBodyPart(i);
-                    int size = mbp.getSize();
-                    if (size != -1) {
-                        metrics.incrementBytesReceived(size);
-                    }
-                }
-            } else {
-                int size = mimeMessage.getSize();
-                if (size != -1) {
-                    metrics.incrementBytesReceived(size);
-                }
-            }
-        }
+        updateMetrics(message);
 
         // populate transport headers using the mail headers
-        Map trpHeaders = new HashMap();
-        try {
-            Enumeration e = message.getAllHeaders();
-            while (e.hasMoreElements()) {
-                Header h = (Header) e.nextElement();
-                if (entry.retainHeader(h.getName())) {
-                    trpHeaders.put(h.getName(), h.getValue());
-                }
-            }
-        } catch (MessagingException ignore) {}
+        Map trpHeaders = getTransportHeaders(message, entry);
 
         // FIXME: we should already skip these messages in the checkMail method
         // some times the mail server sends a special mail message which is not relavent
@@ -298,58 +280,9 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
             log.debug("Processing message as Content-Type : " + contentType);
         }
 
-        org.apache.axis2.context.MessageContext msgContext = createMessageContext();
-        
-        if (entry.getServiceName() != null) {
-            AxisService service = cfgCtx.getAxisConfiguration().getService(entry.getServiceName());
-            msgContext.setAxisService(service);
-    
-            // find the operation for the message, or default to one
-            Parameter operationParam = service.getParameter(BaseConstants.OPERATION_PARAM);
-            QName operationQName = (
-                operationParam != null ?
-                    BaseUtils.getQNameFromString(operationParam.getValue()) :
-                    BaseConstants.DEFAULT_OPERATION);
-    
-            AxisOperation operation = service.getOperation(operationQName);
-            if (operation != null) {
-                msgContext.setAxisOperation(operation);
-                msgContext.setSoapAction("urn:" + operation.getName().getLocalPart());
-            }
-        }
+        MessageContext msgContext = createMessageContext(entry);
 
-        MailOutTransportInfo outInfo = new MailOutTransportInfo(entry.getEmailAddress());
-
-        // determine reply address
-        if (message.getReplyTo() != null) {
-            outInfo.setTargetAddresses((InternetAddress[]) message.getReplyTo());
-        } else if (message.getFrom() != null) {
-            outInfo.setTargetAddresses((InternetAddress[]) message.getFrom());
-        } else {
-            // does the service specify a default reply address ?
-            InternetAddress replyAddress = entry.getReplyAddress();
-            if (replyAddress != null) {
-                outInfo.setTargetAddresses(new InternetAddress[] { replyAddress });
-            }
-        }
-
-        // save CC addresses
-        if (message.getRecipients(Message.RecipientType.CC) != null) {
-            outInfo.setCcAddresses(
-                (InternetAddress[]) message.getRecipients(Message.RecipientType.CC));
-        }
-
-        // determine and subject for the reply message
-        if (message.getSubject() != null) {
-            outInfo.setSubject("Re: " + message.getSubject());
-        }
-
-        // save original message ID if one exists, so that replies can be correlated
-        if (message.getHeader(MailConstants.MAIL_HEADER_X_MESSAGE_ID) != null) {
-            outInfo.setRequestMessageID(message.getHeader(MailConstants.MAIL_HEADER_X_MESSAGE_ID)[0]);
-        } else if (message instanceof MimeMessage && ((MimeMessage) message).getMessageID() != null) {
-            outInfo.setRequestMessageID(((MimeMessage) message).getMessageID());
-        }
+        MailOutTransportInfo outInfo = buildOutTransportInfo(message, entry);
 
         // save out transport information
         msgContext.setProperty(Constants.OUT_TRANSPORT_INFO, outInfo);
@@ -387,6 +320,102 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
             log.debug("Processed message : " + message.getMessageNumber() +
                 " :: " + message.getSubject());
         }
+    }
+
+    private void updateMetrics(Message message) throws IOException, MessagingException {
+        if (message instanceof MimeMessage) {
+            MimeMessage mimeMessage = (MimeMessage) message;
+            if (mimeMessage.getContent() instanceof Multipart) {
+                Multipart mp = (Multipart) mimeMessage.getContent();
+                for (int i=0; i<mp.getCount(); i++) {
+                    MimeBodyPart mbp = (MimeBodyPart) mp.getBodyPart(i);
+                    int size = mbp.getSize();
+                    if (size != -1) {
+                        metrics.incrementBytesReceived(size);
+                    }
+                }
+            } else {
+                int size = mimeMessage.getSize();
+                if (size != -1) {
+                    metrics.incrementBytesReceived(size);
+                }
+            }
+        }
+    }
+
+    private Map getTransportHeaders(Message message, PollTableEntry entry) {
+        Map trpHeaders = new HashMap();
+        try {
+            Enumeration e = message.getAllHeaders();
+            while (e.hasMoreElements()) {
+                Header h = (Header) e.nextElement();
+                if (entry.retainHeader(h.getName())) {
+                    trpHeaders.put(h.getName(), h.getValue());
+                }
+            }
+        } catch (MessagingException ignore) {}
+        return trpHeaders;
+    }
+
+    // TODO: the same code is used by other transports; the method should be moved to Abstract(Polling)TransportListener
+    private MessageContext createMessageContext(PollTableEntry entry) throws AxisFault {
+        MessageContext msgContext = createMessageContext();
+        
+        if (entry.getServiceName() != null) {
+            AxisService service = cfgCtx.getAxisConfiguration().getService(entry.getServiceName());
+            msgContext.setAxisService(service);
+    
+            // find the operation for the message, or default to one
+            Parameter operationParam = service.getParameter(BaseConstants.OPERATION_PARAM);
+            QName operationQName = (
+                operationParam != null ?
+                    BaseUtils.getQNameFromString(operationParam.getValue()) :
+                    BaseConstants.DEFAULT_OPERATION);
+    
+            AxisOperation operation = service.getOperation(operationQName);
+            if (operation != null) {
+                msgContext.setAxisOperation(operation);
+                msgContext.setSoapAction("urn:" + operation.getName().getLocalPart());
+            }
+        }
+        return msgContext;
+    }
+
+    private MailOutTransportInfo buildOutTransportInfo(Message message,
+            PollTableEntry entry) throws MessagingException {
+        MailOutTransportInfo outInfo = new MailOutTransportInfo(entry.getEmailAddress());
+
+        // determine reply address
+        if (message.getReplyTo() != null) {
+            outInfo.setTargetAddresses((InternetAddress[]) message.getReplyTo());
+        } else if (message.getFrom() != null) {
+            outInfo.setTargetAddresses((InternetAddress[]) message.getFrom());
+        } else {
+            // does the service specify a default reply address ?
+            InternetAddress replyAddress = entry.getReplyAddress();
+            if (replyAddress != null) {
+                outInfo.setTargetAddresses(new InternetAddress[] { replyAddress });
+            }
+        }
+
+        // save CC addresses
+        if (message.getRecipients(Message.RecipientType.CC) != null) {
+            outInfo.setCcAddresses(
+                (InternetAddress[]) message.getRecipients(Message.RecipientType.CC));
+        }
+
+        // determine and subject for the reply message
+        if (message.getSubject() != null) {
+            outInfo.setSubject("Re: " + message.getSubject());
+        }
+
+        // save original message ID if one exists, so that replies can be correlated
+        if (message.getHeader(MailConstants.MAIL_HEADER_X_MESSAGE_ID) != null) {
+            outInfo.setRequestMessageID(message.getHeader(MailConstants.MAIL_HEADER_X_MESSAGE_ID)[0]);
+        } else if (message instanceof MimeMessage && ((MimeMessage) message).getMessageID() != null) {
+            outInfo.setRequestMessageID(((MimeMessage) message).getMessageID());
+        }
+        return outInfo;
     }
 
     /**
