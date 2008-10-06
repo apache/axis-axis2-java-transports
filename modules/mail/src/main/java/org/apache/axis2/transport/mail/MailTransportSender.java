@@ -336,30 +336,21 @@ public class MailTransportSender extends AbstractTransportSender
 
         // set Bcc address/es to any custom addresses set at the transport sender level + any
         // custom transport header
-        InternetAddress[] trpBccArr = null;
         if (trpHeaders != null && trpHeaders.containsKey(MailConstants.MAIL_HEADER_BCC)) {
-            trpBccArr = InternetAddress.parse((String) trpHeaders.get(MailConstants.MAIL_HEADER_BCC));
+            InternetAddress[] bcc =
+                InternetAddress.parse((String) trpHeaders.get(MailConstants.MAIL_HEADER_BCC));
             if (log.isDebugEnabled()) {
-                log.debug("Adding Bcc header values " + InternetAddress.toString(trpBccArr) +
+                log.debug("Adding Bcc header values " + InternetAddress.toString(bcc) +
                         " from transport headers");
             }
-        }
-
-        InternetAddress[] mergedBcc = new InternetAddress[
-            (trpBccArr != null ? trpBccArr.length : 0) +
-            (smtpBccAddresses != null ? smtpBccAddresses.length : 0)];
-        if (trpBccArr != null) {
-            System.arraycopy(trpBccArr, 0, mergedBcc, 0, trpBccArr.length);
+            message.addRecipients(Message.RecipientType.BCC, bcc);
         }
         if (smtpBccAddresses != null) {
             if (log.isDebugEnabled()) {
                 log.debug("Adding Bcc header values " + InternetAddress.toString(smtpBccAddresses) +
                         " from transport configuration");
             }
-            System.arraycopy(smtpBccAddresses, 0, mergedBcc, mergedBcc.length, smtpBccAddresses.length);
-        }
-        if (mergedBcc != null) {
-            message.setRecipients(Message.RecipientType.BCC, mergedBcc);
+            message.addRecipients(Message.RecipientType.BCC, smtpBccAddresses);
         }
 
         // set subject
