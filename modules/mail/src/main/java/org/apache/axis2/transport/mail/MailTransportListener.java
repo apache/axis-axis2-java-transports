@@ -215,6 +215,7 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
                                 entry.setLastPollState(PollTableEntry.SUCCSESSFUL);
                                 metrics.incrementMessagesReceived();
                             } catch (Exception e) {
+                                log.error("Failed to process message", e);
                                 entry.setLastPollState(PollTableEntry.FAILED);
                                 metrics.incrementFaultsReceiving();
                             }
