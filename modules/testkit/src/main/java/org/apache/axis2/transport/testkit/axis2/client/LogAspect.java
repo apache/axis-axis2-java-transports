@@ -28,6 +28,7 @@ import org.apache.axiom.om.OMOutputFormat;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.testkit.util.LogManager;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.TeeInputStream;
 import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -75,5 +76,23 @@ public class LogAspect {
         } catch (Throwable ex) {
             log.error("Unable to dump message", ex);
         }
+    }
+    
+    @Around("call(org.apache.axiom.om.OMElement org.apache.axis2.builder.Builder.processDocument(" +
+            "       java.io.InputStream, java.lang.String, org.apache.axis2.context.MessageContext))" +
+            " && args(in, contentType, msgContext)")
+    public Object aroundProcessDocument(ProceedingJoinPoint proceedingJoinPoint,
+            InputStream in, String contentType, MessageContext msgContext) throws Throwable {
+        InputStream tee;
+        if (in == null) {
+            tee = null;
+        } else {
+            OutputStream log = LogManager.INSTANCE.createLog("builder");
+            // Note: We can't close the log right after the method execution because the
+            //       message builder may use streaming. LogManager will take care of closing the
+            //       log for us if anything goes wrong.
+            tee = new TeeInputStream(in, log, true);
+        }
+        return proceedingJoinPoint.proceed(new Object[] { tee, contentType, msgContext });
     }
 }
