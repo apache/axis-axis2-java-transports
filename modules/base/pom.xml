@@ -34,7 +34,7 @@
     <artifactId>axis2-transport-base</artifactId>
     <name> Apache Axis2 - Transport - Base</name>
     <description>Apache Axis2 - Base Transport</description>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
 
     <build>
         <plugins>
@@ -46,6 +46,27 @@
                     <target>1.5</target>
                 </configuration>
              </plugin>
+
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>1.4.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-Version>1.0</Bundle-Version>
+                        <Bundle-Name>${pom.artifactId}</Bundle-Name>
+                        <Bundle-Vendor>Apache Software Foundation</Bundle-Vendor>
+                        <Bundle-Description>${pom.description}</Bundle-Description>
+                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+                        <Export-Package>
+                            org.apache.axis2.transport.base.*;-split-package:=merge-last,
+                            org.apache.axis2.format.*;-split-package:=merge-last,
+                        </Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+            
         </plugins>
     </build>
 
