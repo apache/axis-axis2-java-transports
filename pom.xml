@@ -34,7 +34,6 @@
     <packaging>pom</packaging>
     <name>Apache Axis2 - Transport - Root</name>
     <modules>
-        <module>modules/parent</module>
         <module>modules/base</module>
         <module>modules/http</module>
         <module>modules/tcp</module>
