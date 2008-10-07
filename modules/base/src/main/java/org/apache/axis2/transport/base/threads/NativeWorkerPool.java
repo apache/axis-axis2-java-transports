@@ -51,8 +51,16 @@ public class NativeWorkerPool implements WorkerPool {
             new NativeThreadFactory(new ThreadGroup(threadGroupName), threadGroupId));
     }
 
-    public void execute(Runnable task) {
-        executor.execute(task);
+    public void execute(final Runnable task) {
+        executor.execute(new Runnable() {
+            public void run() {
+                try {
+                    task.run();
+                } catch (Exception ignore) {
+                    // this is to re-use this thread, even if it threw a RuntimeException
+                }
+            }
+        });
     }
 
     public int getActiveCount() {
@@ -66,36 +74,5 @@ public class NativeWorkerPool implements WorkerPool {
     public void shutdown(int timeout) throws InterruptedException {
         executor.shutdown();
         executor.awaitTermination(timeout, TimeUnit.MILLISECONDS);
-    }
-
-    /**
-     * This is a simple ThreadFactory implementation using java.util.concurrent
-     * Creates threads with the given name prefix
-     */
-    public class NativeThreadFactory implements
-        ThreadFactory {
-
-        final ThreadGroup group;
-        final AtomicInteger count;
-        final String namePrefix;
-
-        public NativeThreadFactory(final ThreadGroup group, final String namePrefix) {
-            super();
-            this.count = new AtomicInteger(1);
-            this.group = group;
-            this.namePrefix = namePrefix;
-        }
-
-        public Thread newThread(final Runnable runnable) {
-            StringBuffer buffer = new StringBuffer();
-            buffer.append(this.namePrefix);
-            buffer.append('-');
-            buffer.append(this.count.getAndIncrement());
-            Thread t = new Thread(group, runnable, buffer.toString(), 0);
-            t.setDaemon(false);
-            t.setPriority(Thread.NORM_PRIORITY);
-            return t;
-        }
-
     }
 }

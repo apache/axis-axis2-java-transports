@@ -44,6 +44,10 @@ public class BaseConstants {
      * character set marker to identify charset from a Content-Type string
      */
     public static final String CHARSET_PARAM = "; charset=";
+    /**
+     * The property specifying an optional message level metrics collector
+     */
+    public static final String METRICS_COLLECTOR = "METRICS_COLLECTOR";    
 
     //------------------------------------ defaults ------------------------------------
     /**

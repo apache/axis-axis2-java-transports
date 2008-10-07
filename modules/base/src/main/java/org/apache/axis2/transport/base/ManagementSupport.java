@@ -1,6 +1,7 @@
 package org.apache.axis2.transport.base;
 
 import org.apache.axis2.AxisFault;
+import java.util.Map;
 
 /*
 *  Licensed to the Apache Software Foundation (ASF) under one
@@ -29,8 +30,21 @@ public interface ManagementSupport {
 
     public long getMessagesReceived();
     public long getFaultsReceiving();
+    public long getTimeoutsReceiving();
     public long getMessagesSent();
     public long getFaultsSending();
+    public long getTimeoutsSending();
     public long getBytesReceived();
     public long getBytesSent();
+    public long getMinSizeReceived();
+    public long getMaxSizeReceived();
+    public double getAvgSizeReceived();
+    public long getMinSizeSent();
+    public long getMaxSizeSent();
+    public double getAvgSizeSent();
+    public Map getResponseCodeTable();
+
+    public void resetStatistics();
+    public long getLastResetTime();
+    public long getMetricsWindow();
 }

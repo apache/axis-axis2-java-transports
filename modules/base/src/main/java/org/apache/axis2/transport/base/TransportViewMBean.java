@@ -18,18 +18,28 @@
  */
 
 package org.apache.axis2.transport.base;
+import java.util.Map;
 
 public interface TransportViewMBean {
 
     // JMX Attributes
     public long getMessagesReceived();
     public long getFaultsReceiving();
+    public long getTimeoutsReceiving();
     public long getMessagesSent();
     public long getFaultsSending();
+    public long getTimeoutsSending();
     public long getBytesReceived();
     public long getBytesSent();
+    public long getMinSizeReceived();
+    public long getMaxSizeReceived();
+    public double getAvgSizeReceived();
+    public long getMinSizeSent();
+    public long getMaxSizeSent();
+    public double getAvgSizeSent();
     public int  getActiveThreadCount();
     public int getQueueSize();
+    public Map getResponseCodeTable();
 
     // JMX Operations
     public void start() throws Exception;
@@ -39,4 +49,6 @@ public interface TransportViewMBean {
     public void maintenenceShutdown(long seconds) throws Exception;
 
     public void resetStatistics();
+    public long getLastResetTime();
+    public long getMetricsWindow();
 }

@@ -307,6 +307,89 @@ public abstract class AbstractTransportSender extends AbstractHandler implements
         return -1;
     }
 
+    public long getTimeoutsReceiving() {
+        if (metrics != null) {
+            return metrics.getTimeoutsReceiving();
+        }
+        return -1;
+    }
+
+    public long getTimeoutsSending() {
+        if (metrics != null) {
+            return metrics.getTimeoutsSending();
+        }
+        return -1;
+    }
+
+    public long getMinSizeReceived() {
+        if (metrics != null) {
+            return metrics.getMinSizeReceived();
+        }
+        return -1;
+    }
+
+    public long getMaxSizeReceived() {
+        if (metrics != null) {
+            return metrics.getMaxSizeReceived();
+        }
+        return -1;
+    }
+
+    public double getAvgSizeReceived() {
+        if (metrics != null) {
+            return metrics.getAvgSizeReceived();
+        }
+        return -1;
+    }
+
+    public long getMinSizeSent() {
+        if (metrics != null) {
+            return metrics.getMinSizeSent();
+        }
+        return -1;
+    }
+
+    public long getMaxSizeSent() {
+        if (metrics != null) {
+            return metrics.getMaxSizeSent();
+        }
+        return -1;
+    }
+
+    public double getAvgSizeSent() {
+        if (metrics != null) {
+            return metrics.getAvgSizeSent();
+        }
+        return -1;
+    }
+
+    public Map getResponseCodeTable() {
+        if (metrics != null) {
+            return metrics.getResponseCodeTable();
+        }
+        return null;
+    }
+
+    public void resetStatistics() {
+        if (metrics != null) {
+            metrics.reset();
+        }
+    }
+
+    public long getLastResetTime() {
+        if (metrics != null) {
+            return metrics.getLastResetTime();
+        }
+        return -1;
+    }
+
+    public long getMetricsWindow() {
+        if (metrics != null) {
+            return System.currentTimeMillis() - metrics.getLastResetTime();
+        }
+        return -1;
+    } 
+
     private void registerMBean(MBeanServer mbs, Object mbeanInstance, String objectName) {
         try {
             ObjectName name = new ObjectName(objectName);
