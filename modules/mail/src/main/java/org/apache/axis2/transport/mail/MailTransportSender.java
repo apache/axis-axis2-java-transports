@@ -38,8 +38,6 @@ import org.apache.axiom.om.OMOutputFormat;
 import javax.mail.*;
 import javax.mail.internet.*;
 import javax.activation.DataHandler;
-import javax.activation.MailcapCommandMap;
-import javax.activation.CommandMap;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -124,17 +122,6 @@ public class MailTransportSender extends AbstractTransportSender
             session = Session.getInstance(props, null);
         }
 
-        // add handlers for main MIME types
-        MailcapCommandMap mc = (MailcapCommandMap) CommandMap.getDefaultCommandMap();
-        mc.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html");
-        mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
-        mc.addMailcap("application/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
-        mc.addMailcap("application/soap+xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
-        mc.addMailcap("text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain");
-        mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed");
-        mc.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822");
-        CommandMap.setDefaultCommandMap(mc);
-        
         session.setDebug(log.isTraceEnabled());
 
         // set the synchronise callback table
