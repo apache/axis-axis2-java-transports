@@ -122,7 +122,7 @@ public class MailTransportSender extends AbstractTransportSender
             session = Session.getInstance(props, null);
         }
 
-        session.setDebug(log.isTraceEnabled());
+        MailUtils.setupLogging(session, log, transportOut);
 
         // set the synchronise callback table
         if (cfgCtx.getProperty(BaseConstants.CALLBACK_TABLE) == null){

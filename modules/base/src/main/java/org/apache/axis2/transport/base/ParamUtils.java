@@ -24,6 +24,7 @@ import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.ParameterInclude;
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.description.TransportOutDescription;
+import org.apache.axis2.util.JavaUtils;
 
 /**
  * Utility class with methods to manipulate service or transport parameters.
@@ -75,6 +76,11 @@ public class ParamUtils {
     public static int getOptionalParamInt(ParameterInclude paramInclude, String paramName, int defaultValue) throws AxisFault {
         Integer value = getOptionalParamInt(paramInclude, paramName);
         return value == null ? defaultValue : value.intValue();
+    }
+
+    public static boolean getOptionalParamBoolean(ParameterInclude paramInclude, String paramName, boolean defaultValue) throws AxisFault {
+        Parameter param = paramInclude.getParameter(paramName);
+        return param == null ? defaultValue : JavaUtils.isTrueExplicitly(param.getValue(), defaultValue);
     }
 
     public static int getRequiredParamInt(ParameterInclude paramInclude, String paramName) throws AxisFault {

@@ -74,6 +74,7 @@ public abstract class MailTestEnvironment implements TransportDescriptionFactory
     public TransportOutDescription createTransportOutDescription() throws Exception {
         TransportOutDescription trpOutDesc = new TransportOutDescription(MailConstants.TRANSPORT_NAME);
         trpOutDesc.setSender(new MailTransportSender());
+        trpOutDesc.addParameter(new Parameter(MailConstants.TRANSPORT_MAIL_DEBUG, "true"));
         for (Map.Entry<String,String> prop : getOutProperties().entrySet()) {
             trpOutDesc.addParameter(new Parameter(prop.getKey(), prop.getValue()));
         }
@@ -81,6 +82,7 @@ public abstract class MailTestEnvironment implements TransportDescriptionFactory
     }
     
     public void setupPoll(ParameterInclude params, Account account) throws AxisFault {
+        params.addParameter(new Parameter(MailConstants.TRANSPORT_MAIL_DEBUG, "true"));
         params.addParameter(new Parameter("transport.mail.Protocol", getProtocol()));
         params.addParameter(new Parameter("transport.mail.Address", account.getAddress()));
         params.addParameter(new Parameter("transport.PollInterval", "50ms"));

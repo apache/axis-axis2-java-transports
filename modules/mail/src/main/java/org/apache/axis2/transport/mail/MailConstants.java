@@ -47,6 +47,8 @@ public class MailConstants {
 
     public static final String TRANSPORT_MAIL_ADDRESS  = "transport.mail.Address";
     
+    public static final String TRANSPORT_MAIL_DEBUG = "transport.mail.Debug";
+    
     /**
      * Key for the mail store protocol parameter.
      * The mail store protocol identifier is used in calls to {@link Session#getStore()}.

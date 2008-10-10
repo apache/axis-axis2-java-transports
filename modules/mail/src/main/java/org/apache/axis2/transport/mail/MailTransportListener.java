@@ -578,7 +578,7 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
             }
 
             Session session = Session.getInstance(props, null);
-            session.setDebug(log.isTraceEnabled());
+            MailUtils.setupLogging(session, log, paramIncl);
             entry.setSession(session);
 
             entry.setContentType(
