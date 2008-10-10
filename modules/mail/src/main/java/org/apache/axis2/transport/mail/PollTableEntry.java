@@ -21,7 +21,6 @@ package org.apache.axis2.transport.mail;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.StringTokenizer;
 
 import javax.mail.Session;
@@ -50,8 +49,8 @@ public class PollTableEntry extends AbstractPollTableEntry {
     private String password = null;
     /** The protocol to be used - pop3 or imap */
     private String protocol = null;
-    /** Store POP3 or IMAP mail properties */
-    Properties properties = new Properties();    
+    /** The JavaMail session used to connect to the mail store */
+    private Session session;
 
     /** The mail folder from which to check mail */
     private String folder;
@@ -212,12 +211,12 @@ public class PollTableEntry extends AbstractPollTableEntry {
         this.protocol = protocol;
     }
 
-    public Properties getProperties() {
-        return properties;
+    public Session getSession() {
+        return session;
     }
 
-    public void addProperty(String name, String value) {
-        properties.put(name, value);
+    public void setSession(Session session) {
+        this.session = session;
     }
 
     public void addPreserveHeaders(String headerList) {

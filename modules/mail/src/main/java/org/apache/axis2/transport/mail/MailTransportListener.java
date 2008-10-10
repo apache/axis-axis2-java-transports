@@ -19,7 +19,6 @@
 
 package org.apache.axis2.transport.mail;
 
-import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.EndpointReference;
@@ -116,6 +115,7 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
         int retryCount = 0;
         int maxRetryCount = entry.getMaxRetryCount();
         long reconnectionTimeout = entry.getReconnectTimeout();
+        Session session = entry.getSession();
         Store store = null;
 
         while (!connected) {
@@ -123,11 +123,9 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
                 retryCount++;
                 if (log.isDebugEnabled()) {
                     log.debug("Attempting to connect to POP3/IMAP server for : " +
-                        entry.getEmailAddress() + " using " + entry.getProperties());
+                        entry.getEmailAddress() + " using " + session.getProperties());
                 }
 
-                Session session = Session.getInstance(entry.getProperties(), null);
-                session.setDebug(log.isTraceEnabled());
                 store = session.getStore(entry.getProtocol());
 
                 if (entry.getUserName() != null && entry.getPassword() != null) {
@@ -560,9 +558,10 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
             }
 
             List<Parameter> params = paramIncl.getParameters();
+            Properties props = new Properties();
             for (Parameter p : params) {
                 if (p.getName().startsWith("mail.")) {
-                    entry.addProperty(p.getName(), (String) p.getValue());
+                    props.setProperty(p.getName(), (String) p.getValue());
                 }
 
                 if (MailConstants.MAIL_POP3_USERNAME.equals(p.getName()) ||
@@ -578,6 +577,9 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
                 }
             }
 
+            Session session = Session.getInstance(props, null);
+            session.setDebug(log.isTraceEnabled());
+            entry.setSession(session);
 
             entry.setContentType(
                 ParamUtils.getOptionalParam(paramIncl, MailConstants.TRANSPORT_MAIL_CONTENT_TYPE));
