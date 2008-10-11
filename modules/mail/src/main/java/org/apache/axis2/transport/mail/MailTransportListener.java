@@ -433,8 +433,8 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
     private MessageContext createMessageContext(PollTableEntry entry) throws AxisFault {
         MessageContext msgContext = createMessageContext();
         
-        if (entry.getServiceName() != null) {
-            AxisService service = cfgCtx.getAxisConfiguration().getService(entry.getServiceName());
+        AxisService service = entry.getService();
+        if (service != null) {
             msgContext.setAxisService(service);
     
             // find the operation for the message, or default to one

@@ -59,7 +59,7 @@ public abstract class AbstractPollingTransportListener<T extends AbstractPollTab
         // modifies pollTable.
         List<T> entriesToCancel = new ArrayList<T>();
         for (T entry : pollTable) {
-            if (entry.getServiceName() == null) {
+            if (entry.getService() == null) {
                 entriesToCancel.add(entry);
             }
         }
@@ -176,7 +176,7 @@ public abstract class AbstractPollingTransportListener<T extends AbstractPollTab
         if (entry == null) {
             disableTransportForService(service);
         } else {
-            entry.setServiceName(service.getName());
+            entry.setService(service);
             schedulePoll(entry, getPollInterval(service));
             pollTable.add(entry);
         }
@@ -206,9 +206,13 @@ public abstract class AbstractPollingTransportListener<T extends AbstractPollTab
      */
     public EndpointReference[] getEPRsForService(String serviceName, String ip) throws AxisFault {
         for (T entry : pollTable) {
-            if (entry.getServiceName().equals(serviceName) ||
-                    serviceName.startsWith(entry.getServiceName() + ".")) {
-                return new EndpointReference[]{ entry.getEndpointReference() };
+            AxisService service = entry.getService();
+            if (service != null) {
+                String candidateName = service.getName();
+                if (candidateName.equals(serviceName) ||
+                        serviceName.startsWith(candidateName + ".")) {
+                    return new EndpointReference[]{ entry.getEndpointReference() };
+                }
             }
         }
         return null;
@@ -217,7 +221,7 @@ public abstract class AbstractPollingTransportListener<T extends AbstractPollTab
     @Override
     protected void stopListeningForService(AxisService service) {
         for (T entry : pollTable) {
-            if (service.getName().equals(entry.getServiceName())) {
+            if (service == entry.getService()) {
                 cancelPoll(entry);
                 break;
             }
