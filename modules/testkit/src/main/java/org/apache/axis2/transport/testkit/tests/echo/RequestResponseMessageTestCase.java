@@ -23,7 +23,7 @@ import javax.mail.internet.ContentType;
 
 import org.apache.axis2.transport.testkit.channel.RequestResponseChannel;
 import org.apache.axis2.transport.testkit.client.RequestResponseTestClient;
-import org.apache.axis2.transport.testkit.server.TestEndpoint;
+import org.apache.axis2.transport.testkit.endpoint.TestEndpoint;
 import org.apache.axis2.transport.testkit.tests.MessageTestCase;
 
 public abstract class RequestResponseMessageTestCase<M,N> extends MessageTestCase {

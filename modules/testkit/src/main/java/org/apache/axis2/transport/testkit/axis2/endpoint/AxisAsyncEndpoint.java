@@ -33,9 +33,9 @@ import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.InOnlyAxisOperation;
 import org.apache.axis2.engine.MessageReceiver;
 import org.apache.axis2.transport.testkit.axis2.MessageContextValidator;
+import org.apache.axis2.transport.testkit.endpoint.AsyncEndpoint;
 import org.apache.axis2.transport.testkit.message.AxisMessage;
 import org.apache.axis2.transport.testkit.message.IncomingMessage;
-import org.apache.axis2.transport.testkit.server.AsyncEndpoint;
 
 public class AxisAsyncEndpoint extends AxisTestEndpoint implements AsyncEndpoint<AxisMessage>, MessageReceiver /*, TransportErrorListener*/ {
     private interface Event {

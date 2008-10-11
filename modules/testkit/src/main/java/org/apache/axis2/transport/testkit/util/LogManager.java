@@ -26,7 +26,7 @@ import java.io.OutputStream;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.axis2.transport.testkit.tests.TransportTestCase;
+import org.apache.axis2.transport.testkit.tests.ManagedTestCase;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -46,7 +46,7 @@ public class LogManager {
         logDir = new File("target" + File.separator + "testkit-logs");
     }
     
-    public void setTestCase(TransportTestCase testCase) throws IOException {
+    public void setTestCase(ManagedTestCase testCase) throws IOException {
         if (appender != null) {
             Logger.getRootLogger().removeAppender(appender);
             appender.close();

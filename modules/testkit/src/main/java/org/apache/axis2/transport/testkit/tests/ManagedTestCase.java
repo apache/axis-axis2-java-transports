@@ -29,7 +29,7 @@ import org.apache.axis2.transport.testkit.name.NameUtils;
 import org.apache.axis2.transport.testkit.util.LogManager;
 
 @Key("test")
-public abstract class TransportTestCase extends TestCase {
+public abstract class ManagedTestCase extends TestCase {
     private final TestResourceSet resourceSet = new TestResourceSet();
     
     private Map<String,String> nameComponents;
@@ -38,7 +38,7 @@ public abstract class TransportTestCase extends TestCase {
     private boolean managed;
     private Class<?> testClass;
 
-    public TransportTestCase(Object... resources) {
+    public ManagedTestCase(Object... resources) {
         resourceSet.addResources(resources);
         addResource(LogManager.INSTANCE);
     }

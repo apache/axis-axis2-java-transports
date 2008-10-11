@@ -24,7 +24,7 @@ import junit.framework.TestSuite;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.transport.testkit.TransportTestSuite;
+import org.apache.axis2.transport.testkit.ManagedTestSuite;
 import org.apache.axis2.transport.testkit.TransportTestSuiteBuilder;
 import org.apache.axis2.transport.testkit.axis2.client.AxisAsyncTestClient;
 import org.apache.axis2.transport.testkit.axis2.client.AxisRequestResponseTestClient;
@@ -36,7 +36,7 @@ import org.apache.axis2.transport.testkit.tests.misc.MinConcurrencyTest;
 
 public class JMSTransportTest extends TestCase {
     public static TestSuite suite() throws Exception {
-        TransportTestSuite suite = new TransportTestSuite(JMSTransportTest.class);
+        ManagedTestSuite suite = new ManagedTestSuite(JMSTransportTest.class);
         
         // SwA doesn't make sense with text messages
         suite.addExclude("(&(test=AsyncSwA)(client=jms)(jmsType=text))");

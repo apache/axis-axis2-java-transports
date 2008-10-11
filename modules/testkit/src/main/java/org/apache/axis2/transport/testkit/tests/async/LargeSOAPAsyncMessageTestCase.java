@@ -28,9 +28,9 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axis2.transport.testkit.channel.AsyncChannel;
 import org.apache.axis2.transport.testkit.client.AsyncTestClient;
+import org.apache.axis2.transport.testkit.endpoint.AsyncEndpoint;
 import org.apache.axis2.transport.testkit.message.XMLMessage;
 import org.apache.axis2.transport.testkit.name.Name;
-import org.apache.axis2.transport.testkit.server.AsyncEndpoint;
 
 @Name("AsyncSOAPLarge")
 // TODO: maybe we should use XMLUnit to construct these kind of tests

@@ -25,10 +25,10 @@ import java.util.Set;
 
 import org.apache.axis2.transport.testkit.channel.AsyncChannel;
 import org.apache.axis2.transport.testkit.client.AsyncTestClient;
+import org.apache.axis2.transport.testkit.endpoint.AsyncEndpoint;
 import org.apache.axis2.transport.testkit.message.RESTMessage;
 import org.apache.axis2.transport.testkit.message.RESTMessage.Parameter;
 import org.apache.axis2.transport.testkit.name.Name;
-import org.apache.axis2.transport.testkit.server.AsyncEndpoint;
 
 @Name("REST")
 public class RESTTestCase extends AsyncMessageTestCase<RESTMessage> {

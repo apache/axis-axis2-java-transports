@@ -22,13 +22,13 @@ package org.apache.axis2.transport.http;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.apache.axis2.transport.testkit.TransportTestSuite;
+import org.apache.axis2.transport.testkit.ManagedTestSuite;
 import org.apache.axis2.transport.testkit.axis2.TransportDescriptionFactory;
 import org.apache.axis2.transport.testkit.http.HttpTransportTestSuiteBuilder;
 
 public class SimpleHTTPServerTest extends TestCase {
     public static TestSuite suite() throws Exception {
-        TransportTestSuite suite = new TransportTestSuite(SimpleHTTPServerTest.class);
+        ManagedTestSuite suite = new ManagedTestSuite(SimpleHTTPServerTest.class);
         
         TransportDescriptionFactory tdf = new HttpTransportDescriptionFactory(8280);
         

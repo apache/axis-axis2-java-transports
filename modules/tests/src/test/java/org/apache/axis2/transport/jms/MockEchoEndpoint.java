@@ -29,8 +29,8 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
+import org.apache.axis2.transport.testkit.endpoint.TestEndpoint;
 import org.apache.axis2.transport.testkit.name.Name;
-import org.apache.axis2.transport.testkit.server.TestEndpoint;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

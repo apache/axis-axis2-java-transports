@@ -33,14 +33,14 @@ import org.apache.axis2.transport.testkit.channel.AsyncChannel;
 import org.apache.axis2.transport.testkit.channel.RequestResponseChannel;
 import org.apache.axis2.transport.testkit.client.AsyncTestClient;
 import org.apache.axis2.transport.testkit.client.RequestResponseTestClient;
+import org.apache.axis2.transport.testkit.endpoint.AsyncEndpoint;
+import org.apache.axis2.transport.testkit.endpoint.TestEndpoint;
 import org.apache.axis2.transport.testkit.message.AxisMessage;
 import org.apache.axis2.transport.testkit.message.MessageDecoder;
 import org.apache.axis2.transport.testkit.message.MessageEncoder;
 import org.apache.axis2.transport.testkit.message.RESTMessage;
 import org.apache.axis2.transport.testkit.message.XMLMessage;
 import org.apache.axis2.transport.testkit.message.RESTMessage.Parameter;
-import org.apache.axis2.transport.testkit.server.AsyncEndpoint;
-import org.apache.axis2.transport.testkit.server.TestEndpoint;
 import org.apache.axis2.transport.testkit.tests.async.BinaryTestCase;
 import org.apache.axis2.transport.testkit.tests.async.LargeSOAPAsyncMessageTestCase;
 import org.apache.axis2.transport.testkit.tests.async.RESTTestCase;
@@ -102,7 +102,7 @@ public class TransportTestSuiteBuilder {
             new Parameter("param", "value2"),
         });
     
-    private final TransportTestSuite suite;
+    private final ManagedTestSuite suite;
     
     private final List<Object[]> environments = new LinkedList<Object[]>();
     
@@ -124,7 +124,7 @@ public class TransportTestSuiteBuilder {
     
     private final ResourceList<TestEndpoint> echoEndpoints = new ResourceList<TestEndpoint>();
     
-    public TransportTestSuiteBuilder(TransportTestSuite suite) {
+    public TransportTestSuiteBuilder(ManagedTestSuite suite) {
         this.suite = suite;
         try {
             // We only want tests with client and/or endpoint based on Axis

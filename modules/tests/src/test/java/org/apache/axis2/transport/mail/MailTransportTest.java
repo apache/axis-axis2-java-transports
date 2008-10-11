@@ -22,7 +22,7 @@ package org.apache.axis2.transport.mail;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.apache.axis2.transport.testkit.TransportTestSuite;
+import org.apache.axis2.transport.testkit.ManagedTestSuite;
 import org.apache.axis2.transport.testkit.TransportTestSuiteBuilder;
 import org.apache.axis2.transport.testkit.axis2.client.AxisAsyncTestClient;
 import org.apache.axis2.transport.testkit.axis2.client.AxisRequestResponseTestClient;
@@ -32,7 +32,7 @@ import org.apache.axis2.transport.testkit.tests.misc.MinConcurrencyTest;
 
 public class MailTransportTest extends TestCase {
     public static TestSuite suite() throws Exception {
-        TransportTestSuite suite = new TransportTestSuite(MailTransportTest.class);
+        ManagedTestSuite suite = new ManagedTestSuite(MailTransportTest.class);
         
         // SwA doesn't work because attachments are sent with "Content-Transfer-Encoding: binary"
         // and mail servers don't like that.

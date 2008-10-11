@@ -22,7 +22,7 @@ package org.apache.axis2.transport.testkit.http;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.axis2.transport.testkit.TransportTestSuite;
+import org.apache.axis2.transport.testkit.ManagedTestSuite;
 import org.apache.axis2.transport.testkit.TransportTestSuiteBuilder;
 import org.apache.axis2.transport.testkit.axis2.TransportDescriptionFactory;
 import org.apache.axis2.transport.testkit.axis2.client.AxisAsyncTestClient;
@@ -34,12 +34,12 @@ import org.apache.axis2.transport.testkit.channel.AsyncChannel;
 import org.apache.axis2.transport.testkit.tests.misc.MinConcurrencyTest;
 
 public class HttpTransportTestSuiteBuilder {
-    private final TransportTestSuite suite;
+    private final ManagedTestSuite suite;
     private final TransportDescriptionFactory tdf;
     
     private final List<AxisTestClientConfigurator> axisTestClientConfigurators = new LinkedList<AxisTestClientConfigurator>();
     
-    public HttpTransportTestSuiteBuilder(TransportTestSuite suite,
+    public HttpTransportTestSuiteBuilder(ManagedTestSuite suite,
             TransportDescriptionFactory tdf) {
         this.suite = suite;
         this.tdf = tdf;

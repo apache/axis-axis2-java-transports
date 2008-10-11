@@ -34,9 +34,9 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.util.UUIDGenerator;
 import org.apache.axis2.transport.testkit.channel.AsyncChannel;
 import org.apache.axis2.transport.testkit.client.AsyncTestClient;
+import org.apache.axis2.transport.testkit.endpoint.AsyncEndpoint;
 import org.apache.axis2.transport.testkit.message.XMLMessage;
 import org.apache.axis2.transport.testkit.name.Name;
-import org.apache.axis2.transport.testkit.server.AsyncEndpoint;
 
 @Name("AsyncSwA")
 public class SwATestCase extends AsyncMessageTestCase<XMLMessage> {

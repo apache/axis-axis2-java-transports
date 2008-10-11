@@ -23,7 +23,7 @@ import javax.mail.internet.ContentType;
 
 import org.apache.axis2.transport.testkit.client.ClientOptions;
 
-public class MessageTestCase extends TransportTestCase {
+public class MessageTestCase extends ManagedTestCase {
     protected final ClientOptions options;
 
     public MessageTestCase(ContentType contentType, String charset, Object... resources) {

@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.axis2.transport.testkit.axis2.client;
+package org.apache.axis2.transport.testkit.axis2;
 
 import java.io.InputStream;
 import java.io.OutputStream;

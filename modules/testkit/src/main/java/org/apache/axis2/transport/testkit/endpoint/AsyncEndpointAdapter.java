@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.apache.axis2.transport.testkit.server;
+package org.apache.axis2.transport.testkit.endpoint;
 
 import javax.mail.internet.ContentType;
 

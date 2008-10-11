@@ -17,15 +17,10 @@
  *  under the License.
  */
 
-package org.apache.axis2.transport.testkit.server;
+package org.apache.axis2.transport.testkit.endpoint;
 
-import org.apache.axis2.transport.testkit.message.IncomingMessage;
+import org.apache.axis2.transport.testkit.name.Key;
 
-public interface AsyncEndpoint<M> extends TestEndpoint {
-    /**
-     * Discard any pending messages.
-     */
-    void clear() throws Exception;
-    
-    IncomingMessage<M> waitForMessage(int timeout) throws Throwable;
+@Key("endpoint")
+public interface TestEndpoint {
 }

@@ -43,7 +43,7 @@ import org.apache.axis2.transport.testkit.client.ClientOptions;
 import org.apache.axis2.transport.testkit.message.AxisMessage;
 import org.apache.axis2.transport.testkit.name.Name;
 import org.apache.axis2.transport.testkit.tests.TestResourceSet;
-import org.apache.axis2.transport.testkit.tests.TransportTestCase;
+import org.apache.axis2.transport.testkit.tests.ManagedTestCase;
 
 /**
  * Generic test case to check whether a transport listener processes messages with the expected
@@ -57,7 +57,7 @@ import org.apache.axis2.transport.testkit.tests.TransportTestCase;
  * the test fails.
  */
 @Name("MinConcurrency")
-public class MinConcurrencyTest extends TransportTestCase {
+public class MinConcurrencyTest extends ManagedTestCase {
     private final AsyncChannel[] channels;
     private final int messages;
     private final boolean preloadMessages;

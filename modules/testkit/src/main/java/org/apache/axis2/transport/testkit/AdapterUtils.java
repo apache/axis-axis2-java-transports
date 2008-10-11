@@ -23,10 +23,10 @@ import org.apache.axis2.transport.testkit.client.AsyncTestClient;
 import org.apache.axis2.transport.testkit.client.AsyncTestClientAdapter;
 import org.apache.axis2.transport.testkit.client.RequestResponseTestClient;
 import org.apache.axis2.transport.testkit.client.RequestResponseTestClientAdapter;
+import org.apache.axis2.transport.testkit.endpoint.AsyncEndpoint;
+import org.apache.axis2.transport.testkit.endpoint.AsyncEndpointAdapter;
 import org.apache.axis2.transport.testkit.message.MessageDecoder;
 import org.apache.axis2.transport.testkit.message.MessageEncoder;
-import org.apache.axis2.transport.testkit.server.AsyncEndpoint;
-import org.apache.axis2.transport.testkit.server.AsyncEndpointAdapter;
 
 public class AdapterUtils {
     public static <M,N> AsyncTestClient<M> adapt(AsyncTestClient<N> target, MessageEncoder<M,N> encoder) {

@@ -19,6 +19,6 @@
   -->
 <aspectj>
     <aspects>
-        <aspect name="org.apache.axis2.transport.testkit.axis2.client.LogAspect"/>
+        <aspect name="org.apache.axis2.transport.testkit.axis2.LogAspect"/>
     </aspects>
 </aspectj>

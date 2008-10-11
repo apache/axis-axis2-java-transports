@@ -33,23 +33,23 @@ import org.apache.axis2.transport.testkit.filter.FilterExpression;
 import org.apache.axis2.transport.testkit.filter.FilterExpressionParser;
 import org.apache.axis2.transport.testkit.tests.TestResourceSet;
 import org.apache.axis2.transport.testkit.tests.TestResourceSetTransition;
-import org.apache.axis2.transport.testkit.tests.TransportTestCase;
+import org.apache.axis2.transport.testkit.tests.ManagedTestCase;
 import org.apache.axis2.transport.testkit.util.LogManager;
 import org.apache.commons.lang.StringUtils;
 
-public class TransportTestSuite extends TestSuite {
+public class ManagedTestSuite extends TestSuite {
     private final Class<?> testClass;
     private final List<FilterExpression> excludes = new LinkedList<FilterExpression>();
     private final boolean reuseResources;
     private boolean invertExcludes;
     private int nextId = 1;
     
-    public TransportTestSuite(Class<?> testClass, boolean reuseResources) {
+    public ManagedTestSuite(Class<?> testClass, boolean reuseResources) {
         this.testClass = testClass;
         this.reuseResources = reuseResources;
     }
     
-    public TransportTestSuite(Class<?> testClass) {
+    public ManagedTestSuite(Class<?> testClass) {
         this(testClass, true);
     }
 
@@ -67,8 +67,8 @@ public class TransportTestSuite extends TestSuite {
 
     @Override
     public void addTest(Test test) {
-        if (test instanceof TransportTestCase) {
-            TransportTestCase ttest = (TransportTestCase)test;
+        if (test instanceof ManagedTestCase) {
+            ManagedTestCase ttest = (ManagedTestCase)test;
             Map<String,String> map = ttest.getNameComponents();
             boolean excluded = false;
             for (FilterExpression exclude : excludes) {
@@ -96,8 +96,8 @@ public class TransportTestSuite extends TestSuite {
             TestResourceSet resourceSet = null;
             for (Enumeration<?> e = tests(); e.hasMoreElements(); ) {
                 Test test = (Test)e.nextElement();
-                if (test instanceof TransportTestCase) {
-                    TransportTestCase ttest = (TransportTestCase)test;
+                if (test instanceof ManagedTestCase) {
+                    ManagedTestCase ttest = (ManagedTestCase)test;
                     TestResourceSet newResourceSet = ttest.getResourceSet();
                     try {
                         if (resourceSet == null) {

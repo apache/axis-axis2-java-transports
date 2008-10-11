@@ -27,11 +27,11 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axis2.transport.testkit.MessageTestData;
 import org.apache.axis2.transport.testkit.channel.RequestResponseChannel;
 import org.apache.axis2.transport.testkit.client.RequestResponseTestClient;
+import org.apache.axis2.transport.testkit.endpoint.TestEndpoint;
 import org.apache.axis2.transport.testkit.message.XMLMessage;
 import org.apache.axis2.transport.testkit.name.Key;
 import org.apache.axis2.transport.testkit.name.Name;
 import org.apache.axis2.transport.testkit.name.Named;
-import org.apache.axis2.transport.testkit.server.TestEndpoint;
 
 @Name("EchoXML")
 public class XMLRequestResponseMessageTestCase extends RequestResponseMessageTestCase<XMLMessage,XMLMessage> {
