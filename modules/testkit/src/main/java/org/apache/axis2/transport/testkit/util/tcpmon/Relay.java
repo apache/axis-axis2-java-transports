@@ -22,6 +22,7 @@ package org.apache.axis2.transport.testkit.util.tcpmon;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.Socket;
 
 import org.apache.axis2.transport.base.datagram.Utils;
 import org.apache.commons.io.IOUtils;
@@ -32,13 +33,15 @@ public class Relay implements Runnable {
     private static final Log log = LogFactory.getLog(Relay.class);
     
     private final String tag;
+    private final Socket inSocket;
     private final InputStream in;
     private final OutputStream out;
     
-    public Relay(String tag, InputStream in, OutputStream out) {
+    public Relay(String tag, Socket inSocket, Socket outSocket) throws IOException {
         this.tag = tag;
-        this.in = in;
-        this.out = out;
+        this.inSocket = inSocket;
+        this.in = inSocket.getInputStream();
+        this.out = outSocket.getOutputStream();
     }
     
     public void run() {
@@ -54,7 +57,9 @@ public class Relay implements Runnable {
                 out.flush();
             }
         } catch (IOException ex) {
-            log.error(ex);
+            if (!inSocket.isClosed()) {
+                log.error(ex);
+            }
         } finally {
             IOUtils.closeQuietly(in);
             IOUtils.closeQuietly(out);

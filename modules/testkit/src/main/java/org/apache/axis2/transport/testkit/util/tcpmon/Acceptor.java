@@ -51,8 +51,8 @@ public class Acceptor implements Runnable {
             }
             try {
                 Socket targetSocket = new Socket(target.getAddress(), target.getPort());
-                executorService.execute(new Relay("SENT", socket.getInputStream(), targetSocket.getOutputStream()));
-                executorService.execute(new Relay("RECEIVED", targetSocket.getInputStream(), socket.getOutputStream()));
+                executorService.execute(new Relay("SENT", socket, targetSocket));
+                executorService.execute(new Relay("RECEIVED", targetSocket, socket));
             } catch (IOException ex) {
                 log.error(ex);
             }
