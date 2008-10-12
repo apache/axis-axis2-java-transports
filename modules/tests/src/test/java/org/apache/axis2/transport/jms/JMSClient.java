@@ -32,15 +32,18 @@ import org.apache.axis2.transport.testkit.client.ClientOptions;
 import org.apache.axis2.transport.testkit.client.TestClient;
 import org.apache.axis2.transport.testkit.name.Name;
 import org.apache.axis2.transport.testkit.name.Named;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.TearDown;
+import org.apache.axis2.transport.testkit.tests.Transient;
 
 @Name("jms")
 public class JMSClient<T> implements TestClient {
     protected final JMSMessageFactory<T> jmsMessageFactory;
     
-    private Connection connection;
-    private Session session;
-    private MessageProducer producer;
-    private ContentTypeMode contentTypeMode;
+    private @Transient Connection connection;
+    private @Transient Session session;
+    private @Transient MessageProducer producer;
+    private @Transient ContentTypeMode contentTypeMode;
     
     public JMSClient(JMSMessageFactory<T> jmsMessageFactory) {
         this.jmsMessageFactory = jmsMessageFactory;
@@ -51,7 +54,7 @@ public class JMSClient<T> implements TestClient {
         return jmsMessageFactory;
     }
 
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp(JMSTestEnvironment env, JMSChannel channel) throws Exception {
         Destination destination = channel.getDestination();
         ConnectionFactory connectionFactory = env.getConnectionFactory();
@@ -70,7 +73,7 @@ public class JMSClient<T> implements TestClient {
         return jmsMessage.getJMSMessageID();
     }
     
-    @SuppressWarnings("unused")
+    @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
         producer.close();
         session.close();

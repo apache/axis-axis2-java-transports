@@ -25,16 +25,18 @@ import org.apache.axis2.description.AxisService;
 import org.apache.axis2.transport.testkit.axis2.AxisServiceConfigurator;
 import org.apache.axis2.transport.testkit.client.ClientOptions;
 import org.apache.axis2.transport.testkit.client.TestClient;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.Transient;
 
 public class ContentTypeServiceConfigurator implements AxisServiceConfigurator {
     private final String parameterName;
-    private ContentType contentType;
+    private @Transient ContentType contentType;
     
     public ContentTypeServiceConfigurator(String parameterName) {
         this.parameterName = parameterName;
     }
 
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp(TestClient client, ClientOptions options) throws Exception {
         contentType = client.getContentType(options, options.getBaseContentType());
     }

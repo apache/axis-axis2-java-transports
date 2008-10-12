@@ -17,29 +17,17 @@
  *  under the License.
  */
 
-package org.apache.axis2.transport.jms;
+package org.apache.axis2.transport.testkit.tests;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import org.apache.axis2.transport.testkit.tests.Setup;
-import org.apache.axis2.transport.testkit.tests.Transient;
-import org.mockejb.jndi.MockContextFactory;
-
-public class JNDIEnvironment {
-    public static final JNDIEnvironment INSTANCE = new JNDIEnvironment();
-    
-    private @Transient Context context;
-    
-    private JNDIEnvironment() {}
-    
-    @Setup @SuppressWarnings("unused")
-    private void setUp() throws Exception {
-        MockContextFactory.setAsInitial();
-        context = new InitialContext();
-    }
-    
-    public Context getContext() {
-        return context;
-    }
+/**
+ * Annotation identifying methods to be called when a resource is set up.
+ */
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Setup {
 }

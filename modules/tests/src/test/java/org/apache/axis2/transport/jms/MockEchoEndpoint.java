@@ -32,6 +32,9 @@ import javax.jms.TextMessage;
 import org.apache.axis2.transport.testkit.endpoint.InOutEndpoint;
 import org.apache.axis2.transport.testkit.endpoint.InOutEndpointSupport;
 import org.apache.axis2.transport.testkit.name.Name;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.TearDown;
+import org.apache.axis2.transport.testkit.tests.Transient;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,10 +43,10 @@ import org.apache.commons.logging.LogFactory;
 public class MockEchoEndpoint extends InOutEndpointSupport implements InOutEndpoint {
     static Log log = LogFactory.getLog(MockEchoEndpoint.class);
     
-    private Connection connection;
-    private Connection replyConnection;
+    private @Transient Connection connection;
+    private @Transient Connection replyConnection;
     
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp(JMSTestEnvironment env, JMSRequestResponseChannel channel) throws Exception {
         Destination destination = channel.getDestination();
         Destination replyDestination = channel.getReplyDestination();
@@ -79,11 +82,9 @@ public class MockEchoEndpoint extends InOutEndpointSupport implements InOutEndpo
         });
     }
     
-    @SuppressWarnings("unused")
+    @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
         connection.close();
         replyConnection.close();
-        connection = null;
-        replyConnection = null;
     }
 }

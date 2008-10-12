@@ -27,12 +27,15 @@ import org.apache.axis2.description.AxisService;
 import org.apache.axis2.transport.testkit.axis2.client.AxisTestClientConfigurator;
 import org.apache.axis2.transport.testkit.channel.RequestResponseChannel;
 import org.apache.axis2.transport.testkit.name.Key;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.TearDown;
+import org.apache.axis2.transport.testkit.tests.Transient;
 
 public class JMSRequestResponseChannel extends JMSChannel implements RequestResponseChannel, AxisTestClientConfigurator {
     private final String replyDestinationType;
-    private String replyDestinationName;
-    private String replyJndiName;
-    private Destination replyDestination;
+    private @Transient String replyDestinationName;
+    private @Transient String replyJndiName;
+    private @Transient Destination replyDestination;
     
     public JMSRequestResponseChannel(String name, String destinationType, String replyDestinationType, ContentTypeMode contentTypeMode) {
         super(name, destinationType, contentTypeMode);
@@ -43,7 +46,7 @@ public class JMSRequestResponseChannel extends JMSChannel implements RequestResp
         this(null, destinationType, replyDestinationType, contentTypeMode);
     }
     
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp(JMSTestEnvironment env) throws Exception {
         replyDestinationName = buildDestinationName("response", replyDestinationType);
         replyJndiName = buildJndiName("response", replyDestinationType);
@@ -51,12 +54,9 @@ public class JMSRequestResponseChannel extends JMSChannel implements RequestResp
         context.bind(replyJndiName, replyDestination);
     }
 
-    @SuppressWarnings("unused")
+    @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
         context.unbind(replyJndiName);
-        replyDestinationName = null;
-        replyJndiName = null;
-        replyDestination = null;
     }
 
     @Override

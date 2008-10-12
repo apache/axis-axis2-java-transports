@@ -32,25 +32,26 @@ import org.apache.axis2.transport.testkit.axis2.AxisServiceConfigurator;
 import org.apache.axis2.transport.testkit.axis2.client.AxisTestClientConfigurator;
 import org.apache.axis2.transport.testkit.channel.AsyncChannel;
 import org.apache.axis2.transport.testkit.channel.RequestResponseChannel;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.TearDown;
+import org.apache.axis2.transport.testkit.tests.Transient;
 
 public class MailChannel implements AsyncChannel, RequestResponseChannel, AxisTestClientConfigurator, AxisServiceConfigurator {
-    private MailTestEnvironment env;
-    private MailTestEnvironment.Account sender;
-    private MailTestEnvironment.Account recipient;
+    private @Transient MailTestEnvironment env;
+    private @Transient MailTestEnvironment.Account sender;
+    private @Transient MailTestEnvironment.Account recipient;
     
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp(MailTestEnvironment env) throws Exception {
         this.env = env;
         sender = env.allocateAccount();
         recipient = env.allocateAccount();
     }
     
-    @SuppressWarnings("unused")
+    @TearDown @SuppressWarnings("unused")
     private void tearDown() {
         env.freeAccount(sender);
         env.freeAccount(recipient);
-        sender = null;
-        recipient = null;
     }
 
     public MailTestEnvironment.Account getSender() {

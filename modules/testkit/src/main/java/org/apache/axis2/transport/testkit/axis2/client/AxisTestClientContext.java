@@ -27,6 +27,9 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.ListenerManager;
 import org.apache.axis2.transport.CustomAxisConfigurator;
 import org.apache.axis2.transport.testkit.axis2.TransportDescriptionFactory;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.TearDown;
+import org.apache.axis2.transport.testkit.tests.Transient;
 
 /**
  * Resource maintaining the {@link ConfigurationContext} for {@link AxisTestClient}
@@ -44,13 +47,13 @@ import org.apache.axis2.transport.testkit.axis2.TransportDescriptionFactory;
 public class AxisTestClientContext {
     public static final AxisTestClientContext INSTANCE = new AxisTestClientContext();
     
-    private TransportOutDescription trpOutDesc;
-    private ConfigurationContext cfgCtx;
-    private ListenerManager listenerManager;
+    private @Transient TransportOutDescription trpOutDesc;
+    private @Transient ConfigurationContext cfgCtx;
+    private @Transient ListenerManager listenerManager;
     
     private AxisTestClientContext() {}
     
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp(TransportDescriptionFactory tdf, AxisTestClientContextConfigurator[] configurators) throws Exception {
         cfgCtx = ConfigurationContextFactory.createConfigurationContext(new CustomAxisConfigurator());
         AxisConfiguration axisCfg = cfgCtx.getAxisConfiguration();
@@ -87,17 +90,14 @@ public class AxisTestClientContext {
         }
     }
     
-    @SuppressWarnings("unused")
+    @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
         trpOutDesc.getSender().stop();
-        trpOutDesc = null;
         if (listenerManager != null) {
             listenerManager.stop();
             listenerManager.destroy();
-            listenerManager = null;
         }
         cfgCtx.terminate();
-        cfgCtx = null;
     }
 
     public ConfigurationContext getConfigurationContext() {

@@ -31,14 +31,17 @@ import org.apache.axis2.transport.base.event.TransportErrorSource;
 import org.apache.axis2.transport.testkit.axis2.AxisServiceConfigurator;
 import org.apache.axis2.transport.testkit.channel.Channel;
 import org.apache.axis2.transport.testkit.name.Name;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.TearDown;
+import org.apache.axis2.transport.testkit.tests.Transient;
 
 @Name("axis")
 public abstract class AxisTestEndpoint implements TransportErrorListener {
-    private AxisTestEndpointContext context;
-    private TransportErrorSource transportErrorSource;
-    private AxisService service;
+    private @Transient AxisTestEndpointContext context;
+    private @Transient TransportErrorSource transportErrorSource;
+    private @Transient AxisService service;
     
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp(AxisTestEndpointContext context, Channel channel, AxisServiceConfigurator[] configurators) throws Exception {
         this.context = context;
         
@@ -69,15 +72,12 @@ public abstract class AxisTestEndpoint implements TransportErrorListener {
         context.getAxisConfiguration().addService(service);
     }
     
-    @SuppressWarnings("unused")
+    @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
         if (transportErrorSource != null) {
             transportErrorSource.removeErrorListener(this);
-            transportErrorSource = null;
         }
         context.getAxisConfiguration().removeService(service.getName());
-        context = null;
-        service = null;
     }
     
     public void error(TransportError error) {

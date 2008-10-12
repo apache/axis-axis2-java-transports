@@ -36,20 +36,23 @@ import junit.framework.Assert;
 import org.apache.axis2.transport.testkit.client.ClientOptions;
 import org.apache.axis2.transport.testkit.client.RequestResponseTestClient;
 import org.apache.axis2.transport.testkit.message.IncomingMessage;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.TearDown;
+import org.apache.axis2.transport.testkit.tests.Transient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class MailRequestResponseClient extends MailClient implements RequestResponseTestClient<byte[],byte[]> {
     private static final Log log = LogFactory.getLog(MailRequestResponseClient.class);
     
-    private MailChannel channel;
-    private Store store;
+    private @Transient MailChannel channel;
+    private @Transient Store store;
     
     public MailRequestResponseClient(MessageLayout layout) {
         super(layout);
     }
     
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp(MailTestEnvironment env, MailChannel channel) throws MessagingException {
         this.channel = channel;
         Session session = channel.getReplySession();
@@ -59,10 +62,9 @@ public class MailRequestResponseClient extends MailClient implements RequestResp
         store.connect(sender.getLogin(), sender.getPassword());
     }
     
-    @SuppressWarnings("unused")
+    @TearDown @SuppressWarnings("unused")
     private void tearDown() throws MessagingException {
         store.close();
-        store = null;
     }
     
     public IncomingMessage<byte[]> sendMessage(ClientOptions options, ContentType contentType, byte[] message) throws Exception {

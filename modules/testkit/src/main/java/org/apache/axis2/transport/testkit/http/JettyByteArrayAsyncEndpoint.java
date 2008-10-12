@@ -29,15 +29,17 @@ import javax.mail.internet.ContentType;
 import javax.mail.internet.ParseException;
 
 import org.apache.axis2.transport.testkit.message.IncomingMessage;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.Transient;
 import org.apache.axis2.transport.testkit.util.LogManager;
 import org.apache.commons.io.IOUtils;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpRequest;
 
 public class JettyByteArrayAsyncEndpoint extends JettyAsyncEndpoint<byte[]> {
-    private LogManager logManager;
+    private @Transient LogManager logManager;
 
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp(LogManager logManager) throws Exception {
         this.logManager = logManager;
     }
@@ -69,10 +71,5 @@ public class JettyByteArrayAsyncEndpoint extends JettyAsyncEndpoint<byte[]> {
         pw.println();
         pw.flush();
         out.write(data);
-    }
-    
-    @SuppressWarnings("unused")
-    private void tearDown() throws Exception {
-        logManager = null;
     }
 }

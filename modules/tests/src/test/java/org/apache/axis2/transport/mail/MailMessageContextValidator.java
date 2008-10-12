@@ -25,15 +25,17 @@ import junit.framework.Assert;
 
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.testkit.axis2.MessageContextValidator;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.Transient;
 
 public class MailMessageContextValidator extends Assert implements MessageContextValidator {
     public static final MailMessageContextValidator INSTANCE = new MailMessageContextValidator();
     
-    private MailChannel channel;
+    private @Transient MailChannel channel;
     
     private MailMessageContextValidator() {}
     
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp(MailChannel channel) {
         this.channel = channel;
     }

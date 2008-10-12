@@ -30,6 +30,9 @@ import javax.mail.Flags;
 
 import org.apache.axis2.transport.testkit.name.Key;
 import org.apache.axis2.transport.testkit.name.Name;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.TearDown;
+import org.apache.axis2.transport.testkit.tests.Transient;
 import org.apache.axis2.transport.testkit.util.LogManager;
 import org.apache.axis2.transport.testkit.util.ServerUtil;
 import org.apache.axis2.transport.testkit.util.tcpmon.Tunnel;
@@ -54,11 +57,11 @@ public class GreenMailTestEnvironment extends MailTestEnvironment {
     
     private final String protocol;
     private final ServerSetup storeServerSetup;
-    private LogManager logManager;
-    private GreenMail greenMail;
-    private Tunnel smtpTunnel;
+    private @Transient LogManager logManager;
+    private @Transient GreenMail greenMail;
+    private @Transient Tunnel smtpTunnel;
     private int accountNumber;
-    private List<Account> unallocatedAccounts;
+    private @Transient List<Account> unallocatedAccounts;
 
     public GreenMailTestEnvironment(String protocol) {
         this.protocol = protocol;
@@ -71,7 +74,7 @@ public class GreenMailTestEnvironment extends MailTestEnvironment {
         }
     }
 
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp(LogManager logManager) throws Exception {
         this.logManager = logManager;
         greenMail = new GreenMail(new ServerSetup[] { SMTP, storeServerSetup });
@@ -83,13 +86,10 @@ public class GreenMailTestEnvironment extends MailTestEnvironment {
         ServerUtil.waitForServer(storeServerSetup.getPort());
     }
 
-    @SuppressWarnings("unused")
+    @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
         greenMail.stop();
-        greenMail = null;
         accountNumber = 1;
-        unallocatedAccounts = null;
-        logManager = null;
     }
     
     @Override

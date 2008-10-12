@@ -36,16 +36,18 @@ import org.apache.axis2.transport.testkit.axis2.MessageContextValidator;
 import org.apache.axis2.transport.testkit.endpoint.AsyncEndpoint;
 import org.apache.axis2.transport.testkit.message.AxisMessage;
 import org.apache.axis2.transport.testkit.message.IncomingMessage;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.Transient;
 
 public class AxisAsyncEndpoint extends AxisTestEndpoint implements AsyncEndpoint<AxisMessage>, MessageReceiver {
     private interface Event {
         IncomingMessage<AxisMessage> process() throws Throwable;
     }
     
-    private MessageContextValidator[] validators;
-    private BlockingQueue<Event> queue;
+    private @Transient MessageContextValidator[] validators;
+    private @Transient BlockingQueue<Event> queue;
     
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp(AxisTestEndpointContext context, MessageContextValidator[] validators) {
         this.validators = validators;
         queue = new LinkedBlockingQueue<Event>();
@@ -98,10 +100,5 @@ public class AxisAsyncEndpoint extends AxisTestEndpoint implements AsyncEndpoint
     public IncomingMessage<AxisMessage> waitForMessage(int timeout) throws Throwable {
         Event event = queue.poll(timeout, TimeUnit.MILLISECONDS);
         return event == null ? null : event.process();
-    }
-    
-    @SuppressWarnings("unused")
-    private void tearDown() {
-        queue = null;
     }
 }

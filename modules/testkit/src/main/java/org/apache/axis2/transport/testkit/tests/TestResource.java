@@ -20,6 +20,7 @@
 package org.apache.axis2.transport.testkit.tests;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.HashSet;
@@ -33,41 +34,41 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 public class TestResource {
     private enum Status { UNRESOLVED, RESOLVED, SETUP, RECYCLED };
     
-    private static class Initializer {
+    private interface Invocable {
+        void execute(Object object) throws Exception;
+    }
+    
+    private static class MethodInvocation implements Invocable {
         private final Method method;
-        private final Object object;
         private final Object[] args;
         
-        public Initializer(Method method, Object object, Object[] args) {
+        public MethodInvocation(Method method, Object[] args) {
             this.method = method;
-            this.object = object;
             this.args = args;
         }
         
-        public void execute() throws Exception {
+        public void execute(Object object) throws Exception {
             method.invoke(object, args);
         }
     }
     
-    private static class Finalizer {
-        private final Method method;
-        private final Object object;
+    private static class FieldResetter implements Invocable {
+        private final Field field;
         
-        public Finalizer(Method method, Object object) {
-            this.method = method;
-            this.object = object;
+        public FieldResetter(Field field) {
+            this.field = field;
         }
-        
-        public void execute() throws Exception {
-            method.invoke(object);
+
+        public void execute(Object object) throws Exception {
+            field.set(object, null);
         }
     }
     
     private final Object instance;
     private final Object target;
     private final Set<TestResource> directDependencies = new HashSet<TestResource>();
-    private final LinkedList<Initializer> initializers = new LinkedList<Initializer>();
-    private final List<Finalizer> finalizers = new LinkedList<Finalizer>();
+    private final LinkedList<Invocable> initializers = new LinkedList<Invocable>();
+    private final List<Invocable> finalizers = new LinkedList<Invocable>();
     private Status status = Status.UNRESOLVED;
     private boolean hasHashCode;
     private int hashCode;
@@ -88,8 +89,7 @@ public class TestResource {
         for (Class<?> clazz = target.getClass(); !clazz.equals(Object.class);
                 clazz = clazz.getSuperclass()) {
             for (Method method : clazz.getDeclaredMethods()) {
-                String name = method.getName();
-                if (name.equals("setUp")) {
+                if (method.getAnnotation(Setup.class) != null) {
                     Type[] parameterTypes = method.getGenericParameterTypes();
                     Object[] args = new Object[parameterTypes.length];
                     for (int i=0; i<parameterTypes.length; i++) {
@@ -124,10 +124,16 @@ public class TestResource {
                         }
                     }
                     method.setAccessible(true);
-                    initializers.addFirst(new Initializer(method, target, args));
-                } else if (name.equals("tearDown") && method.getParameterTypes().length == 0) {
+                    initializers.addFirst(new MethodInvocation(method, args));
+                } else if (method.getAnnotation(TearDown.class) != null && method.getParameterTypes().length == 0) {
                     method.setAccessible(true);
-                    finalizers.add(new Finalizer(method, target));
+                    finalizers.add(new MethodInvocation(method, null));
+                }
+            }
+            for (Field field : clazz.getDeclaredFields()) {
+                if (field.getAnnotation(Transient.class) != null) {
+                    field.setAccessible(true);
+                    finalizers.add(new FieldResetter(field));
                 }
             }
         }
@@ -150,8 +156,8 @@ public class TestResource {
         if (status != Status.RESOLVED) {
             throw new IllegalStateException();
         }
-        for (Initializer initializer : initializers) {
-            initializer.execute();
+        for (Invocable initializer : initializers) {
+            initializer.execute(target);
         }
         status = Status.SETUP;
     }
@@ -168,8 +174,8 @@ public class TestResource {
         if (status != Status.SETUP) {
             throw new IllegalStateException();
         }
-        for (Finalizer finalizer : finalizers) {
-            finalizer.execute();
+        for (Invocable finalizer : finalizers) {
+            finalizer.execute(target);
         }
         status = Status.RESOLVED;
     }

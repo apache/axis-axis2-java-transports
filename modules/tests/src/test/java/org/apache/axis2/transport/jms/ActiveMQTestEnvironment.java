@@ -28,14 +28,17 @@ import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.activemq.command.ActiveMQTopic;
 import org.apache.activemq.store.memory.MemoryPersistenceAdapter;
 import org.apache.axis2.transport.testkit.name.Name;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.TearDown;
+import org.apache.axis2.transport.testkit.tests.Transient;
 
 @Name("ActiveMQ")
 public class ActiveMQTestEnvironment extends JMSTestEnvironment {
     private static final String BROKER_NAME = "test";
     
-    private BrokerService broker;
+    private @Transient BrokerService broker;
     
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp() throws Exception {
         broker = new BrokerService();
         broker.setBrokerName(BROKER_NAME);
@@ -44,10 +47,9 @@ public class ActiveMQTestEnvironment extends JMSTestEnvironment {
         broker.start();
     }
 
-    @SuppressWarnings("unused")
+    @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
         broker.stop();
-        broker = null;
     }
 
     @Override

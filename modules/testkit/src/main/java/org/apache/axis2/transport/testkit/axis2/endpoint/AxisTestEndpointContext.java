@@ -29,6 +29,9 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.TransportListener;
 import org.apache.axis2.transport.UtilsTransportServer;
 import org.apache.axis2.transport.testkit.axis2.TransportDescriptionFactory;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.TearDown;
+import org.apache.axis2.transport.testkit.tests.Transient;
 
 /**
  * Resource maintaining the {@link ConfigurationContext} for {@link AxisTestEndpoint}
@@ -45,12 +48,12 @@ import org.apache.axis2.transport.testkit.axis2.TransportDescriptionFactory;
 public class AxisTestEndpointContext {
     public static final AxisTestEndpointContext INSTANCE = new AxisTestEndpointContext();
     
-    private TransportListener listener;
-    private UtilsTransportServer server;
+    private @Transient TransportListener listener;
+    private @Transient UtilsTransportServer server;
     
     private AxisTestEndpointContext() {}
     
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp(TransportDescriptionFactory tdf, AxisTestEndpointContextConfigurator[] configurators) throws Exception {
         
         server = new UtilsTransportServer();
@@ -74,11 +77,9 @@ public class AxisTestEndpointContext {
         server.start();
     }
     
-    @SuppressWarnings("unused")
+    @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
         server.stop();
-        listener = null;
-        server = null;
     }
     
     public AxisConfiguration getAxisConfiguration() {

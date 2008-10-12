@@ -36,12 +36,14 @@ import org.apache.axis2.transport.testkit.client.ClientOptions;
 import org.apache.axis2.transport.testkit.client.TestClient;
 import org.apache.axis2.transport.testkit.name.Name;
 import org.apache.axis2.transport.testkit.name.Named;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.Transient;
 
 @Name("javamail")
 public abstract class MailClient implements TestClient {
     private final MessageLayout layout;
-    private MailChannel channel;
-    private Session session;
+    private @Transient MailChannel channel;
+    private @Transient Session session;
     
     public MailClient(MessageLayout layout) {
         this.layout = layout;
@@ -52,18 +54,12 @@ public abstract class MailClient implements TestClient {
         return layout;
     }
 
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp(MailTestEnvironment env, MailChannel channel) throws Exception {
         Properties props = new Properties();
         props.putAll(env.getOutProperties());
         session = Session.getInstance(props);
         this.channel = channel;
-    }
-    
-    @SuppressWarnings("unused")
-    private void tearDown() {
-        channel = null;
-        session = null;
     }
 
     public ContentType getContentType(ClientOptions options, ContentType contentType) {

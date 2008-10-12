@@ -33,15 +33,18 @@ import org.apache.axis2.transport.testkit.client.ClientOptions;
 import org.apache.axis2.transport.testkit.client.TestClient;
 import org.apache.axis2.transport.testkit.message.AxisMessage;
 import org.apache.axis2.transport.testkit.name.Name;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.TearDown;
+import org.apache.axis2.transport.testkit.tests.Transient;
 import org.apache.axis2.transport.testkit.util.ContentTypeUtil;
 
 @Name("axis")
 public class AxisTestClient implements TestClient {
-    private AxisTestClientConfigurator[] configurators;
-    protected ServiceClient serviceClient;
-    protected Options axisOptions;
+    private @Transient AxisTestClientConfigurator[] configurators;
+    protected @Transient ServiceClient serviceClient;
+    protected @Transient Options axisOptions;
     
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp(AxisTestClientContext context, Channel channel, AxisTestClientConfigurator[] configurators) throws Exception {
         this.configurators = configurators;
         serviceClient = new ServiceClient(context.getConfigurationContext(), null);
@@ -50,12 +53,9 @@ public class AxisTestClient implements TestClient {
         serviceClient.setOptions(axisOptions);
     }
     
-    @SuppressWarnings("unused")
+    @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
         serviceClient.cleanup();
-        configurators = null;
-        serviceClient = null;
-        axisOptions = null;
     }
 
     public ContentType getContentType(ClientOptions options, ContentType contentType) {

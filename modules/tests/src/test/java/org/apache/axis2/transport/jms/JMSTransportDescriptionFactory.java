@@ -33,6 +33,9 @@ import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.transport.testkit.axis2.TransportDescriptionFactory;
 import org.apache.axis2.transport.testkit.name.Key;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.TearDown;
+import org.apache.axis2.transport.testkit.tests.Transient;
 import org.mockejb.jndi.MockContextFactory;
 
 public class JMSTransportDescriptionFactory implements TransportDescriptionFactory {
@@ -44,7 +47,7 @@ public class JMSTransportDescriptionFactory implements TransportDescriptionFacto
     
     private final boolean singleCF;
     private final boolean cfOnSender;
-    private Context context;
+    private @Transient Context context;
     
     /**
      * Constructor.
@@ -60,7 +63,7 @@ public class JMSTransportDescriptionFactory implements TransportDescriptionFacto
         this.cfOnSender = cfOnSender;
     }
 
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp(JMSTestEnvironment env, JNDIEnvironment jndiEnvironment) throws Exception {
         context = jndiEnvironment.getContext();
         ConnectionFactory connectionFactory = env.getConnectionFactory();
@@ -72,7 +75,7 @@ public class JMSTransportDescriptionFactory implements TransportDescriptionFacto
         }
     }
     
-    @SuppressWarnings("unused")
+    @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
         if (singleCF) {
             context.unbind(CONNECTION_FACTORY);
@@ -80,7 +83,6 @@ public class JMSTransportDescriptionFactory implements TransportDescriptionFacto
             context.unbind(QUEUE_CONNECTION_FACTORY);
             context.unbind(TOPIC_CONNECTION_FACTORY);
         }
-        context = null;
     }
     
     @Key("singleCF")

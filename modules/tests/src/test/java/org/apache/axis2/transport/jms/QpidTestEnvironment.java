@@ -23,6 +23,8 @@ import javax.jms.Queue;
 import javax.jms.Topic;
 
 import org.apache.axis2.transport.testkit.name.Name;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.TearDown;
 import org.apache.qpid.client.AMQConnectionFactory;
 import org.apache.qpid.client.AMQQueue;
 import org.apache.qpid.client.AMQTopic;
@@ -31,12 +33,12 @@ import org.apache.qpid.framing.AMQShortString;
 
 @Name("qpid")
 public class QpidTestEnvironment extends JMSTestEnvironment {
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp() throws Exception {
         TransportConnection.createVMBroker(1);
     }
 
-    @SuppressWarnings("unused")
+    @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
         TransportConnection.killVMBroker(1);
     }

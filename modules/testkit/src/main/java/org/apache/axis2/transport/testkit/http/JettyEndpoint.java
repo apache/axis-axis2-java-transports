@@ -21,6 +21,9 @@ package org.apache.axis2.transport.testkit.http;
 
 import java.io.IOException;
 
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.TearDown;
+import org.apache.axis2.transport.testkit.tests.Transient;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpHandler;
 import org.mortbay.http.HttpRequest;
@@ -28,10 +31,10 @@ import org.mortbay.http.HttpResponse;
 import org.mortbay.http.handler.AbstractHttpHandler;
 
 public abstract class JettyEndpoint {
-    private JettyServer server;
-    private HttpHandler handler;
+    private @Transient JettyServer server;
+    private @Transient HttpHandler handler;
 
-    @SuppressWarnings({ "unused", "serial" })
+    @Setup @SuppressWarnings({ "unused", "serial" })
     private void setUp(JettyServer server, HttpChannel channel) throws Exception {
         this.server = server;
         final String path = "/" + channel.getServiceName();
@@ -50,11 +53,10 @@ public abstract class JettyEndpoint {
         handler.start();
     }
     
-    @SuppressWarnings("unused")
+    @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
         handler.stop();
         server.getContext().removeHandler(handler);
-        server = null;
     }
     
     protected abstract void handle(String pathParams, HttpRequest request, HttpResponse response)

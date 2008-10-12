@@ -30,17 +30,20 @@ import javax.mail.internet.ContentType;
 import org.apache.axis2.transport.testkit.client.ClientOptions;
 import org.apache.axis2.transport.testkit.client.RequestResponseTestClient;
 import org.apache.axis2.transport.testkit.message.IncomingMessage;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.TearDown;
+import org.apache.axis2.transport.testkit.tests.Transient;
 
 public class JMSRequestResponseClient<T> extends JMSClient<T> implements RequestResponseTestClient<T,T> {
-    private Destination replyDestination;
-    private Connection replyConnection;
-    private Session replySession;
+    private @Transient Destination replyDestination;
+    private @Transient Connection replyConnection;
+    private @Transient Session replySession;
 
     public JMSRequestResponseClient(JMSMessageFactory<T> jmsMessageFactory) {
         super(jmsMessageFactory);
     }
     
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp(JMSTestEnvironment env, JMSRequestResponseChannel channel) throws Exception {
         replyDestination = channel.getReplyDestination();
         ConnectionFactory connectionFactory = env.getConnectionFactory();
@@ -61,7 +64,7 @@ public class JMSRequestResponseClient<T> extends JMSClient<T> implements Request
         }
     }
 
-    @SuppressWarnings("unused")
+    @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
         replySession.close();
         replyConnection.close();

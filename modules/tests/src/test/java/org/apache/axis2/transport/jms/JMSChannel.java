@@ -33,18 +33,21 @@ import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.transport.testkit.axis2.AxisServiceConfigurator;
 import org.apache.axis2.transport.testkit.name.Key;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.TearDown;
+import org.apache.axis2.transport.testkit.tests.Transient;
 
 public abstract class JMSChannel implements AxisServiceConfigurator {
     private final String name;
     private final String destinationType;
     private final ContentTypeMode contentTypeMode;
-    protected JMSTestEnvironment env;
-    protected Context context;
-    private String destinationName;
-    private String jndiName;
-    private Destination destination;
-    private String connectionFactoryName;
-    private String connectionFactoryJNDIName;
+    protected @Transient JMSTestEnvironment env;
+    protected @Transient Context context;
+    private @Transient String destinationName;
+    private @Transient String jndiName;
+    private @Transient Destination destination;
+    private @Transient String connectionFactoryName;
+    private @Transient String connectionFactoryJNDIName;
     
     public JMSChannel(String name, String destinationType, ContentTypeMode contentTypeMode) {
         this.name = name;
@@ -73,7 +76,7 @@ public abstract class JMSChannel implements AxisServiceConfigurator {
         return "jms/" + buildDestinationName(direction, destinationType);
     }
     
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp(JMSTestEnvironment env, JNDIEnvironment jndiEnvironment, JMSTransportDescriptionFactory tdf) throws Exception {
         this.env = env;
         context = jndiEnvironment.getContext();
@@ -85,12 +88,9 @@ public abstract class JMSChannel implements AxisServiceConfigurator {
         connectionFactoryJNDIName = tdf.getConnectionFactoryJNDIName(destinationType);
     }
 
-    @SuppressWarnings("unused")
+    @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
         context.unbind(jndiName);
-        destinationName = null;
-        jndiName = null;
-        destination = null;
     }
 
     @Key("destType")

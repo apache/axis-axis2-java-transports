@@ -22,21 +22,17 @@ package org.apache.axis2.transport.mail;
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.transport.testkit.axis2.client.AxisTestClientContextConfigurator;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.Transient;
 
 public class ResponseListenerConfigurator implements AxisTestClientContextConfigurator {
-    private MailTestEnvironment env;
-    private MailTestEnvironment.Account sender;
+    private @Transient MailTestEnvironment env;
+    private @Transient MailTestEnvironment.Account sender;
     
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp(MailTestEnvironment env, MailChannel channel) {
         this.env = env;
         sender = channel.getSender();
-    }
-    
-    @SuppressWarnings("unused")
-    private void tearDown() {
-        env = null;
-        sender = null;
     }
     
     public boolean isTransportListenerRequired() {

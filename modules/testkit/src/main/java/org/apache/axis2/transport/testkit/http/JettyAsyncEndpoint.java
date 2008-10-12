@@ -27,15 +27,17 @@ import java.util.concurrent.TimeUnit;
 import org.apache.axis2.transport.testkit.endpoint.AsyncEndpoint;
 import org.apache.axis2.transport.testkit.message.IncomingMessage;
 import org.apache.axis2.transport.testkit.name.Name;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.Transient;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 
 @Name("jetty")
 public abstract class JettyAsyncEndpoint<M> extends JettyEndpoint implements AsyncEndpoint<M> {
-    private BlockingQueue<IncomingMessage<M>> queue;
+    private @Transient BlockingQueue<IncomingMessage<M>> queue;
     
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp() throws Exception {
         queue = new LinkedBlockingQueue<IncomingMessage<M>>();
     }
@@ -48,11 +50,6 @@ public abstract class JettyAsyncEndpoint<M> extends JettyEndpoint implements Asy
     }
     
     protected abstract IncomingMessage<M> handle(HttpRequest request) throws HttpException, IOException;
-    
-    @SuppressWarnings("unused")
-    private void tearDown() throws Exception {
-        queue = null;
-    }
     
     public void clear() throws Exception {
         queue.clear();

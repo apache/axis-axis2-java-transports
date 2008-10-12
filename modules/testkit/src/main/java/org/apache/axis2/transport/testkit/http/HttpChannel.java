@@ -25,20 +25,23 @@ import java.util.UUID;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.transport.testkit.channel.AsyncChannel;
 import org.apache.axis2.transport.testkit.channel.RequestResponseChannel;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.TearDown;
+import org.apache.axis2.transport.testkit.tests.Transient;
 import org.apache.axis2.transport.testkit.util.tcpmon.Tunnel;
 
 public class HttpChannel implements AsyncChannel, RequestResponseChannel {
-    private String serviceName;
-    private Tunnel tunnel;
+    private @Transient String serviceName;
+    private @Transient Tunnel tunnel;
     
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp() throws Exception {
         serviceName = "TestService-" + UUID.randomUUID();
         tunnel = new Tunnel(new InetSocketAddress("127.0.0.1", 8280));
         tunnel.start();
     }
     
-    @SuppressWarnings("unused")
+    @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
         tunnel.stop();
     }

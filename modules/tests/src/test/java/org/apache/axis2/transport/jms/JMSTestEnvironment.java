@@ -25,19 +25,16 @@ import javax.jms.Queue;
 import javax.jms.Topic;
 
 import org.apache.axis2.transport.testkit.name.Key;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.Transient;
 
 @Key("broker")
 public abstract class JMSTestEnvironment {
-    private ConnectionFactory connectionFactory;
+    private @Transient ConnectionFactory connectionFactory;
     
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp() throws Exception {
         connectionFactory = createConnectionFactory();
-    }
-    
-    @SuppressWarnings("unused")
-    private void tearDown() throws Exception {
-        connectionFactory = null;
     }
     
     protected abstract ConnectionFactory createConnectionFactory() throws Exception;

@@ -20,6 +20,9 @@
 package org.apache.axis2.transport.testkit.http;
 
 import org.apache.axis2.transport.testkit.channel.Channel;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.TearDown;
+import org.apache.axis2.transport.testkit.tests.Transient;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.SocketListener;
 import org.mortbay.jetty.Server;
@@ -27,12 +30,12 @@ import org.mortbay.jetty.Server;
 public class JettyServer {
     public static final JettyServer INSTANCE = new JettyServer();
     
-    private Server server;
-    private HttpContext context;
+    private @Transient Server server;
+    private @Transient HttpContext context;
     
     private JettyServer() {}
     
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp() throws Exception {
         server = new Server();
         SocketListener listener = new SocketListener();
@@ -46,10 +49,8 @@ public class JettyServer {
         return context;
     }
 
-    @SuppressWarnings("unused")
+    @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
         server.stop();
-        server = null;
-        context = null;
     }
 }

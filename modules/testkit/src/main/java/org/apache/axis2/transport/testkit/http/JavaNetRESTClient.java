@@ -29,13 +29,15 @@ import org.apache.axis2.transport.testkit.client.AsyncTestClient;
 import org.apache.axis2.transport.testkit.client.ClientOptions;
 import org.apache.axis2.transport.testkit.message.RESTMessage;
 import org.apache.axis2.transport.testkit.name.Name;
+import org.apache.axis2.transport.testkit.tests.Setup;
+import org.apache.axis2.transport.testkit.tests.Transient;
 import org.apache.commons.io.IOUtils;
 
 @Name("java.net")
 public class JavaNetRESTClient implements AsyncTestClient<RESTMessage> {
-    private HttpChannel channel;
+    private @Transient HttpChannel channel;
     
-    @SuppressWarnings("unused")
+    @Setup @SuppressWarnings("unused")
     private void setUp(HttpChannel channel) {
         this.channel = channel;
     }
