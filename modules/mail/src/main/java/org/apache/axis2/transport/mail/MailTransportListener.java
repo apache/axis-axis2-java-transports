@@ -36,6 +36,9 @@ import org.apache.axis2.transport.base.BaseConstants;
 import org.apache.axis2.transport.base.BaseUtils;
 import org.apache.axis2.transport.base.ManagementSupport;
 import org.apache.axis2.transport.base.ParamUtils;
+import org.apache.axis2.transport.base.event.TransportErrorListener;
+import org.apache.axis2.transport.base.event.TransportErrorSource;
+import org.apache.axis2.transport.base.event.TransportErrorSourceSupport;
 
 import javax.mail.Flags;
 import javax.mail.Folder;
@@ -71,10 +74,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 
 public class MailTransportListener extends AbstractPollingTransportListener<PollTableEntry>
-    implements ManagementSupport {
+    implements ManagementSupport, TransportErrorSource {
 
     public static final String DELETE = "DELETE";
     public static final String MOVE = "MOVE";
+    
+    private final TransportErrorSourceSupport tess = new TransportErrorSourceSupport(this);
 
     /**
      * Initializes the Mail transport
@@ -216,6 +221,7 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
                                 log.error("Failed to process message", e);
                                 entry.setLastPollState(PollTableEntry.FAILED);
                                 metrics.incrementFaultsReceiving();
+                                tess.error(entry.getService(), e);
                             }
 
                             moveOrDeleteAfterProcessing(entry, store, folder, messages[i]);
@@ -628,5 +634,13 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
 
             return entry;
         }
+    }
+
+    public void addErrorListener(TransportErrorListener listener) {
+        tess.addErrorListener(listener);
+    }
+
+    public void removeErrorListener(TransportErrorListener listener) {
+        tess.removeErrorListener(listener);
     }
 }

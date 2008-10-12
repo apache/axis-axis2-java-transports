@@ -29,14 +29,15 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import org.apache.axis2.transport.testkit.endpoint.TestEndpoint;
+import org.apache.axis2.transport.testkit.endpoint.InOutEndpoint;
+import org.apache.axis2.transport.testkit.endpoint.InOutEndpointSupport;
 import org.apache.axis2.transport.testkit.name.Name;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 @Name("mock")
-public class MockEchoEndpoint implements TestEndpoint {
+public class MockEchoEndpoint extends InOutEndpointSupport implements InOutEndpoint {
     static Log log = LogFactory.getLog(MockEchoEndpoint.class);
     
     private Connection connection;
@@ -71,9 +72,8 @@ public class MockEchoEndpoint implements TestEndpoint {
                     Thread.sleep(50);
                     producer.send(reply);
                     log.info("Message sent: ID = " + reply.getJMSMessageID());
-                } catch (Throwable e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                } catch (Throwable ex) {
+                    fireEndpointError(ex);
                 }
             }
         });

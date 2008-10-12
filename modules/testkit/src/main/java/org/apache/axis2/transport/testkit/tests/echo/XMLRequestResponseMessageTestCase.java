@@ -27,7 +27,7 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axis2.transport.testkit.MessageTestData;
 import org.apache.axis2.transport.testkit.channel.RequestResponseChannel;
 import org.apache.axis2.transport.testkit.client.RequestResponseTestClient;
-import org.apache.axis2.transport.testkit.endpoint.TestEndpoint;
+import org.apache.axis2.transport.testkit.endpoint.InOutEndpoint;
 import org.apache.axis2.transport.testkit.message.XMLMessage;
 import org.apache.axis2.transport.testkit.name.Key;
 import org.apache.axis2.transport.testkit.name.Name;
@@ -38,7 +38,7 @@ public class XMLRequestResponseMessageTestCase extends RequestResponseMessageTes
     private final XMLMessage.Type xmlMessageType;
     private final MessageTestData data;
     
-    public XMLRequestResponseMessageTestCase(RequestResponseChannel channel, RequestResponseTestClient<XMLMessage,XMLMessage> client, TestEndpoint endpoint, XMLMessage.Type xmlMessageType, MessageTestData data, Object... resources) {
+    public XMLRequestResponseMessageTestCase(RequestResponseChannel channel, RequestResponseTestClient<XMLMessage,XMLMessage> client, InOutEndpoint endpoint, XMLMessage.Type xmlMessageType, MessageTestData data, Object... resources) {
         super(channel, client, endpoint, xmlMessageType.getContentType(), data.getCharset(), resources);
         this.xmlMessageType = xmlMessageType;
         this.data = data;

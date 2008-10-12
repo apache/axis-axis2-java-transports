@@ -21,14 +21,13 @@ package org.apache.axis2.transport.testkit.http;
 
 import java.io.IOException;
 
-import org.apache.axis2.transport.testkit.endpoint.TestEndpoint;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpHandler;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.handler.AbstractHttpHandler;
 
-public abstract class JettyEndpoint implements TestEndpoint {
+public abstract class JettyEndpoint {
     private JettyServer server;
     private HttpHandler handler;
 

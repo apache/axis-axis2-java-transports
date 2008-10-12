@@ -24,19 +24,32 @@ import java.util.UUID;
 
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
+import org.apache.axis2.transport.TransportListener;
+import org.apache.axis2.transport.base.event.TransportError;
+import org.apache.axis2.transport.base.event.TransportErrorListener;
+import org.apache.axis2.transport.base.event.TransportErrorSource;
 import org.apache.axis2.transport.testkit.axis2.AxisServiceConfigurator;
 import org.apache.axis2.transport.testkit.channel.Channel;
-import org.apache.axis2.transport.testkit.endpoint.TestEndpoint;
 import org.apache.axis2.transport.testkit.name.Name;
 
 @Name("axis")
-public abstract class AxisTestEndpoint implements TestEndpoint {
+public abstract class AxisTestEndpoint implements TransportErrorListener {
     private AxisTestEndpointContext context;
+    private TransportErrorSource transportErrorSource;
     private AxisService service;
     
     @SuppressWarnings("unused")
     private void setUp(AxisTestEndpointContext context, Channel channel, AxisServiceConfigurator[] configurators) throws Exception {
         this.context = context;
+        
+        TransportListener listener = context.getTransportListener();
+        if (listener instanceof TransportErrorSource) {
+            transportErrorSource = (TransportErrorSource)listener;
+            transportErrorSource.addErrorListener(this);
+        } else {
+            transportErrorSource = null;
+        }
+        
         String path = new URI(channel.getEndpointReference().getAddress()).getPath();
         String serviceName;
         if (path != null && path.startsWith(Channel.CONTEXT_PATH + "/")) {
@@ -58,10 +71,23 @@ public abstract class AxisTestEndpoint implements TestEndpoint {
     
     @SuppressWarnings("unused")
     private void tearDown() throws Exception {
+        if (transportErrorSource != null) {
+            transportErrorSource.removeErrorListener(this);
+            transportErrorSource = null;
+        }
         context.getAxisConfiguration().removeService(service.getName());
         context = null;
         service = null;
     }
     
+    public void error(TransportError error) {
+        AxisService s = error.getService();
+        if (s == null || s == service) {
+            onTransportError(error.getException());
+        }
+    }
+
     protected abstract AxisOperation createOperation();
+    
+    protected abstract void onTransportError(Throwable ex);
 }

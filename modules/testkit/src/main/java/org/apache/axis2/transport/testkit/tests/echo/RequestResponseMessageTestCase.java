@@ -23,16 +23,18 @@ import javax.mail.internet.ContentType;
 
 import org.apache.axis2.transport.testkit.channel.RequestResponseChannel;
 import org.apache.axis2.transport.testkit.client.RequestResponseTestClient;
-import org.apache.axis2.transport.testkit.endpoint.TestEndpoint;
+import org.apache.axis2.transport.testkit.endpoint.InOutEndpoint;
 import org.apache.axis2.transport.testkit.tests.MessageTestCase;
 
 public abstract class RequestResponseMessageTestCase<M,N> extends MessageTestCase {
     private final RequestResponseTestClient<M,N> client;
+    private final InOutEndpoint endpoint;
 
     // TODO: maybe we don't need an explicit RequestResponseChannel
-    public RequestResponseMessageTestCase(RequestResponseChannel channel, RequestResponseTestClient<M,N> client, TestEndpoint endpoint, ContentType contentType, String charset, Object... resources) {
+    public RequestResponseMessageTestCase(RequestResponseChannel channel, RequestResponseTestClient<M,N> client, InOutEndpoint endpoint, ContentType contentType, String charset, Object... resources) {
         super(contentType, charset, resources);
         this.client = client;
+        this.endpoint = endpoint;
         addResource(channel);
         addResource(client);
         addResource(endpoint);
@@ -41,7 +43,20 @@ public abstract class RequestResponseMessageTestCase<M,N> extends MessageTestCas
     @Override
     protected void runTest() throws Throwable {
         M request = prepareRequest();
-        N response = client.sendMessage(options, options.getBaseContentType(), request).getData();
+        InterruptingEndpointErrorListener listener = new InterruptingEndpointErrorListener(Thread.currentThread());
+        N response;
+        endpoint.addEndpointErrorListener(listener);
+        try {
+            response = client.sendMessage(options, options.getBaseContentType(), request).getData();
+        } catch (Throwable ex) {
+            if (listener.getException() != null) {
+                throw listener.getException();
+            } else {
+                throw ex;
+            }
+        } finally {
+            endpoint.removeEndpointErrorListener(listener);
+        }
         checkResponse(request, response);
     }
 

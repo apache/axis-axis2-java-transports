@@ -34,6 +34,7 @@ import org.apache.axis2.transport.testkit.channel.RequestResponseChannel;
 import org.apache.axis2.transport.testkit.client.AsyncTestClient;
 import org.apache.axis2.transport.testkit.client.RequestResponseTestClient;
 import org.apache.axis2.transport.testkit.endpoint.AsyncEndpoint;
+import org.apache.axis2.transport.testkit.endpoint.InOutEndpoint;
 import org.apache.axis2.transport.testkit.endpoint.TestEndpoint;
 import org.apache.axis2.transport.testkit.message.AxisMessage;
 import org.apache.axis2.transport.testkit.message.MessageDecoder;
@@ -122,7 +123,7 @@ public class TransportTestSuiteBuilder {
     
     private final ResourceList<RequestResponseTestClient<XMLMessage,XMLMessage>> xmlRequestResponseClients = new ResourceList<RequestResponseTestClient<XMLMessage,XMLMessage>>();
     
-    private final ResourceList<TestEndpoint> echoEndpoints = new ResourceList<TestEndpoint>();
+    private final ResourceList<InOutEndpoint> echoEndpoints = new ResourceList<InOutEndpoint>();
     
     public TransportTestSuiteBuilder(ManagedTestSuite suite) {
         this.suite = suite;
@@ -196,7 +197,7 @@ public class TransportTestSuiteBuilder {
         xmlRequestResponseClients.add(adapt(client, MessageEncoder.XML_TO_STRING, MessageDecoder.STRING_TO_XML), relatedResources);
     }
     
-    public void addEchoEndpoint(TestEndpoint endpoint, Object... relatedResources) {
+    public void addEchoEndpoint(InOutEndpoint endpoint, Object... relatedResources) {
         echoEndpoints.add(endpoint, relatedResources);
     }
     
@@ -251,7 +252,7 @@ public class TransportTestSuiteBuilder {
         }
         for (ResourceRelation<RequestResponseChannel> channel : requestResponseChannels) {
             for (ResourceRelation<RequestResponseTestClient<XMLMessage,XMLMessage>> client : xmlRequestResponseClients) {
-                for (ResourceRelation<TestEndpoint> endpoint : echoEndpoints) {
+                for (ResourceRelation<InOutEndpoint> endpoint : echoEndpoints) {
                     Object[] resources = merge(env, channel, client, endpoint);
                     for (MessageTestData data : messageTestData) {
                         for (XMLMessage.Type type : XMLMessage.Type.values()) {

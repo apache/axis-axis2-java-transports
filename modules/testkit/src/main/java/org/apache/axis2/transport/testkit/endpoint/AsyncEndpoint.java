@@ -20,8 +20,10 @@
 package org.apache.axis2.transport.testkit.endpoint;
 
 import org.apache.axis2.transport.testkit.message.IncomingMessage;
+import org.apache.axis2.transport.testkit.name.Key;
 
-public interface AsyncEndpoint<M> extends TestEndpoint {
+@Key("endpoint")
+public interface AsyncEndpoint<M> {
     /**
      * Discard any pending messages.
      */

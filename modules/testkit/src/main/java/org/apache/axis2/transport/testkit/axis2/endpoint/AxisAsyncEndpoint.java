@@ -37,7 +37,7 @@ import org.apache.axis2.transport.testkit.endpoint.AsyncEndpoint;
 import org.apache.axis2.transport.testkit.message.AxisMessage;
 import org.apache.axis2.transport.testkit.message.IncomingMessage;
 
-public class AxisAsyncEndpoint extends AxisTestEndpoint implements AsyncEndpoint<AxisMessage>, MessageReceiver /*, TransportErrorListener*/ {
+public class AxisAsyncEndpoint extends AxisTestEndpoint implements AsyncEndpoint<AxisMessage>, MessageReceiver {
     private interface Event {
         IncomingMessage<AxisMessage> process() throws Throwable;
     }
@@ -46,7 +46,7 @@ public class AxisAsyncEndpoint extends AxisTestEndpoint implements AsyncEndpoint
     private BlockingQueue<Event> queue;
     
     @SuppressWarnings("unused")
-    private void setUp(MessageContextValidator[] validators) {
+    private void setUp(AxisTestEndpointContext context, MessageContextValidator[] validators) {
         this.validators = validators;
         queue = new LinkedBlockingQueue<Event>();
     }
@@ -82,13 +82,14 @@ public class AxisAsyncEndpoint extends AxisTestEndpoint implements AsyncEndpoint
         });
     }
 
-//    public void error(final TransportError error) {
-//        queue.add(new Event() {
-//            public MessageData process() throws Throwable {
-//                throw error.getException();
-//            }
-//        });
-//    }
+    @Override
+    protected void onTransportError(final Throwable ex) {
+        queue.add(new Event() {
+            public IncomingMessage<AxisMessage> process() throws Throwable {
+                throw ex;
+            }
+        });
+    }
     
     public void clear() throws Exception {
         queue.clear();

@@ -110,6 +110,11 @@ public class MinConcurrencyTest extends ManagedTestCase {
                         operation.setMessageReceiver(messageReceiver);
                         return operation;
                     }
+
+                    @Override
+                    protected void onTransportError(Throwable ex) {
+                        // TODO Auto-generated method stub
+                    }
                 });
                 
                 if (!preloadMessages) {

@@ -85,6 +85,10 @@ public class AxisTestEndpointContext {
         return server.getAxisConfiguration();
     }
 
+    public TransportListener getTransportListener() {
+        return listener;
+    }
+
     public String getEPR(AxisService service) throws AxisFault {
         EndpointReference[] endpointReferences =
             listener.getEPRsForService(service.getName(), "localhost");
