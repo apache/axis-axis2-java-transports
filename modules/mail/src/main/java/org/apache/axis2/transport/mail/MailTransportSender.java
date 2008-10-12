@@ -238,6 +238,10 @@ public class MailTransportSender extends AbstractTransportSender
         throws AxisFault, MessagingException, IOException {
 
         OMOutputFormat format = BaseUtils.getOMOutputFormat(msgContext);
+        // Make sure that non textual attachements are sent with base64 transfer encoding
+        // instead of binary.
+        format.setProperty(OMOutputFormat.USE_CTE_BASE64_FOR_NON_TEXTUAL_ATTACHMENTS, true);
+        
         MessageFormatter messageFormatter = BaseUtils.getMessageFormatter(msgContext);
 
         if (log.isDebugEnabled()) {

@@ -34,10 +34,9 @@ public class MailTransportTest extends TestCase {
     public static TestSuite suite() throws Exception {
         ManagedTestSuite suite = new ManagedTestSuite(MailTransportTest.class);
         
-        // SwA doesn't work because attachments are sent with "Content-Transfer-Encoding: binary"
-        // and mail servers don't like that.
-        // TODO: this could be fixed with the enhancement introduced by WSCOMMONS-390
-        suite.addExclude("(test=AsyncSwA)");
+        // SwA doesn't work with the mock client because attachments are sent with
+        // "Content-Transfer-Encoding: binary" and mail servers don't like that.
+        suite.addExclude("(&(test=AsyncSwA)(client=javamail))");
         // There seems to be a problem with Sun's IMAP client or GreenMail's IMAP server
         // in this particular case:
         suite.addExclude("(&(protocol=imap)(|(test=AsyncSwA)(&(test=EchoXML)(messageType=SOAP12))))");
