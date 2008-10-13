@@ -21,14 +21,49 @@ package org.apache.axis2.transport.testkit.tests;
 
 import javax.mail.internet.ContentType;
 
+import org.apache.axis2.transport.testkit.Adapter;
+import org.apache.axis2.transport.testkit.MessageExchangeValidator;
 import org.apache.axis2.transport.testkit.client.ClientOptions;
+import org.apache.axis2.transport.testkit.client.TestClient;
 
-public class MessageTestCase extends ManagedTestCase {
+public abstract class MessageTestCase extends ManagedTestCase {
+    protected final ContentType contentType;
     protected final ClientOptions options;
+    private @Transient MessageExchangeValidator[] validators;
 
-    public MessageTestCase(ContentType contentType, String charset, Object... resources) {
+    public MessageTestCase(TestClient client, ContentType contentType, String charset, Object... resources) {
         super(resources);
-        options = new ClientOptions(contentType, charset);
+        if (client instanceof Adapter) {
+            addResource(((Adapter)client).getTarget());
+        } else {
+            addResource(client);
+        }
+        this.contentType = contentType;
+        try {
+            options = new ClientOptions(client, contentType, charset);
+        } catch (Exception ex) {
+            // TODO: handle this in a better way
+            throw new Error(ex);
+        }
         addResource(options);
+        addResource(this);
     }
+    
+    @Setup @SuppressWarnings("unused")
+    private void setUp(MessageExchangeValidator[] validators) {
+        this.validators = validators;
+    }
+    
+    @Override
+    protected void runTest() throws Throwable {
+        for (MessageExchangeValidator validator : validators) {
+            validator.beforeSend();
+        }
+        doRunTest();
+        for (MessageExchangeValidator validator : validators) {
+            validator.afterReceive();
+        }
+    }
+
+    protected abstract void doRunTest() throws Throwable;
 }

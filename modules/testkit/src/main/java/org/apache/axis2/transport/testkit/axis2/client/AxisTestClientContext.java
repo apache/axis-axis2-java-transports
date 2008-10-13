@@ -26,6 +26,7 @@ import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.ListenerManager;
 import org.apache.axis2.transport.CustomAxisConfigurator;
+import org.apache.axis2.transport.TransportSender;
 import org.apache.axis2.transport.testkit.axis2.TransportDescriptionFactory;
 import org.apache.axis2.transport.testkit.tests.Setup;
 import org.apache.axis2.transport.testkit.tests.TearDown;
@@ -47,7 +48,7 @@ import org.apache.axis2.transport.testkit.tests.Transient;
 public class AxisTestClientContext {
     public static final AxisTestClientContext INSTANCE = new AxisTestClientContext();
     
-    private @Transient TransportOutDescription trpOutDesc;
+    private @Transient TransportSender sender;
     private @Transient ConfigurationContext cfgCtx;
     private @Transient ListenerManager listenerManager;
     
@@ -58,9 +59,10 @@ public class AxisTestClientContext {
         cfgCtx = ConfigurationContextFactory.createConfigurationContext(new CustomAxisConfigurator());
         AxisConfiguration axisCfg = cfgCtx.getAxisConfiguration();
 
-        trpOutDesc = tdf.createTransportOutDescription();
+        TransportOutDescription trpOutDesc = tdf.createTransportOutDescription();
         axisCfg.addTransportOut(trpOutDesc);
-        trpOutDesc.getSender().init(cfgCtx, trpOutDesc);
+        sender = trpOutDesc.getSender();
+        sender.init(cfgCtx, trpOutDesc);
         
         boolean useListener = false;
         for (AxisTestClientContextConfigurator configurator : configurators) {
@@ -90,9 +92,13 @@ public class AxisTestClientContext {
         }
     }
     
+    public TransportSender getSender() {
+        return sender;
+    }
+
     @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
-        trpOutDesc.getSender().stop();
+        sender.stop();
         if (listenerManager != null) {
             listenerManager.stop();
             listenerManager.destroy();

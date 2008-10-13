@@ -24,18 +24,19 @@ import javax.mail.internet.ContentType;
 import org.apache.axiom.om.util.UUIDGenerator;
 
 public class ClientOptions {
-    private final ContentType baseContentType;
+    private final ContentType transportContentType;
     private final String charset;
     private String mimeBoundary;
     private String rootContentId;
 
-    public ClientOptions(ContentType baseContentType, String charset) {
-        this.baseContentType = baseContentType;
+    // TODO: this is ugly; find a better solution
+    public ClientOptions(TestClient client, ContentType baseContentType, String charset) throws Exception {
         this.charset = charset;
+        transportContentType = client.getContentType(this, baseContentType);
     }
 
-    public ContentType getBaseContentType() {
-        return baseContentType;
+    public ContentType getTransportContentType() {
+        return transportContentType;
     }
 
     public String getCharset() {

@@ -17,27 +17,9 @@
  *  under the License.
  */
 
-package org.apache.axis2.transport.testkit.axis2.client;
+package org.apache.axis2.transport.testkit;
 
-import javax.mail.internet.ContentType;
-
-import org.apache.axis2.client.ServiceClient;
-import org.apache.axis2.transport.testkit.client.AsyncTestClient;
-import org.apache.axis2.transport.testkit.client.ClientOptions;
-import org.apache.axis2.transport.testkit.message.AxisMessage;
-
-public class AxisAsyncTestClient extends AxisTestClient implements AsyncTestClient<AxisMessage> {
-    private final boolean block;
-    
-    public AxisAsyncTestClient(boolean block) {
-        this.block = block;
-    }
-
-    public AxisAsyncTestClient() {
-        this(true);
-    }
-
-    public void sendMessage(ClientOptions options, ContentType contentType, AxisMessage message) throws Exception {
-        send(options, message, ServiceClient.ANON_OUT_ONLY_OP, block, null);
-    }
+public interface MessageExchangeValidator {
+    void beforeSend() throws Exception;
+    void afterReceive() throws Exception;
 }

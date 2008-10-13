@@ -439,19 +439,9 @@ public class MailTransportSender extends AbstractTransportSender
 
             // update metrics
             metrics.incrementMessagesSent();
-            if (mimeMultiPart != null) {
-                for (int i=0; i<mimeMultiPart.getCount(); i++) {
-                    MimeBodyPart mbp = (MimeBodyPart) mimeMultiPart.getBodyPart(i);
-                    int size = mbp.getSize();
-                    if (size != -1) {
-                        metrics.incrementBytesSent(size);
-                    }
-                }
-            } else {
-                int size = message.getSize();
-                if (size != -1) {
-                    metrics.incrementBytesSent(size);
-                }
+            long bytesSent = message.getBytesSent();
+            if (bytesSent != -1) {
+                metrics.incrementBytesSent(bytesSent);
             }
 
         } catch (MessagingException e) {

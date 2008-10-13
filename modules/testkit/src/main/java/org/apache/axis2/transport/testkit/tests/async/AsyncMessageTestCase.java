@@ -33,22 +33,21 @@ public abstract class AsyncMessageTestCase<M> extends MessageTestCase {
     
     // TODO: maybe we don't need an explicit AsyncChannel
     public AsyncMessageTestCase(AsyncChannel channel, AsyncTestClient<M> client, AsyncEndpoint<M> endpoint, ContentType contentType, String charset, Object... resources) {
-        super(contentType, charset, resources);
+        super(client, contentType, charset, resources);
         this.client = client;
         this.endpoint = endpoint;
         addResource(channel);
-        addResource(client);
         addResource(endpoint);
     }
 
     @Override
-    protected void runTest() throws Throwable {
+    protected void doRunTest() throws Throwable {
         endpoint.clear();
         M expected = prepareMessage();
         
         // Run the test.
 //                    contentTypeMode == ContentTypeMode.TRANSPORT ? contentType : null);
-        client.sendMessage(options, options.getBaseContentType(), expected);
+        client.sendMessage(options, contentType, expected);
         IncomingMessage<M> actual = endpoint.waitForMessage(8000);
         if (actual == null) {
             fail("Failed to get message");

@@ -19,7 +19,11 @@
 
 package org.apache.axis2.transport.mail;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 import org.apache.axiom.om.util.UUIDGenerator;
+import org.apache.commons.io.output.CountingOutputStream;
 
 import javax.mail.internet.MimeMessage;
 import javax.mail.MessagingException;
@@ -33,15 +37,32 @@ import javax.mail.Session;
  * find out the relationship of a response to his request
  */
 public class WSMimeMessage extends MimeMessage {
+    private long bytesSent = -1;
 
     WSMimeMessage(Session session) {
         super(session);
     }
 
+    @Override
     protected void updateMessageID() throws MessagingException {
 	    if (getHeader(MailConstants.MAIL_HEADER_MESSAGE_ID) == null) {
             setHeader(MailConstants.MAIL_HEADER_MESSAGE_ID, UUIDGenerator.getUUID());    
         }
     }
-    
+
+    @Override
+    public void writeTo(OutputStream out, String[] ignoreHeaders)
+            throws MessagingException, IOException {
+        if (bytesSent == -1) {
+            CountingOutputStream countingOut = new CountingOutputStream(out);
+            super.writeTo(countingOut, ignoreHeaders);
+            bytesSent = countingOut.getByteCount();
+        } else {
+            super.writeTo(out, ignoreHeaders);
+        }
+    }
+
+    public long getBytesSent() {
+        return bytesSent;
+    }
 }

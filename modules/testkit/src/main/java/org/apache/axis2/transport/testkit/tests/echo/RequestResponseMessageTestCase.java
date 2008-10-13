@@ -32,22 +32,21 @@ public abstract class RequestResponseMessageTestCase<M,N> extends MessageTestCas
 
     // TODO: maybe we don't need an explicit RequestResponseChannel
     public RequestResponseMessageTestCase(RequestResponseChannel channel, RequestResponseTestClient<M,N> client, InOutEndpoint endpoint, ContentType contentType, String charset, Object... resources) {
-        super(contentType, charset, resources);
+        super(client, contentType, charset, resources);
         this.client = client;
         this.endpoint = endpoint;
         addResource(channel);
-        addResource(client);
         addResource(endpoint);
     }
     
     @Override
-    protected void runTest() throws Throwable {
+    protected void doRunTest() throws Throwable {
         M request = prepareRequest();
         InterruptingEndpointErrorListener listener = new InterruptingEndpointErrorListener(Thread.currentThread());
         N response;
         endpoint.addEndpointErrorListener(listener);
         try {
-            response = client.sendMessage(options, options.getBaseContentType(), request).getData();
+            response = client.sendMessage(options, contentType, request).getData();
         } catch (Throwable ex) {
             if (listener.getException() != null) {
                 throw listener.getException();

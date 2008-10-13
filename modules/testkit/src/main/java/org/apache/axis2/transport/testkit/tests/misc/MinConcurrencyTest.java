@@ -122,7 +122,7 @@ public class MinConcurrencyTest extends ManagedTestCase {
                     endpointResourceSets[i] = endpointResourceSet;
                 }
                 for (int j=0; j<messages; j++) {
-                    ClientOptions options = new ClientOptions(new ContentType(SOAP11Constants.SOAP_11_CONTENT_TYPE), "UTF-8");
+                    ClientOptions options = new ClientOptions(client, new ContentType(SOAP11Constants.SOAP_11_CONTENT_TYPE), "UTF-8");
                     AxisMessage message = new AxisMessage();
                     message.setMessageType(SOAP11Constants.SOAP_11_CONTENT_TYPE);
                     SOAPFactory factory = OMAbstractFactory.getSOAP11Factory();
