@@ -22,6 +22,8 @@ package org.apache.axis2.transport.jms;
 import javax.jms.BytesMessage;
 import javax.jms.Connection;
 import javax.jms.Destination;
+import javax.jms.ExceptionListener;
+import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
@@ -40,7 +42,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 @Name("mock")
-public class MockEchoEndpoint extends InOutEndpointSupport implements InOutEndpoint {
+public class MockEchoEndpoint extends InOutEndpointSupport implements InOutEndpoint, ExceptionListener {
     static Log log = LogFactory.getLog(MockEchoEndpoint.class);
     
     private @Transient Connection connection;
@@ -51,8 +53,10 @@ public class MockEchoEndpoint extends InOutEndpointSupport implements InOutEndpo
         Destination destination = channel.getDestination();
         Destination replyDestination = channel.getReplyDestination();
         connection = env.getConnectionFactory().createConnection();
+        connection.setExceptionListener(this);
         connection.start();
         replyConnection = env.getConnectionFactory().createConnection();
+        replyConnection.setExceptionListener(this);
         final Session replySession = replyConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         final MessageProducer producer = replySession.createProducer(replyDestination);
         MessageConsumer consumer = connection.createSession(false, Session.AUTO_ACKNOWLEDGE).createConsumer(destination);
@@ -86,5 +90,10 @@ public class MockEchoEndpoint extends InOutEndpointSupport implements InOutEndpo
     private void tearDown() throws Exception {
         connection.close();
         replyConnection.close();
+    }
+
+    public void onException(JMSException ex) {
+        log.error("Exception received by JMS exception listener", ex);
+        fireEndpointError(ex);
     }
 }
