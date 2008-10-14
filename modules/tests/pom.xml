@@ -138,6 +138,14 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        
+        <!-- UDP transport tests -->
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-transport-udp</artifactId>
+            <version>${pom.version}</version>
+            <scope>test</scope>
+        </dependency>    
     </dependencies>
 
     <profiles>

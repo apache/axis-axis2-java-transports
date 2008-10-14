@@ -39,6 +39,7 @@
         <module>modules/base</module>
         <module>modules/http</module>
         <module>modules/tcp</module>
+        <module>modules/udp</module>
         <module>modules/local</module>
         <module>modules/xmpp</module>
         <module>modules/mail</module>
