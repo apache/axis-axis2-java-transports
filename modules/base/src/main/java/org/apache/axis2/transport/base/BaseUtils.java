@@ -443,7 +443,15 @@ public abstract class BaseUtils {
         // message was a MTOM message we sent out MTOM
         if (!enableMTOM && msgContext.isDoingMTOM() && (enableMTOMObject instanceof String)) {
             if (((String) enableMTOMObject).equalsIgnoreCase(Constants.VALUE_OPTIONAL)) {
-                enableMTOM = true;
+                //In server side, we check whether request was MTOM
+                if (msgContext.isServerSide()) {
+                    if (msgContext.isDoingMTOM()) {
+                        enableMTOM = true;
+                    } 
+                // in the client side, we enable MTOM if it is optional    
+                } else {
+                    enableMTOM = true;
+                }
             }
         }
         return enableMTOM;
