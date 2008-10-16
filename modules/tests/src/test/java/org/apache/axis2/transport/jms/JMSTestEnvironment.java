@@ -39,7 +39,7 @@ public abstract class JMSTestEnvironment {
     
     protected abstract ConnectionFactory createConnectionFactory() throws Exception;
     
-    public Destination createDestination(String destinationType, String name) {
+    public Destination createDestination(String destinationType, String name) throws Exception {
         if (destinationType.equals(JMSConstants.DESTINATION_TYPE_TOPIC)) {
             return createTopic(name);
         } else {
@@ -47,8 +47,10 @@ public abstract class JMSTestEnvironment {
         }
     }
 
-    public abstract Queue createQueue(String name);
-    public abstract Topic createTopic(String name);
+    public abstract Queue createQueue(String name) throws Exception;
+    public abstract Topic createTopic(String name) throws Exception;
+    
+    public abstract void deleteDestination(Destination destination) throws Exception;
     
     public ConnectionFactory getConnectionFactory() {
         return connectionFactory;

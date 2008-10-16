@@ -91,6 +91,7 @@ public abstract class JMSChannel implements AxisServiceConfigurator {
     @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
         context.unbind(jndiName);
+        env.deleteDestination(destination);
     }
 
     @Key("destType")

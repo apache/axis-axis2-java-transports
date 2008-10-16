@@ -19,23 +19,33 @@
 
 package org.apache.axis2.transport.jms;
 
+import javax.jms.Destination;
 import javax.jms.Queue;
 import javax.jms.Topic;
 
 import org.apache.axis2.transport.testkit.name.Name;
 import org.apache.axis2.transport.testkit.tests.Setup;
 import org.apache.axis2.transport.testkit.tests.TearDown;
+import org.apache.qpid.AMQException;
 import org.apache.qpid.client.AMQConnectionFactory;
+import org.apache.qpid.client.AMQDestination;
 import org.apache.qpid.client.AMQQueue;
 import org.apache.qpid.client.AMQTopic;
 import org.apache.qpid.client.transport.TransportConnection;
+import org.apache.qpid.exchange.ExchangeDefaults;
 import org.apache.qpid.framing.AMQShortString;
+import org.apache.qpid.server.registry.ApplicationRegistry;
+import org.apache.qpid.server.virtualhost.VirtualHost;
 
 @Name("qpid")
 public class QpidTestEnvironment extends JMSTestEnvironment {
+    private VirtualHost virtualHost;
+    
     @Setup @SuppressWarnings("unused")
     private void setUp() throws Exception {
         TransportConnection.createVMBroker(1);
+        // null means the default virtual host
+        virtualHost = ApplicationRegistry.getInstance(1).getVirtualHostRegistry().getVirtualHost(null);
     }
 
     @TearDown @SuppressWarnings("unused")
@@ -49,12 +59,19 @@ public class QpidTestEnvironment extends JMSTestEnvironment {
     }
 
     @Override
-    public Queue createQueue(String name) {
-        return new AMQQueue(name, name);
+    public Queue createQueue(String name) throws AMQException {
+        QpidUtil.createQueue(virtualHost, ExchangeDefaults.DIRECT_EXCHANGE_NAME, name);
+        return new AMQQueue(ExchangeDefaults.DIRECT_EXCHANGE_NAME, name);
     }
 
     @Override
-    public Topic createTopic(String name) {
-        return new AMQTopic(new AMQShortString(name), name);
+    public Topic createTopic(String name) throws AMQException {
+        QpidUtil.createQueue(virtualHost, ExchangeDefaults.TOPIC_EXCHANGE_NAME, name);
+        return new AMQTopic(ExchangeDefaults.TOPIC_EXCHANGE_NAME, name);
+    }
+
+    @Override
+    public void deleteDestination(Destination destination) throws Exception {
+        QpidUtil.deleteQueue(virtualHost, ((AMQDestination)destination).getDestinationName().asString());
     }
 }

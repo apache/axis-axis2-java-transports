@@ -76,7 +76,6 @@ public class MockEchoEndpoint extends InOutEndpointSupport implements InOutEndpo
                         throw new UnsupportedOperationException("Unsupported message type");
                     }
                     reply.setJMSCorrelationID(message.getJMSMessageID());
-                    Thread.sleep(50);
                     producer.send(reply);
                     log.info("Message sent: ID = " + reply.getJMSMessageID());
                 } catch (Throwable ex) {

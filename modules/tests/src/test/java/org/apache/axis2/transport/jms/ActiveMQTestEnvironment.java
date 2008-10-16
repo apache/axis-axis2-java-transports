@@ -19,6 +19,7 @@
 
 package org.apache.axis2.transport.jms;
 
+import javax.jms.Destination;
 import javax.jms.Queue;
 import javax.jms.Topic;
 
@@ -66,5 +67,9 @@ public class ActiveMQTestEnvironment extends JMSTestEnvironment {
     @Override
     public Topic createTopic(String name) {
         return new ActiveMQTopic(name);
+    }
+
+    @Override
+    public void deleteDestination(Destination destination) throws Exception {
     }
 }

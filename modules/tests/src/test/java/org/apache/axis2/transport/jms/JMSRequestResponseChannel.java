@@ -57,6 +57,7 @@ public class JMSRequestResponseChannel extends JMSChannel implements RequestResp
     @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
         context.unbind(replyJndiName);
+        env.deleteDestination(replyDestination);
     }
 
     @Override
