@@ -76,7 +76,6 @@ public class JMSTransportTest extends TestCase {
         builder.addAxisAsyncEndpoint(new AxisAsyncEndpoint());
         
         builder.addRequestResponseChannel(new JMSRequestResponseChannel(JMSConstants.DESTINATION_TYPE_QUEUE, JMSConstants.DESTINATION_TYPE_QUEUE, ContentTypeMode.TRANSPORT));
-        builder.addRequestResponseChannel(new JMSRequestResponseChannel(JMSConstants.DESTINATION_TYPE_TOPIC, JMSConstants.DESTINATION_TYPE_TOPIC, ContentTypeMode.TRANSPORT));
         
         AxisTestClientConfigurator timeoutConfigurator = new AxisTestClientConfigurator() {
             public void setupRequestMessageContext(MessageContext msgContext) throws AxisFault {
