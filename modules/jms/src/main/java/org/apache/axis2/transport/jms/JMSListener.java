@@ -26,6 +26,9 @@ import org.apache.axis2.transport.base.AbstractTransportListener;
 import org.apache.axis2.transport.base.BaseConstants;
 import org.apache.axis2.transport.base.BaseUtils;
 import org.apache.axis2.transport.base.ManagementSupport;
+import org.apache.axis2.transport.base.event.TransportErrorListener;
+import org.apache.axis2.transport.base.event.TransportErrorSource;
+import org.apache.axis2.transport.base.event.TransportErrorSourceSupport;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +55,8 @@ import java.util.Map;
  * <parameter name="transport.jms.Destination" locked="true">
  * dynamicTopics/something.TestTopic</parameter>
  */
-public class JMSListener extends AbstractTransportListener implements ManagementSupport {
+public class JMSListener extends AbstractTransportListener implements ManagementSupport,
+        TransportErrorSource {
 
     public static final String TRANSPORT_NAME = Constants.TRANSPORT_JMS;
 
@@ -60,6 +64,8 @@ public class JMSListener extends AbstractTransportListener implements Management
     /** A Map of service name to the JMS EPR addresses */
     private Map<String,String> serviceNameToEPRMap = new HashMap<String,String>();
 
+    private final TransportErrorSourceSupport tess = new TransportErrorSourceSupport(this);
+    
     /**
      * This is the TransportListener initialization method invoked by Axis2
      *
@@ -236,5 +242,17 @@ public class JMSListener extends AbstractTransportListener implements Management
         } catch (Exception e) {
             handleException("Error shutting down the listener for maintenence", e);
         }
+    }
+
+    public void addErrorListener(TransportErrorListener listener) {
+        tess.addErrorListener(listener);
+    }
+
+    public void removeErrorListener(TransportErrorListener listener) {
+        tess.removeErrorListener(listener);
+    }
+
+    void error(AxisService service, Throwable ex) {
+        tess.error(service, ex);
     }
 }

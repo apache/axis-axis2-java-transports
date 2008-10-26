@@ -159,10 +159,10 @@ public class JMSMessageReceiver implements MessageListener {
                 msgContext.setProperty(JMSConstants.JMS_COORELATION_ID, message.getJMSMessageID());
             } catch (JMSException ignore) {}
 
+            AxisService service = null;
             try {
                 String soapAction = JMSUtils.getInstace().
                     getProperty(message, BaseConstants.SOAPACTION);
-                AxisService service = null;
 
                 // set to bypass dispatching if we know the service - we already should!
                 if (serviceName != null) {
@@ -219,9 +219,11 @@ public class JMSMessageReceiver implements MessageListener {
 
             } catch (JMSException e) {
                 metrics.incrementFaultsReceiving();
+                jmsListener.error(service, e);
                 handleException("JMS Exception reading the message Destination or JMS ReplyTo", e);
             } catch (AxisFault e) {
                 metrics.incrementFaultsReceiving();
+                jmsListener.error(service, e);
                 handleException("Axis fault creating a MessageContext", e);
             }
         }

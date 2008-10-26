@@ -524,6 +524,10 @@ public class JMSConnectionFactory implements ExceptionListener {
         log.error("JMS connection factory " + name + " encountered an error", e);
         boolean wasError = true;
 
+        if (jmsListener != null) {
+            jmsListener.error(null, e);
+        }
+
         // try to connect
         // if error occurs wait and try again
         while (wasError == true) {
