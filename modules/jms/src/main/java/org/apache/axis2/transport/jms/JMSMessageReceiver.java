@@ -218,11 +218,11 @@ public class JMSMessageReceiver implements MessageListener {
                 metrics.incrementMessagesReceived();
 
             } catch (JMSException e) {
+                metrics.incrementFaultsReceiving();
                 handleException("JMS Exception reading the message Destination or JMS ReplyTo", e);
-                metrics.incrementFaultsReceiving();
             } catch (AxisFault e) {
-                handleException("Axis fault creating a MessageContext", e);
                 metrics.incrementFaultsReceiving();
+                handleException("Axis fault creating a MessageContext", e);
             }
         }
     }
