@@ -31,6 +31,7 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
+import org.apache.axis2.transport.base.BaseConstants;
 import org.apache.axis2.transport.testkit.endpoint.InOutEndpoint;
 import org.apache.axis2.transport.testkit.endpoint.InOutEndpointSupport;
 import org.apache.axis2.transport.testkit.name.Name;
@@ -76,6 +77,7 @@ public class MockEchoEndpoint extends InOutEndpointSupport implements InOutEndpo
                         throw new UnsupportedOperationException("Unsupported message type");
                     }
                     reply.setJMSCorrelationID(message.getJMSMessageID());
+                    reply.setStringProperty(BaseConstants.CONTENT_TYPE, message.getStringProperty(BaseConstants.CONTENT_TYPE));
                     producer.send(reply);
                     log.info("Message sent: ID = " + reply.getJMSMessageID());
                 } catch (Throwable ex) {
