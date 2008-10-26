@@ -81,7 +81,10 @@ public class JMSConstants {
      * The Parameter name indicating the JMS connection factory JNDI name
      */
     public static final String CONFAC_JNDI_NAME_PARAM = "transport.jms.ConnectionFactoryJNDIName";
-    
+    /**
+     * The parameter indicating the expected content type for messages received by the service.
+     */
+    public static final String CONTENT_TYPE_PARAM = "transport.jms.contentType";
 
     //------------ message context / transport header properties and client options ------------
     /**

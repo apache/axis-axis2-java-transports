@@ -23,8 +23,12 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 
+import javax.mail.internet.ContentType;
+import javax.mail.internet.ParseException;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.Constants;
 import org.apache.axis2.builder.Builder;
 import org.apache.axis2.context.MessageContext;
 
@@ -51,10 +55,19 @@ public class TextMessageBuilderAdapter implements TextMessageBuilder {
 
     public OMElement processDocument(Reader reader, String contentType,
                                      MessageContext messageContext) throws AxisFault {
-        // TODO: check that using the default charset encoding and leaving the content type unaltered is a valid strategy
-        return processDocument(
-                new ReaderInputStream(reader, MessageContext.DEFAULT_CHAR_SET_ENCODING),
-                contentType, messageContext);
+        String charset;
+        try {
+            ContentType ct = new ContentType(contentType);
+            charset = ct.getParameter("charset");
+        } catch (ParseException ex) {
+            charset = null;
+        }
+        if (charset == null) {
+            charset = MessageContext.DEFAULT_CHAR_SET_ENCODING;
+        }
+        messageContext.setProperty(Constants.Configuration.CHARACTER_SET_ENCODING, charset);        
+        return processDocument(new ReaderInputStream(reader, charset), contentType,
+                messageContext);
     }
 
     public OMElement processDocument(String content, String contentType,

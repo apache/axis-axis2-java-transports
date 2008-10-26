@@ -48,8 +48,6 @@ public class JMSTransportTest extends TestCase {
         		             "(&(test=AsyncXML)(messageType=SOAP11)(data=ASCII))" +
         		             "(&(test=EchoXML)(messageType=POX)(data=ASCII))))");
         
-        // SYNAPSE-304:
-        suite.addExclude("(&(test=AsyncTextPlain)(client=jms)(jmsType=bytes))");
         // SYNAPSE-436:
         suite.addExclude("(&(test=EchoXML)(replyDestType=topic)(endpoint=axis))");
         

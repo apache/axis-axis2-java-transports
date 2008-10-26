@@ -15,7 +15,6 @@
 */
 package org.apache.axis2.transport.jms;
 
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.transport.base.threads.WorkerPool;
 import org.apache.axis2.transport.base.BaseUtils;
@@ -203,11 +202,16 @@ public class JMSMessageReceiver implements MessageListener {
                     }
                 }
 
-                String contentType =
-                    JMSUtils.getInstace().getProperty(message, BaseConstants.CONTENT_TYPE);
+                String contentType = null;
+                if (service != null) {
+                    contentType = (String)service.getParameterValue(JMSConstants.CONTENT_TYPE_PARAM);
+                }
+                if (contentType == null) {
+                    contentType
+                        = JMSUtils.getInstace().getProperty(message, BaseConstants.CONTENT_TYPE);
+                }
                 
-                // set the message payload to the message context
-                JMSUtils.getInstace().setSOAPEnvelope(message, msgContext, contentType);
+                JMSUtils.setSOAPEnvelope(message, msgContext, contentType);
 
                 jmsListener.handleIncomingMessage(
                     msgContext,

@@ -16,22 +16,34 @@
 package org.apache.axis2.transport.jms;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMException;
+import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.Constants;
+import org.apache.axis2.builder.Builder;
 import org.apache.axis2.builder.BuilderUtil;
+import org.apache.axis2.builder.SOAPBuilder;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.ParameterIncludeImpl;
+import org.apache.axis2.format.TextMessageBuilder;
+import org.apache.axis2.format.TextMessageBuilderAdapter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.axis2.transport.TransportUtils;
 import org.apache.axis2.transport.base.BaseConstants;
 import org.apache.axis2.transport.base.BaseUtils;
 
 import javax.jms.*;
 import javax.jms.Queue;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.ParseException;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.Reference;
+import javax.xml.parsers.FactoryConfigurationError;
+import javax.xml.stream.XMLStreamException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -293,6 +305,64 @@ public class JMSUtils extends BaseUtils {
             } else {
                 jmsConFactory.addJNDIContextProperty( p.getName(), (String) p.getValue());
             }
+        }
+    }
+
+    public static void setSOAPEnvelope(Message message, MessageContext msgContext, String contentType) throws AxisFault, JMSException {
+        if (message instanceof BytesMessage) {
+            if (contentType == null) {
+                log.debug("No content type specified; assuming application/octet-stream.");
+                contentType = "application/octet-stream";
+            } else {
+                // Extract the charset encoding from the content type and
+                // set the CHARACTER_SET_ENCODING property as e.g. SOAPBuilder relies on this.
+                String charSetEnc = null;
+                try {
+                    if (contentType != null) {
+                        charSetEnc = new ContentType(contentType).getParameter("charset");
+                    }
+                } catch (ParseException ex) {
+                    // ignore
+                }
+                msgContext.setProperty(Constants.Configuration.CHARACTER_SET_ENCODING, charSetEnc);
+            }
+            
+            SOAPEnvelope envelope;
+            try {
+                envelope = TransportUtils.createSOAPMessage(msgContext,
+                        new BytesMessageInputStream((BytesMessage)message), contentType);
+            } catch (XMLStreamException ex) {
+                handleException("Error parsing XML", ex);
+                return; // Make compiler happy
+            }
+            msgContext.setEnvelope(envelope);
+        } else if (message instanceof TextMessage) {
+            String type;
+            if (contentType == null) {
+                log.debug("No content type specified; assuming text/plain.");
+                type = contentType = "text/plain";
+            } else {
+                int index = contentType.indexOf(';');
+                if (index > 0) {
+                    type = contentType.substring(0, index);
+                } else {
+                    type = contentType;
+                }
+            }
+            Builder builder = BuilderUtil.getBuilderFromSelector(type, msgContext);
+            if (builder == null) {
+                builder = new SOAPBuilder();
+            }
+            TextMessageBuilder textMessageBuilder;
+            if (builder instanceof TextMessageBuilder) {
+                textMessageBuilder = (TextMessageBuilder)builder;
+            } else {
+                textMessageBuilder = new TextMessageBuilderAdapter(builder);
+            }
+            String content = ((TextMessage)message).getText();
+            OMElement documentElement
+                    = textMessageBuilder.processDocument(content, contentType, msgContext);
+            msgContext.setEnvelope(TransportUtils.createSOAPEnvelope(documentElement));
         }
     }
 
