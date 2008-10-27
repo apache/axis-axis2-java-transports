@@ -84,7 +84,7 @@ public class JMSConstants {
     /**
      * The parameter indicating the expected content type for messages received by the service.
      */
-    public static final String CONTENT_TYPE_PARAM = "transport.jms.contentType";
+    public static final String CONTENT_TYPE_PARAM = "transport.jms.ContentType";
 
     //------------ message context / transport header properties and client options ------------
     /**
