@@ -351,6 +351,9 @@ public class JMSUtils extends BaseUtils {
             }
             Builder builder = BuilderUtil.getBuilderFromSelector(type, msgContext);
             if (builder == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("No message builder found for type '" + type + "'. Falling back to SOAP.");
+                }
                 builder = new SOAPBuilder();
             }
             TextMessageBuilder textMessageBuilder;

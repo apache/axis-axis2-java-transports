@@ -224,7 +224,7 @@ public class JMSMessageReceiver implements MessageListener {
             } catch (Throwable e) {
                 metrics.incrementFaultsReceiving();
                 jmsListener.error(service, e);
-                log.error(e);
+                log.error("Exception while processing incoming message", e);
             }
         }
     }
