@@ -87,9 +87,12 @@
                     as application/octet-stream or text/plain, depending on the JMS message type.</td>
                 </tr>
                 <tr>
-                    <td>transport.jms.Wrapper</td>
+                    <td>Wrapper</td>
                     <td>Optional</td>
-                    <td>The wrapper element for the JMS message.</td>
+                    <td>The wrapper element for pure text or binary messages. Note that this parameter is
+                    actually not JMS specific but recognized by the message builders for text/plain and
+                    application/octet-stream (which are the respective default content types for JMS text
+                    and binary messages).</td>
                 </tr>
             </table>
             <p>Sample services.xml:</p>
