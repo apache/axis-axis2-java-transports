@@ -160,7 +160,7 @@ public class JMSMessageReceiver implements MessageListener {
 
             AxisService service = null;
             try {
-                String soapAction = JMSUtils.getInstace().
+                String soapAction = JMSUtils.
                     getProperty(message, BaseConstants.SOAPACTION);
 
                 // set to bypass dispatching if we know the service - we already should!
@@ -208,7 +208,7 @@ public class JMSMessageReceiver implements MessageListener {
                 }
                 if (contentType == null) {
                     contentType
-                        = JMSUtils.getInstace().getProperty(message, BaseConstants.CONTENT_TYPE);
+                        = JMSUtils.getProperty(message, BaseConstants.CONTENT_TYPE);
                 }
                 
                 JMSUtils.setSOAPEnvelope(message, msgContext, contentType);

@@ -518,7 +518,7 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
         // workaround as Axis2 1.2 is about to be released and Synapse 1.0
         responseMsgCtx.setServerSide(false);
 
-        String contentType = JMSUtils.getInstace().getProperty(message, BaseConstants.CONTENT_TYPE);
+        String contentType = JMSUtils.getProperty(message, BaseConstants.CONTENT_TYPE);
 
         try {
             JMSUtils.setSOAPEnvelope(message, responseMsgCtx, contentType);
@@ -530,7 +530,7 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
         handleIncomingMessage(
             responseMsgCtx,
             JMSUtils.getTransportHeaders(message),
-            JMSUtils.getInstace().getProperty(message, BaseConstants.SOAPACTION),
+            JMSUtils.getProperty(message, BaseConstants.SOAPACTION),
             contentType
         );
     }
