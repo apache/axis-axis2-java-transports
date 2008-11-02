@@ -22,6 +22,7 @@ package org.apache.axis2.transport.testkit.axis2.endpoint;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -61,7 +62,12 @@ public abstract class AxisTestEndpoint implements TransportErrorListener {
             transportErrorSource = null;
         }
         
-        String path = new URI(channel.getEndpointReference().getAddress()).getPath();
+        String path;
+        try {
+            path = new URI(channel.getEndpointReference().getAddress()).getPath();
+        } catch (URISyntaxException ex) {
+            path = null;
+        }
         String serviceName;
         if (path != null && path.startsWith(Channel.CONTEXT_PATH + "/")) {
             serviceName = path.substring(Channel.CONTEXT_PATH.length()+1);
