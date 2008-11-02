@@ -19,11 +19,16 @@
 
 package org.apache.axis2.transport.testkit.axis2.endpoint;
 
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.URI;
+import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
+import org.apache.axis2.description.Parameter;
 import org.apache.axis2.transport.TransportListener;
 import org.apache.axis2.transport.base.event.TransportError;
 import org.apache.axis2.transport.base.event.TransportErrorListener;
@@ -34,6 +39,7 @@ import org.apache.axis2.transport.testkit.name.Name;
 import org.apache.axis2.transport.testkit.tests.Setup;
 import org.apache.axis2.transport.testkit.tests.TearDown;
 import org.apache.axis2.transport.testkit.tests.Transient;
+import org.apache.axis2.transport.testkit.util.LogManager;
 
 @Name("axis")
 public abstract class AxisTestEndpoint implements TransportErrorListener {
@@ -42,7 +48,9 @@ public abstract class AxisTestEndpoint implements TransportErrorListener {
     private @Transient AxisService service;
     
     @Setup @SuppressWarnings("unused")
-    private void setUp(AxisTestEndpointContext context, Channel channel, AxisServiceConfigurator[] configurators) throws Exception {
+    private void setUp(LogManager logManager, AxisTestEndpointContext context, Channel channel,
+            AxisServiceConfigurator[] configurators) throws Exception {
+        
         this.context = context;
         
         TransportListener listener = context.getTransportListener();
@@ -62,13 +70,30 @@ public abstract class AxisTestEndpoint implements TransportErrorListener {
         }
         service = new AxisService(serviceName);
         service.addOperation(createOperation());
-        // We want to receive all messages through the same operation:
-        service.addParameter(AxisService.SUPPORT_SINGLE_OP, true);
         if (configurators != null) {
             for (AxisServiceConfigurator configurator : configurators) {
                 configurator.setupService(service, false);
             }
         }
+        
+        // Output service parameters to log file
+        List<Parameter> params = (List<Parameter>)service.getParameters();
+        if (!params.isEmpty()) {
+            PrintWriter log = new PrintWriter(logManager.createLog("service-parameters"), false);
+            try {
+                for (Parameter param : params) {
+                    log.print(param.getName());
+                    log.print("=");
+                    log.println(param.getValue());
+                }
+            } finally {
+                log.close();
+            }
+        }
+        
+        // We want to receive all messages through the same operation:
+        service.addParameter(AxisService.SUPPORT_SINGLE_OP, true);
+        
         context.getAxisConfiguration().addService(service);
     }
     
