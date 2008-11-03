@@ -47,10 +47,12 @@ import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.Message;
+import org.apache.axis2.description.AxisOperation;
 
 public class XMPPSender extends AbstractHandler implements TransportSender {
 	Log log = null;
     XMPPConnectionFactory connectionFactory;
+    XMPPServerCredentials serverCredentials;    
 	
     public XMPPSender() {
         log = LogFactory.getLog(XMPPSender.class);
@@ -71,8 +73,8 @@ public class XMPPSender extends AbstractHandler implements TransportSender {
 			TransportOutDescription transportOut) throws AxisFault {
 		//if connection details are available from axis configuration
 		//use those & connect to jabber server(s)
-		XMPPServerCredentials serverCredentials = new XMPPServerCredentials();
-		getConnectionDetailsFromAxisConfiguration(serverCredentials,transportOut);
+		serverCredentials = new XMPPServerCredentials();
+		getConnectionDetailsFromAxisConfiguration(transportOut);		
 		connectionFactory = new XMPPConnectionFactory();
 		connectionFactory.connect(serverCredentials);		
 	}
@@ -82,8 +84,7 @@ public class XMPPSender extends AbstractHandler implements TransportSender {
 	 * @param msgCtx
 	 */
 	private void connectUsingClientOptions(MessageContext msgCtx) throws AxisFault{		
-		XMPPServerCredentials serverCredentials = new XMPPServerCredentials();
-		getConnectionDetailsFromClientOptions(serverCredentials,msgCtx);
+		getConnectionDetailsFromClientOptions(msgCtx);
 		connectionFactory = new XMPPConnectionFactory();
 		connectionFactory.connect(serverCredentials);
 	}
@@ -151,11 +152,19 @@ public class XMPPSender extends AbstractHandler implements TransportSender {
 			message.setProperty(XMPPConstants.IN_REPLY_TO, xmppOutTransportInfo.getInReplyTo());
 		}else{
 			xmppConnection = xmppOutTransportInfo.getConnectionFactory().getXmppConnection();
-			message.setProperty(XMPPConstants.IS_SERVER_SIDE, new Boolean(true));
+			message.setProperty(XMPPConstants.IS_SERVER_SIDE,new Boolean(true));
 			message.setProperty(XMPPConstants.SERVICE_NAME, serviceName);
-			message.setProperty(XMPPConstants.ACTION, options.getAction());
-		}
-		
+			String action = options.getAction();
+			if (action == null) {
+				AxisOperation axisOperation = msgCtx.getAxisOperation();
+				if (axisOperation != null) {
+					action = axisOperation.getSoapAction();
+				}
+			}
+			if (action != null) {
+				message.setProperty(XMPPConstants.ACTION, action);
+			}
+		}		
     	if(xmppConnection == null){
     		handleException("Connection to XMPP Server is not established.");    		
     	}
@@ -220,9 +229,8 @@ public class XMPPSender extends AbstractHandler implements TransportSender {
      * @param serverCredentials
      * @param transportOut
      */
-	private void getConnectionDetailsFromAxisConfiguration(XMPPServerCredentials serverCredentials,
-			TransportOutDescription transportOut){
-		if(transportOut != null){
+    private void getConnectionDetailsFromAxisConfiguration(TransportOutDescription transportOut){
+    	if(transportOut != null){
 			Parameter serverUrl = transportOut.getParameter(XMPPConstants.XMPP_SERVER_URL);
 			if (serverUrl != null) {
 				serverCredentials.setServerUrl(Utils.getParameterValue(serverUrl));
@@ -250,9 +258,8 @@ public class XMPPSender extends AbstractHandler implements TransportSender {
 	 * @param serverCredentials
 	 * @param msgContext
 	 */
-	private void getConnectionDetailsFromClientOptions(XMPPServerCredentials serverCredentials,
-			MessageContext msgContext){
-		Options clientOptions = msgContext.getOptions();
+    private void getConnectionDetailsFromClientOptions(MessageContext msgContext){
+    	Options clientOptions = msgContext.getOptions();
 
 		if (clientOptions.getProperty(XMPPConstants.XMPP_SERVER_USERNAME) != null){
 			serverCredentials.setAccountName((String)clientOptions.getProperty(XMPPConstants.XMPP_SERVER_USERNAME));

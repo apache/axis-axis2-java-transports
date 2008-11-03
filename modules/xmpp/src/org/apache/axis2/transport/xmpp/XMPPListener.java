@@ -49,7 +49,8 @@ import java.util.concurrent.TimeUnit;
 public class XMPPListener implements TransportListener {
     private static Log log = LogFactory.getLog(XMPPListener.class);
     private ConfigurationContext configurationContext = null;
-    private String replyTo = "";
+    private String xmppServerUsername = "";
+    private String xmppServerUrl = "";
 
     /**
      * A Map containing the connection factories managed by this, 
@@ -76,7 +77,7 @@ public class XMPPListener implements TransportListener {
             throws AxisFault {
     	log.info("Initializing XMPPListener...");
         configurationContext = configurationCtx;
-        initializeConnectionFactories(configurationContext,transportIn);
+        initializeConnectionFactories(transportIn);
         if (connectionFactories.isEmpty()) {
             log.warn("No XMPP connection factories defined." +
                      "Will not listen for any XMPP messages");
@@ -90,10 +91,7 @@ public class XMPPListener implements TransportListener {
      * @param configurationContext
      * @param transportIn
      */
-    private void initializeConnectionFactories(
-			ConfigurationContext configurationContext,
-			TransportInDescription transportIn) throws AxisFault{
-    	
+    private void initializeConnectionFactories(TransportInDescription transportIn) throws AxisFault{    	
         Iterator serversToListenOn = transportIn.getParameters().iterator();
         while (serversToListenOn.hasNext()) {
             Parameter connection = (Parameter) serversToListenOn.next();
@@ -112,9 +110,11 @@ public class XMPPListener implements TransportListener {
             while (params.hasNext()) {
                 Parameter param = (Parameter) params.next();
                 if(XMPPConstants.XMPP_SERVER_URL.equals(param.getName())){
-        			serverCredentials.setServerUrl((String)param.getValue());                	
+                	xmppServerUrl = (String)param.getValue();
+        			serverCredentials.setServerUrl(xmppServerUrl);                	
                 }else if(XMPPConstants.XMPP_SERVER_USERNAME.equals(param.getName())){
-        			serverCredentials.setAccountName((String)param.getValue());                	
+                	xmppServerUsername = (String) param.getValue();
+                	serverCredentials.setAccountName(xmppServerUsername);
                 }else if(XMPPConstants.XMPP_SERVER_PASSWORD.equals(param.getName())){
         			serverCredentials.setPassword((String)param.getValue());                	
                 }else if(XMPPConstants.XMPP_SERVER_TYPE.equals(param.getName())){
@@ -133,7 +133,7 @@ public class XMPPListener implements TransportListener {
      * Stop XMPP listener & disconnect from all XMPP Servers
      */
     public void stop() {
-        if (!workerPool.isShutdown()) {
+        if (workerPool != null && !workerPool.isShutdown()) {
             workerPool.shutdown();
         }
         //TODO : Iterate through all connections in connectionFactories & call disconnect()
@@ -155,8 +155,7 @@ public class XMPPListener implements TransportListener {
      */    
     public EndpointReference[] getEPRsForService(String serviceName, String ip) throws AxisFault {
         return new EndpointReference[]{new EndpointReference(XMPPConstants.XMPP_PREFIX +
-                replyTo + "?" + configurationContext
-                .getServiceContextPath() + "/" + serviceName)};
+        		xmppServerUsername +"@"+ xmppServerUrl +"/" + serviceName)};
     }
 
 
