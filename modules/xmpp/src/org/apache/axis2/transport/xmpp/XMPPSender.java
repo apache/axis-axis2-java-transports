@@ -145,13 +145,12 @@ public class XMPPSender extends AbstractHandler implements TransportSender {
 			msgCtx.getProperty(Constants.OUT_TRANSPORT_INFO);
 		}
     	
-    	
+		xmppConnection = xmppOutTransportInfo.getConnectionFactory().getXmppConnection();    
+		
 		if(msgCtx.isServerSide()){
-			xmppConnection = xmppOutTransportInfo.getConnectionFactory().getXmppConnection();
 			message.setProperty(XMPPConstants.IS_SERVER_SIDE, new Boolean(false));
 			message.setProperty(XMPPConstants.IN_REPLY_TO, xmppOutTransportInfo.getInReplyTo());
-		}else{
-			xmppConnection = xmppOutTransportInfo.getConnectionFactory().getXmppConnection();
+		}else{			
 			message.setProperty(XMPPConstants.IS_SERVER_SIDE,new Boolean(true));
 			message.setProperty(XMPPConstants.SERVICE_NAME, serviceName);
 			String action = options.getAction();
@@ -176,9 +175,9 @@ public class XMPPSender extends AbstractHandler implements TransportSender {
 		try 
 		{
 			OMElement msgElement = msgCtx.getEnvelope();
-			if (msgCtx.isDoingREST()) {
-				msgElement = msgCtx.getEnvelope().getBody().getFirstElement();
-			}
+			//if (msgCtx.isDoingREST()) {
+			//	msgElement = msgCtx.getEnvelope().getBody().getFirstElement();
+			//}
 			boolean waitForResponse =
 				msgCtx.getOperationContext() != null &&
 				WSDL2Constants.MEP_URI_OUT_IN.equals(
@@ -203,6 +202,7 @@ public class XMPPSender extends AbstractHandler implements TransportSender {
 			//If this is on client side, wait for the response from server.
 			//Is this the best way to do this?
 			if(waitForResponse && !msgCtx.isServerSide()){
+				//TODO : need to add a timeout
 				while(! xmppClientSidePacketListener.isResponseReceived()){
 					try {
 						Thread.sleep(1000);
