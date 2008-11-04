@@ -128,44 +128,6 @@ public class JMSUtils extends BaseUtils {
     }
 
     /**
-     * Get the JMS destination used by this service
-     *
-     * @param service the Axis Service
-     * @return the name of the JMS destination
-     */
-    public static String getJNDIDestinationNameForService(AxisService service) {
-        Parameter destParam = service.getParameter(JMSConstants.DEST_PARAM);
-        if (destParam != null) {
-            return (String) destParam.getValue();
-        } else {
-            return service.getName();
-        }
-    }
-
-    /**
-     * Get the JMS destination type of this service
-     *
-     * @param service the Axis Service
-     * @return the name of the JMS destination
-     */
-    public static String getDestinationTypeForService(AxisService service) {
-        Parameter destTypeParam = service.getParameter(JMSConstants.DEST_PARAM_TYPE);
-        if (destTypeParam != null) {
-            String paramValue = (String) destTypeParam.getValue();
-            if(JMSConstants.DESTINATION_TYPE_QUEUE.equals(paramValue) ||
-                    JMSConstants.DESTINATION_TYPE_TOPIC.equals(paramValue) )  {
-                return paramValue;
-            } else {
-               handleException("Invalid destinaton type value " + paramValue);
-               return null;
-            }
-        } else {
-            log.debug("JMS destination type not given. default queue");
-            return JMSConstants.DESTINATION_TYPE_QUEUE;
-        }
-    }
-    
-    /**
      * Extract connection factory properties from a given URL
      *
      * @param url a JMS URL of the form jms:/<destination>?[<key>=<value>&]*

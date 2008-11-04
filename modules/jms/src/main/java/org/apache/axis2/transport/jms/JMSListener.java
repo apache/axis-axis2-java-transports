@@ -61,8 +61,8 @@ public class JMSListener extends AbstractTransportListener implements Management
     public static final String TRANSPORT_NAME = Constants.TRANSPORT_JMS;
 
     private JMSConnectionFactoryManager connFacManager;
-    /** A Map of service name to the JMS EPR addresses */
-    private Map<String,String> serviceNameToEPRMap = new HashMap<String,String>();
+    /** A Map of service name to the JMS endpoints */
+    private Map<String,JMSEndpoint> serviceNameToEndpointMap = new HashMap<String,JMSEndpoint>();
 
     private final TransportErrorSourceSupport tess = new TransportErrorSourceSupport(this);
     
@@ -124,8 +124,12 @@ public class JMSListener extends AbstractTransportListener implements Management
         if (serviceName.indexOf('.') != -1) {
             serviceName = serviceName.substring(0, serviceName.indexOf('.'));
         }
-        return new EndpointReference[]{
-            new EndpointReference(serviceNameToEPRMap.get(serviceName))};
+        JMSEndpoint endpoint = serviceNameToEndpointMap.get(serviceName);
+        if (endpoint != null) {
+            return new EndpointReference[] { new EndpointReference(endpoint.getEndpointReference()) };
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -146,16 +150,42 @@ public class JMSListener extends AbstractTransportListener implements Management
             return;
         }
 
-        // compute service EPR and keep for later use
-        String destinationName = JMSUtils.getJNDIDestinationNameForService(service);
-        String destinationType = JMSUtils.getDestinationTypeForService(service);
-        serviceNameToEPRMap.put(service.getName(),
-                JMSUtils.getEPR(cf, destinationType, destinationName));
+        JMSEndpoint endpoint = new JMSEndpoint();
+        endpoint.setService(service);
         
-        log.info("Starting to listen on destination : " + destinationName + " of type "
-                + destinationType + " for service " + service.getName());
-        cf.addDestination(destinationName, destinationType, service.getName());
-        cf.startListeningOnDestination(destinationName, destinationType, service.getName());
+        Parameter destParam = service.getParameter(JMSConstants.DEST_PARAM);
+        if (destParam != null) {
+            endpoint.setJndiDestinationName((String)destParam.getValue());
+        } else {
+            // Assume that the JNDI destination name is the same as the service name
+            endpoint.setJndiDestinationName(service.getName());
+        }
+        
+        Parameter destTypeParam = service.getParameter(JMSConstants.DEST_PARAM_TYPE);
+        if (destTypeParam != null) {
+            String paramValue = (String) destTypeParam.getValue();
+            if(JMSConstants.DESTINATION_TYPE_QUEUE.equals(paramValue) ||
+                    JMSConstants.DESTINATION_TYPE_TOPIC.equals(paramValue) )  {
+                endpoint.setDestinationType(paramValue);
+            } else {
+                throw new AxisJMSException("Invalid destinaton type value " + paramValue);
+            }
+        } else {
+            log.debug("JMS destination type not given. default queue");
+            endpoint.setDestinationType(JMSConstants.DESTINATION_TYPE_QUEUE);
+        }
+        
+        // compute service EPR and keep for later use
+        endpoint.setEndpointReference(JMSUtils.getEPR(cf, endpoint.getDestinationType(),
+                endpoint.getJndiDestinationName()));
+        serviceNameToEndpointMap.put(service.getName(), endpoint);
+        
+        endpoint.setContentType((String)service.getParameterValue(JMSConstants.CONTENT_TYPE_PARAM));
+        
+        log.info("Starting to listen on destination : " + endpoint.getJndiDestinationName() + " of type "
+                + endpoint.getDestinationType() + " for service " + service.getName());
+        cf.addDestination(endpoint);
+        cf.startListeningOnDestination(endpoint);
     }
 
     /**
@@ -168,10 +198,9 @@ public class JMSListener extends AbstractTransportListener implements Management
         JMSConnectionFactory cf = getConnectionFactory(service);
         if (cf != null) {
             // remove from the serviceNameToEprMap
-            serviceNameToEPRMap.remove(service.getName());
+            JMSEndpoint endpoint = serviceNameToEndpointMap.remove(service.getName());
 
-            String destination = JMSUtils.getJNDIDestinationNameForService(service);
-            cf.removeDestination(destination);
+            cf.removeDestination(endpoint.getJndiDestinationName());
         }
     }
     /**

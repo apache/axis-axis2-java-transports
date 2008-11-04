@@ -84,10 +84,8 @@ public class JMSConnectionFactory implements ExceptionListener {
     private final WorkerPool workerPool;
     /** The JNDI name of the actual connection factory */
     private String connFactoryJNDIName = null;
-    /** Map of destination JNDI names to service names */
-    private Map<String,String> serviceJNDINameMapping = null;
-    /** Map of destination JNDI names to destination types*/
-    private Map<String,String> destinationTypeMapping = null;
+    /** Map of destination JNDI names to endpoints */
+    private Map<String,JMSEndpoint> endpointJNDINameMapping = null;
     /** JMS Sessions currently active. One session for each Destination / Service */
     private Map<String,Session> jmsSessions = null;
     /** Properties of the connection factory to acquire the initial context */
@@ -122,8 +120,7 @@ public class JMSConnectionFactory implements ExceptionListener {
         this.jmsListener = jmsListener;
         this.workerPool = workerPool;
         this.cfgCtx = cfgCtx;
-        serviceJNDINameMapping = new HashMap<String,String>();
-        destinationTypeMapping = new HashMap<String,String>();
+        endpointJNDINameMapping = new HashMap<String,JMSEndpoint>();
         jndiProperties = new Hashtable<String,String>();
         jmsSessions = new HashMap<String,Session>();
     }
@@ -132,11 +129,11 @@ public class JMSConnectionFactory implements ExceptionListener {
     /**
      * Add a listen destination on this connection factory on behalf of the given service
      *
-     * @param destinationJNDIName destination JNDI name
-     * @param serviceName     the service to which it belongs
+     * @param endpoint the {@link JMSEndpoint} object that specifies the destination and
+     *                 the service
      */
-    public void addDestination(String destinationJNDIName, String destinationType, String serviceName) {
-
+    public void addDestination(JMSEndpoint endpoint) {
+        String destinationJNDIName = endpoint.getJndiDestinationName();
         String destinationName = getPhysicalDestinationName(destinationJNDIName);
 
         if (destinationName == null) {
@@ -145,25 +142,24 @@ public class JMSConnectionFactory implements ExceptionListener {
             try {
                 log.info("Creating a JMS Queue with the JNDI name : " + destinationJNDIName +
                     " using the connection factory definition named : " + name);
-                JMSUtils.createDestination(conFactory, destinationJNDIName, destinationType);
+                JMSUtils.createDestination(conFactory, destinationJNDIName, endpoint.getDestinationType());
 
                 destinationName = getPhysicalDestinationName(destinationJNDIName);
                 
             } catch (JMSException e) {
                 log.error("Unable to create Destination with JNDI name : " + destinationJNDIName, e);
                 BaseUtils.markServiceAsFaulty(
-                    serviceName,
+                    endpoint.getServiceName(),
                     "Error creating JMS destination : " + destinationJNDIName,
                     cfgCtx.getAxisConfiguration());
                 return;
             }
         }
 
-        serviceJNDINameMapping.put(destinationJNDIName, serviceName);
-        destinationTypeMapping.put(destinationJNDIName, destinationType);
+        endpointJNDINameMapping.put(destinationJNDIName, endpoint);
 
         log.info("Mapped JNDI name : " + destinationJNDIName + " and JMS Destination name : " +
-            destinationName + " against service : " + serviceName);
+            destinationName + " against service : " + endpoint.getServiceName());
     }
 
     /**
@@ -173,7 +169,7 @@ public class JMSConnectionFactory implements ExceptionListener {
      */
     public void removeDestination(String jndiDestinationName) {
         stoplisteningOnDestination(jndiDestinationName);
-        serviceJNDINameMapping.remove(jndiDestinationName);
+        endpointJNDINameMapping.remove(jndiDestinationName);
     }
 
     /**
@@ -248,11 +244,8 @@ public class JMSConnectionFactory implements ExceptionListener {
             handleException("Error connecting to Connection Factory : " + connFactoryJNDIName, e);
         }
 
-        for (Map.Entry<String,String> entry : serviceJNDINameMapping.entrySet()) {
-            String destJNDIName = entry.getKey();
-            String serviceName = entry.getValue();
-            String destinationType = destinationTypeMapping.get(destJNDIName);
-            startListeningOnDestination(destJNDIName, destinationType, serviceName);
+        for (JMSEndpoint endpoint : endpointJNDINameMapping.values()) {
+            startListeningOnDestination(endpoint);
         }
 
         connection.start(); // indicate readiness to start receiving messages
@@ -294,12 +287,11 @@ public class JMSConnectionFactory implements ExceptionListener {
      * Listen on the given destination from this connection factory. Used to
      * start listening on a destination associated with a newly deployed service
      *
-     * @param destinationJNDIname the JMS destination to listen on
+     * @param endpoint the JMS destination to listen on
      */
-    public void startListeningOnDestination(String destinationJNDIname,
-                                            String destinationType,
-                                            String serviceName) {
-
+    public void startListeningOnDestination(JMSEndpoint endpoint) {
+        String destinationJNDIname = endpoint.getJndiDestinationName();
+        String destinationType = endpoint.getDestinationType();
         Session session = jmsSessions.get(destinationJNDIname);
         // if we already had a session open, close it first
         if (session != null) {
@@ -322,7 +314,7 @@ public class JMSConnectionFactory implements ExceptionListener {
 
             MessageConsumer consumer = JMSUtils.createConsumer(session, destination);
             consumer.setMessageListener(new JMSMessageReceiver(jmsListener, this, workerPool,
-                    cfgCtx, serviceName));
+                    cfgCtx, endpoint));
             jmsSessions.put(destinationJNDIname, session);
 
         // catches NameNotFound and JMSExceptions and marks service as faulty    
@@ -334,7 +326,7 @@ public class JMSConnectionFactory implements ExceptionListener {
             }
 
             BaseUtils.markServiceAsFaulty(
-                serviceJNDINameMapping.get(destinationJNDIname),
+                endpoint.getServiceName(),
                 "Error looking up JMS destination : " + destinationJNDIname,
                 cfgCtx.getAxisConfiguration());
         }
@@ -453,16 +445,6 @@ public class JMSConnectionFactory implements ExceptionListener {
     }
 
     // -------------------- getters and setters and trivial methods --------------------
-
-    /**
-     * Return the service name using the JMS destination given by the JNDI name
-     *
-     * @param jndiDestinationName the JNDI name of the destination
-     * @return the name of the service using the destination
-     */
-    public String getServiceNameForJNDIName(String jndiDestinationName) {
-        return serviceJNDINameMapping.get(jndiDestinationName);
-    }
 
     public void setConnFactoryJNDIName(String connFactoryJNDIName) {
         this.connFactoryJNDIName = connFactoryJNDIName;

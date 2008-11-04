@@ -49,8 +49,8 @@ public class JMSMessageReceiver implements MessageListener {
     private ConfigurationContext cfgCtx = null;
     /** A reference to the JMS Connection Factory to which this applies */
     private JMSConnectionFactory jmsConnectionFactory = null;
-    /** The name of the service this message receiver is bound to. */
-    final String serviceName;
+    /** The endpoint this message receiver is bound to. */
+    final JMSEndpoint endpoint;
     /** Metrics collector */
     private MetricsCollector metrics = null;
 
@@ -64,12 +64,12 @@ public class JMSMessageReceiver implements MessageListener {
      * @param serviceName the name of the Axis service
      */
     JMSMessageReceiver(JMSListener jmsListener, JMSConnectionFactory jmsConFac,
-                       WorkerPool workerPool, ConfigurationContext cfgCtx, String serviceName) {
+                       WorkerPool workerPool, ConfigurationContext cfgCtx, JMSEndpoint endpoint) {
         this.jmsListener = jmsListener;
         this.jmsConnectionFactory = jmsConFac;
         this.workerPool = workerPool;
         this.cfgCtx = cfgCtx;
-        this.serviceName = serviceName;
+        this.endpoint = endpoint;
         this.metrics = jmsListener.getMetricsCollector();
     }
 
@@ -163,23 +163,20 @@ public class JMSMessageReceiver implements MessageListener {
                 String soapAction = JMSUtils.
                     getProperty(message, BaseConstants.SOAPACTION);
 
-                // set to bypass dispatching if we know the service - we already should!
-                if (serviceName != null) {
-                    service = cfgCtx.getAxisConfiguration().getService(serviceName);
-                    msgContext.setAxisService(service);
+                service = endpoint.getService();
+                msgContext.setAxisService(service);
 
-                    // find the operation for the message, or default to one
-                    Parameter operationParam = service.getParameter(BaseConstants.OPERATION_PARAM);
-                    QName operationQName = (
-                        operationParam != null ?
-                            BaseUtils.getQNameFromString(operationParam.getValue()) :
-                            BaseConstants.DEFAULT_OPERATION);
+                // find the operation for the message, or default to one
+                Parameter operationParam = service.getParameter(BaseConstants.OPERATION_PARAM);
+                QName operationQName = (
+                    operationParam != null ?
+                        BaseUtils.getQNameFromString(operationParam.getValue()) :
+                        BaseConstants.DEFAULT_OPERATION);
 
-                    AxisOperation operation = service.getOperation(operationQName);
-                    if (operation != null) {
-                        msgContext.setAxisOperation(operation);
-                        msgContext.setSoapAction("urn:" + operation.getName().getLocalPart());
-                    }
+                AxisOperation operation = service.getOperation(operationQName);
+                if (operation != null) {
+                    msgContext.setAxisOperation(operation);
+                    msgContext.setSoapAction("urn:" + operation.getName().getLocalPart());
                 }
 
                 // set the message property OUT_TRANSPORT_INFO
@@ -202,10 +199,7 @@ public class JMSMessageReceiver implements MessageListener {
                     }
                 }
 
-                String contentType = null;
-                if (service != null) {
-                    contentType = (String)service.getParameterValue(JMSConstants.CONTENT_TYPE_PARAM);
-                }
+                String contentType = endpoint.getContentType();
                 if (contentType == null) {
                     contentType
                         = JMSUtils.getProperty(message, BaseConstants.CONTENT_TYPE);
