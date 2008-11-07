@@ -103,7 +103,7 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
 
         JMSConnectionFactory jmsConnectionFactory = null;
         Connection connection = null;   // holds a one time connection if used
-        JMSOutTransportInfo jmsOut = null;
+        JMSOutTransportInfo jmsOut;
         Session session = null;
         Destination replyDestination = null;
 
@@ -146,6 +146,9 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
 
                 session = jmsConnectionFactory.getSessionForDestination(
                     jmsOut.getDestination().toString());
+            } else {
+                handleException("Unable to get JMSOutTransportInfo");
+                return; // We never get here. Just make the compiler happy.
             }
             
             Destination destination = jmsOut.getDestination();
