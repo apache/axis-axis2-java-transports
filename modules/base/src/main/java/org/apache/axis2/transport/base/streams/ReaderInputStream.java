@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.axis2.format;
+package org.apache.axis2.transport.base.streams;
 
 import java.io.IOException;
 import java.io.InputStream;

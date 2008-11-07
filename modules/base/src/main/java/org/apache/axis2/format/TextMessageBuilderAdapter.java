@@ -31,6 +31,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.builder.Builder;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.transport.base.streams.ReaderInputStream;
 
 /**
  * Adapter to add the {@link TextMessageBuilder} interface to an
