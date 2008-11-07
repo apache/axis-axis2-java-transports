@@ -15,6 +15,7 @@
 */
 package org.apache.axis2.transport.jms;
 
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.transport.base.threads.WorkerPool;
 import org.apache.axis2.transport.base.BaseUtils;
@@ -199,10 +200,10 @@ public class JMSMessageReceiver implements MessageListener {
                     }
                 }
 
-                String contentType = endpoint.getContentType();
+                String contentType = endpoint.getContentTypeRuleSet().getContentType(message);
                 if (contentType == null) {
-                    contentType
-                        = JMSUtils.getProperty(message, BaseConstants.CONTENT_TYPE);
+                    throw new AxisFault("Unable to determine content type for message " +
+                            msgContext.getMessageID());
                 }
                 
                 JMSUtils.setSOAPEnvelope(message, msgContext, contentType);

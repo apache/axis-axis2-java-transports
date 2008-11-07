@@ -76,6 +76,18 @@
             <artifactId>geronimo-jms_1.1_spec</artifactId>
             <version>${jms-1.1-spec.version}</version>
         </dependency>
+        
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockejb</groupId>
+            <artifactId>mockejb</artifactId>
+            <version>0.6-beta2</version>
+            <scope>test</scope>
+        </dependency>        
     </dependencies>
     
     <properties>

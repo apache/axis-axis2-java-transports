@@ -29,9 +29,16 @@ import org.apache.axis2.transport.base.ManagementSupport;
 import org.apache.axis2.transport.base.event.TransportErrorListener;
 import org.apache.axis2.transport.base.event.TransportErrorSource;
 import org.apache.axis2.transport.base.event.TransportErrorSourceSupport;
+import org.apache.axis2.transport.jms.ctype.ContentTypeRuleFactory;
+import org.apache.axis2.transport.jms.ctype.ContentTypeRuleSet;
+import org.apache.axis2.transport.jms.ctype.MessageTypeRule;
+import org.apache.axis2.transport.jms.ctype.PropertyRule;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.jms.BytesMessage;
+import javax.jms.TextMessage;
 
 /**
  * The JMS Transport listener implementation. A JMS Listner will hold one or
@@ -180,7 +187,21 @@ public class JMSListener extends AbstractTransportListener implements Management
                 endpoint.getJndiDestinationName()));
         serviceNameToEndpointMap.put(service.getName(), endpoint);
         
-        endpoint.setContentType((String)service.getParameterValue(JMSConstants.CONTENT_TYPE_PARAM));
+        Parameter contentTypeParam = service.getParameter(JMSConstants.CONTENT_TYPE_PARAM);
+        if (contentTypeParam == null) {
+            ContentTypeRuleSet contentTypeRuleSet = new ContentTypeRuleSet();
+            contentTypeRuleSet.addRule(new PropertyRule(BaseConstants.CONTENT_TYPE));
+            contentTypeRuleSet.addRule(new MessageTypeRule(BytesMessage.class, "application/octet-stream"));
+            contentTypeRuleSet.addRule(new MessageTypeRule(TextMessage.class, "text/plain"));
+            endpoint.setContentTypeRuleSet(contentTypeRuleSet);
+        } else {
+            try {
+                endpoint.setContentTypeRuleSet(ContentTypeRuleFactory.parse(contentTypeParam));
+            } catch (AxisFault ex) {
+                // TODO: this is ugly; we should allow startListeningForService to throw AxisFaults
+                throw new AxisJMSException("Invalid value in parameter " + JMSConstants.CONTENT_TYPE_PARAM, ex);
+            }
+        }
         
         log.info("Starting to listen on destination : " + endpoint.getJndiDestinationName() + " of type "
                 + endpoint.getDestinationType() + " for service " + service.getName());

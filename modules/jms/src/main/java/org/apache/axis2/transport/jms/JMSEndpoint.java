@@ -16,6 +16,7 @@
 package org.apache.axis2.transport.jms;
 
 import org.apache.axis2.description.AxisService;
+import org.apache.axis2.transport.jms.ctype.ContentTypeRuleSet;
 
 /**
  * Class that links an Axis2 service to a JMS destination. Additionally, it contains
@@ -27,7 +28,7 @@ public class JMSEndpoint {
     private String jndiDestinationName;
     private String destinationType;
     private String endpointReference;
-    private String contentType;
+    private ContentTypeRuleSet contentTypeRuleSet;
 
     public AxisService getService() {
         return service;
@@ -65,11 +66,11 @@ public class JMSEndpoint {
         this.endpointReference = endpointReference;
     }
 
-    public String getContentType() {
-        return contentType;
+    public ContentTypeRuleSet getContentTypeRuleSet() {
+        return contentTypeRuleSet;
     }
 
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
+    public void setContentTypeRuleSet(ContentTypeRuleSet contentTypeRuleSet) {
+        this.contentTypeRuleSet = contentTypeRuleSet;
     }
 }
