@@ -128,30 +128,6 @@ public class JMSUtils extends BaseUtils {
     }
 
     /**
-     * Extract connection factory properties from a given URL
-     *
-     * @param url a JMS URL of the form jms:/<destination>?[<key>=<value>&]*
-     * @return a Hashtable of extracted properties
-     */
-    public static Hashtable<String,String> getProperties(String url) {
-        Hashtable<String,String> h = new Hashtable<String,String>();
-        int propPos = url.indexOf("?");
-        if (propPos != -1) {
-            StringTokenizer st = new StringTokenizer(url.substring(propPos + 1), "&");
-            while (st.hasMoreTokens()) {
-                String token = st.nextToken();
-                int sep = token.indexOf("=");
-                if (sep != -1) {
-                    h.put(token.substring(0, sep), token.substring(sep + 1));
-                } else {
-                    // ignore, what else can we do?
-                }
-            }
-        }
-        return h;
-    }
-
-    /**
      * Get the EPR for the given JMS connection factory and destination
      * the form of the URL is
      * jms:/<destination>?[<key>=<value>&]*

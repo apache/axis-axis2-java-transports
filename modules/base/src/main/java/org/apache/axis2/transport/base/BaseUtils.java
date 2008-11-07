@@ -21,7 +21,9 @@ package org.apache.axis2.transport.base;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -336,5 +338,29 @@ public class BaseUtils {
         msgContext.setDoingREST(enableREST);
 
         return enableREST;
+    }
+
+    /**
+     * Extract the properties from an endpoint reference.
+     *
+     * @param url an endpoint reference
+     * @return the extracted properties
+     */
+    public static Hashtable<String,String> getEPRProperties(String url) {
+        Hashtable<String,String> h = new Hashtable<String,String>();
+        int propPos = url.indexOf("?");
+        if (propPos != -1) {
+            StringTokenizer st = new StringTokenizer(url.substring(propPos + 1), "&");
+            while (st.hasMoreTokens()) {
+                String token = st.nextToken();
+                int sep = token.indexOf("=");
+                if (sep != -1) {
+                    h.put(token.substring(0, sep), token.substring(sep + 1));
+                } else {
+                    // ignore, what else can we do?
+                }
+            }
+        }
+        return h;
     }
 }

@@ -16,6 +16,7 @@
 package org.apache.axis2.transport.jms;
 
 import org.apache.axis2.transport.OutTransportInfo;
+import org.apache.axis2.transport.base.BaseUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -89,7 +90,7 @@ public class JMSOutTransportInfo implements OutTransportInfo {
         if (!targetEPR.startsWith(JMSConstants.JMS_PREFIX)) {
             handleException("Invalid prefix for a JMS EPR : " + targetEPR);
         } else {
-            properties = JMSUtils.getProperties(targetEPR);
+            properties = BaseUtils.getEPRProperties(targetEPR);
             String destinationType = properties.get(JMSConstants.DEST_PARAM_TYPE);
             if(destinationType != null) {
                 setDestinationType(destinationType);
