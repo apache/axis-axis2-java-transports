@@ -211,32 +211,10 @@ public class JMSConnectionFactory implements ExceptionListener {
         log.info("Connected to the JMS connection factory : " + connFactoryJNDIName);
 
         try {
-            QueueConnectionFactory qConFac = null;
-            TopicConnectionFactory tConFac = null;
-            if (JMSConstants.DESTINATION_TYPE_QUEUE.equals(getConnectionFactoryType())) {
-                qConFac = (QueueConnectionFactory) conFactory;
-            } else if (JMSConstants.DESTINATION_TYPE_TOPIC.equals(getConnectionFactoryType())) {
-                tConFac = (TopicConnectionFactory) conFactory;
-            } else {
-                handleException("Unable to determine type of Connection Factory - i.e. Queue/Topic", null);
-            }
-
-            String user = jndiProperties.get(Context.SECURITY_PRINCIPAL);
-            String pass = jndiProperties.get(Context.SECURITY_CREDENTIALS);
-
-            if (user != null && pass != null) {
-                if (qConFac != null) {
-                    connection = qConFac.createQueueConnection(user, pass);
-                } else if (tConFac != null) {
-                    connection = tConFac.createTopicConnection(user, pass);
-                }
-            } else {
-                if (qConFac != null) {
-                    connection = qConFac.createQueueConnection();
-                } else if (tConFac != null) {
-                    connection = tConFac.createTopicConnection();
-                }
-            }
+            connection = JMSUtils.createConnection(conFactory,
+                    jndiProperties.get(Context.SECURITY_PRINCIPAL),
+                    jndiProperties.get(Context.SECURITY_CREDENTIALS),
+                    getConnectionFactoryType());
             
             connection.setExceptionListener(this);
 

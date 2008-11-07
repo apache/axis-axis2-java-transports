@@ -125,42 +125,13 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
                     try {
                         // create a one time connection and session to be used
                         Hashtable<String,String> jndiProps = jmsOut.getProperties();
-                        String user = jndiProps.get(Context.SECURITY_PRINCIPAL);
-                        String pass = jndiProps.get(Context.SECURITY_CREDENTIALS);
+                        connection = JMSUtils.createConnection(jmsOut.getConnectionFactory(),
+                                jndiProps.get(Context.SECURITY_PRINCIPAL),
+                                jndiProps.get(Context.SECURITY_CREDENTIALS),
+                                jmsOut.getDestinationType());
 
-                        QueueConnectionFactory qConFac = null;
-                        TopicConnectionFactory tConFac = null;
-
-                        if (JMSConstants.DESTINATION_TYPE_QUEUE.equals(jmsOut.getDestinationType())) {
-                            qConFac = (QueueConnectionFactory) jmsOut.getConnectionFactory();
-                        } else if (JMSConstants.DESTINATION_TYPE_TOPIC.equals(jmsOut.getDestinationType())) {
-                            tConFac = (TopicConnectionFactory) jmsOut.getConnectionFactory();
-                        } else {
-                            handleException("Unable to determine type of JMS " +
-                                "Connection Factory - i.e Queue/Topic");
-                        }
-
-                        if (user != null && pass != null) {
-                            if (qConFac != null) {
-                                connection = qConFac.createQueueConnection(user, pass);
-                            } else if (tConFac != null) {
-                                connection = tConFac.createTopicConnection(user, pass);
-                            }
-                        } else {
-                           if (qConFac != null) {
-                                connection = qConFac.createQueueConnection();
-                            } else if (tConFac != null) {
-                                connection = tConFac.createTopicConnection();
-                            }
-                        }
-
-                        if (JMSConstants.DESTINATION_TYPE_QUEUE.equals(jmsOut.getDestinationType())) {
-                            session = ((QueueConnection)connection).
-                                createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-                        } else if (JMSConstants.DESTINATION_TYPE_TOPIC.equals(jmsOut.getDestinationType())) {
-                            session = ((TopicConnection)connection).
-                                createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-                        }
+                        session = JMSUtils.createSession(connection, false,
+                                Session.AUTO_ACKNOWLEDGE, jmsOut.getDestinationType());
 
                     } catch (JMSException e) {
                         handleException("Error creating a connection/session for : " + targetAddress, e);
