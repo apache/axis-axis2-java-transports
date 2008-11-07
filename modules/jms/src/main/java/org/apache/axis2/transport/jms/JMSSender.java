@@ -241,15 +241,7 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
 
                     metrics.incrementMessagesSent();
                     try {
-                        if (message instanceof BytesMessage) {
-                            metrics.incrementBytesSent(JMSUtils.getBodyLength((BytesMessage) message));
-                        } else if (message instanceof TextMessage) {
-                            metrics.incrementBytesSent((
-                                (TextMessage) message).getText().getBytes().length);
-                        } else {
-                            handleException("Unsupported JMS message type : " +
-                                message.getClass().getName());
-                        }
+                        metrics.incrementBytesSent(JMSUtils.getMessageSize(message));
                     } catch (JMSException e) {
                         log.warn("Error reading JMS message size to update transport metrics", e);
                     }
@@ -335,15 +327,7 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
                 // update transport level metrics
                 metrics.incrementMessagesReceived();                
                 try {
-                    if (reply instanceof BytesMessage) {
-                        metrics.incrementBytesReceived(JMSUtils.getBodyLength((BytesMessage) reply));
-                    } else if (reply instanceof TextMessage) {
-                        metrics.incrementBytesReceived((
-                            (TextMessage) reply).getText().getBytes().length);
-                    } else {
-                        handleException("Unsupported JMS message type : " +
-                            reply.getClass().getName());
-                    }
+                    metrics.incrementBytesReceived(JMSUtils.getMessageSize(reply));
                 } catch (JMSException e) {
                     log.warn("Error reading JMS message size to update transport metrics", e);
                 }

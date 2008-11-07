@@ -101,13 +101,7 @@ public class JMSMessageReceiver implements MessageListener {
 
         // update transport level metrics
         try {
-            if (message instanceof BytesMessage) {
-                metrics.incrementBytesReceived((JMSUtils.getBodyLength((BytesMessage) message)));
-            } else if (message instanceof TextMessage) {
-                metrics.incrementBytesReceived(((TextMessage) message).getText().getBytes().length);
-            } else {
-                handleException("Unsupported JMS message type : " + message.getClass().getName());
-            }
+            metrics.incrementBytesReceived(JMSUtils.getMessageSize(message));
         } catch (JMSException e) {
             log.warn("Error reading JMS message size to update transport metrics", e);
         }

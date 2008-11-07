@@ -745,6 +745,20 @@ public class JMSUtils extends BaseUtils {
         return length;
     }
     
+    public static long getMessageSize(Message message) throws JMSException {
+        if (message instanceof BytesMessage) {
+            return JMSUtils.getBodyLength((BytesMessage) message);
+        } else if (message instanceof TextMessage) {
+            // TODO: Converting the whole message to a byte array is too much overhead just to determine the message size.
+            //       Anyway, the result is not accurate since we don't know what encoding the JMS provider uses.
+            return ((TextMessage) message).getText().getBytes().length;
+        } else {
+            log.warn("Can't determine size of JMS message; unsupported message type : "
+                    + message.getClass().getName());
+            return 0;
+        }
+    }
+    
     public static <T> T lookup(Context context, Class<T> clazz, String name)
         throws NamingException {
         
