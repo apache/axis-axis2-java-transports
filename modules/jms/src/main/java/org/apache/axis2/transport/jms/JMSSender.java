@@ -27,6 +27,7 @@ import org.apache.axis2.transport.TransportUtils;
 import org.apache.axis2.transport.MessageFormatter;
 import org.apache.axis2.transport.OutTransportInfo;
 import org.apache.axis2.transport.base.*;
+import org.apache.axis2.transport.base.streams.WriterOutputStream;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.LogFactory;
 
@@ -34,9 +35,10 @@ import javax.jms.*;
 import javax.jms.Queue;
 import javax.activation.DataHandler;
 import javax.naming.Context;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.OutputStream;
+import java.io.StringWriter;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.*;
 
 /**
@@ -363,27 +365,38 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
             String contentType = messageFormatter.getContentType(
                 msgContext, format, msgContext.getSoapAction());
 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            boolean useBytesMessage =
+                msgType != null && JMSConstants.JMS_BYTE_MESSAGE.equals(msgType) ||
+                    contentType.indexOf(HTTPConstants.HEADER_ACCEPT_MULTIPART_RELATED) > -1;
+
+            OutputStream out;
+            StringWriter sw;
+            if (useBytesMessage) {
+                BytesMessage bytesMsg = session.createBytesMessage();
+                sw = null;
+                out = new BytesMessageOutputStream(bytesMsg);
+                message = bytesMsg;
+            } else {
+                sw = new StringWriter();
+                try {
+                    out = new WriterOutputStream(sw, format.getCharSetEncoding());
+                } catch (UnsupportedCharsetException ex) {
+                    handleException("Unsupported encoding " + format.getCharSetEncoding(), ex);
+                    return null;
+                }
+            }
+            
             try {
-                messageFormatter.writeTo(msgContext, format, baos, true);
-                baos.flush();
+                messageFormatter.writeTo(msgContext, format, out, true);
+                out.close();
             } catch (IOException e) {
                 handleException("IO Error while creating BytesMessage", e);
             }
 
-            if (msgType != null && JMSConstants.JMS_BYTE_MESSAGE.equals(msgType) ||
-                contentType.indexOf(HTTPConstants.HEADER_ACCEPT_MULTIPART_RELATED) > -1) {
-                message = session.createBytesMessage();
-                BytesMessage bytesMsg = (BytesMessage) message;
-                bytesMsg.writeBytes(baos.toByteArray());
-            } else {
-                message = session.createTextMessage();  // default
-                TextMessage txtMsg = (TextMessage) message;
-                try {
-                    txtMsg.setText(new String(baos.toByteArray(), format.getCharSetEncoding()));
-                } catch (UnsupportedEncodingException ex) {
-                    handleException("Unsupported encoding " + format.getCharSetEncoding(), ex);
-                }
+            if (!useBytesMessage) {
+                TextMessage txtMsg = session.createTextMessage();
+                txtMsg.setText(sw.toString());
+                message = txtMsg;
             }
             message.setStringProperty(BaseConstants.CONTENT_TYPE, contentType);
 
@@ -396,14 +409,12 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
             if (omNode != null && omNode instanceof OMText) {
                 Object dh = ((OMText) omNode).getDataHandler();
                 if (dh != null && dh instanceof DataHandler) {
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     try {
-                        ((DataHandler) dh).writeTo(baos);
+                        ((DataHandler) dh).writeTo(new BytesMessageOutputStream(bytesMsg));
                     } catch (IOException e) {
                         handleException("Error serializing binary content of element : " +
                             BaseConstants.DEFAULT_BINARY_WRAPPER, e);
                     }
-                    bytesMsg.writeBytes(baos.toByteArray());
                 }
             }
 
