@@ -710,6 +710,16 @@ public class JMSUtils extends BaseUtils {
         }
     }
 
+    public static MessageConsumer createConsumer(Session session, Destination dest, String messageSelector)
+        throws JMSException {
+
+        if (dest instanceof Queue) {
+            return ((QueueSession) session).createReceiver((Queue) dest, messageSelector);
+        } else {
+            return ((TopicSession) session).createSubscriber((Topic) dest, messageSelector, false);
+        }
+    }
+
     public static Destination createTemporaryDestination(Session session) throws JMSException {
 
         if (session instanceof QueueSession) {

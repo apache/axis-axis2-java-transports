@@ -32,7 +32,6 @@ import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.LogFactory;
 
 import javax.jms.*;
-import javax.jms.Queue;
 import javax.activation.DataHandler;
 import javax.naming.Context;
 import java.io.IOException;
@@ -266,21 +265,12 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
         String replyDestinationType, MessageContext msgCtx, String correlationId) throws AxisFault {
 
         try {
-            MessageConsumer consumer = null;
-            if (JMSConstants.DESTINATION_TYPE_QUEUE.equals(replyDestinationType)) {
-                if (correlationId != null) {
-                    consumer = ((QueueSession) session).createReceiver((Queue) replyDestination,
+            MessageConsumer consumer;
+            if (correlationId != null) {
+                consumer = JMSUtils.createConsumer(session, replyDestination,
                         "JMSCorrelationID = '" + correlationId + "'");
-                } else {
-                    consumer = ((QueueSession) session).createReceiver((Queue) replyDestination);
-                }
             } else {
-                if (correlationId != null) {
-                    consumer = ((TopicSession) session).createSubscriber((Topic) replyDestination,
-                        "JMSCorrelationID = '" + correlationId + "'", false);
-                } else {
-                    consumer = ((TopicSession) session).createSubscriber((Topic) replyDestination);
-                }
+                consumer = JMSUtils.createConsumer(session, replyDestination);
             }
 
             // how long are we willing to wait for the sync response
