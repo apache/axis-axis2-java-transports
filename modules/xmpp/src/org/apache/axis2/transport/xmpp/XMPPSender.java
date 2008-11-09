@@ -19,12 +19,18 @@
 
 package org.apache.axis2.transport.xmpp;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.AxisOperation;
+import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.description.WSDL2Constants;
@@ -47,7 +53,6 @@ import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.Message;
-import org.apache.axis2.description.AxisOperation;
 
 public class XMPPSender extends AbstractHandler implements TransportSender {
 	static Log log = null;
@@ -235,10 +240,76 @@ public class XMPPSender extends AbstractHandler implements TransportSender {
         	if(("help".compareToIgnoreCase(message.trim()) == 0)
         			|| "?".equals(message)){
         		response = prepareHelpTextForChat();        		
+        	}else if("listServices".equals(message.trim())){
+        		response = prepareServicesList(msgCtx);        		
+        	}else if (message.trim().startsWith("getOperations")){
+        		response = prepareOperationList(msgCtx,message);
+        	}else{
+        		//TODO add support for more help commands
         	}
         	sendChatMessage(msgCtx,response);    		
     	}
     }
+
+    
+    /**
+     * Prepares a list of service names deployed in current runtime
+     * @param msgCtx
+     * @return
+     */
+	private static String prepareOperationList(MessageContext msgCtx,String chatMessage) {
+		StringBuffer sb = new StringBuffer();
+		//extract service name
+		String serviceName = chatMessage.replace("getOperations", "");
+		serviceName = serviceName.replaceAll(" ", "");
+		if(log.isDebugEnabled()){
+			log.debug("Finding operations for service :"+ serviceName);	
+		}
+		
+		try {
+			AxisService service = msgCtx.getConfigurationContext().getAxisConfiguration().getService(serviceName);
+			Iterator itrOperations = service.getOperations();
+			int index = 1;
+			while(itrOperations.hasNext()){
+				AxisOperation operation = (AxisOperation)itrOperations.next();
+				//ArrayList params = operation.getParameters();
+				//Iterator itrParams = params.iterator();
+				String parameterList = "";
+				//while(itrParams.hasNext()){
+				//	Parameter param = (Parameter) itrParams.next();
+				//	parameterList = param.getName()+",";
+				//}
+				sb.append(index +"."+operation.getName().getLocalPart()+"("+parameterList+")"+"\n");
+				index++;
+			}
+		} catch (AxisFault e) {
+			log.error("Error occurred while retreiving AxisService : "+serviceName,e);
+			sb.append("Error occurred while retrieving operations for service : "+serviceName);
+		}		
+		return sb.toString();
+	}
+
+	
+    /**
+     * Prepares a list of service names deployed in current runtime
+     * @param msgCtx
+     * @return
+     */
+	private static String prepareServicesList(MessageContext msgCtx) {
+		HashMap services = msgCtx.getConfigurationContext().getAxisConfiguration().getServices();
+		StringBuffer sb = new StringBuffer();
+		if(services != null && services.size() > 0){
+			Iterator itrServiceNames = services.keySet().iterator();			
+			int index = 1;
+			while (itrServiceNames.hasNext()) {
+				String serviceName = (String) itrServiceNames.next();
+				sb.append(index+"."+serviceName+"\n");
+				index++;
+			}
+		}
+		return sb.toString();
+	}
+    
     
     /**
      * Generate help text for chat client
