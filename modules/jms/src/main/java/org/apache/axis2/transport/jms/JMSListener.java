@@ -176,11 +176,6 @@ public class JMSListener extends AbstractTransportListener implements Management
             endpoint.setDestinationType(JMSConstants.DESTINATION_TYPE_QUEUE);
         }
         
-        // compute service EPR and keep for later use
-        endpoint.setEndpointReference(JMSUtils.getEPR(cf, endpoint.getDestinationType(),
-                endpoint.getJndiDestinationName()));
-        serviceNameToEndpointMap.put(service.getName(), endpoint);
-        
         Parameter contentTypeParam = service.getParameter(JMSConstants.CONTENT_TYPE_PARAM);
         if (contentTypeParam == null) {
             ContentTypeRuleSet contentTypeRuleSet = new ContentTypeRuleSet();
@@ -191,6 +186,10 @@ public class JMSListener extends AbstractTransportListener implements Management
         } else {
             endpoint.setContentTypeRuleSet(ContentTypeRuleFactory.parse(contentTypeParam));
         }
+        
+        // compute service EPR and keep for later use
+        endpoint.setEndpointReference(JMSUtils.getEPR(cf, endpoint));
+        serviceNameToEndpointMap.put(service.getName(), endpoint);
         
         log.info("Starting to listen on destination : " + endpoint.getJndiDestinationName() + " of type "
                 + endpoint.getDestinationType() + " for service " + service.getName());

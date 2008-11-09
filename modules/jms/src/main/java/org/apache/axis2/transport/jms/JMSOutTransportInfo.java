@@ -65,6 +65,9 @@ public class JMSOutTransportInfo implements OutTransportInfo {
     private Hashtable<String,String> properties = null;
     /** the target EPR string where applicable */
     private String targetEPR = null;
+    /** the message property name that stores the content type of the outgoing message */
+    private String contentTypeProperty;
+    
     private String contentType = null;
 
     /**
@@ -73,11 +76,13 @@ public class JMSOutTransportInfo implements OutTransportInfo {
      * @param jmsConnectionFactory the JMS connection factory
      * @param dest the destination
      */
-    JMSOutTransportInfo(JMSConnectionFactory jmsConnectionFactory, Destination dest) {
+    JMSOutTransportInfo(JMSConnectionFactory jmsConnectionFactory, Destination dest,
+            String contentTypeProperty) {
         this.jmsConnectionFactory = jmsConnectionFactory;
         this.destination = dest;
         destinationType = dest instanceof Topic ? JMSConstants.DESTINATION_TYPE_TOPIC
                                                 : JMSConstants.DESTINATION_TYPE_QUEUE;
+        this.contentTypeProperty = contentTypeProperty;
     }
 
     /**
@@ -99,10 +104,8 @@ public class JMSOutTransportInfo implements OutTransportInfo {
             if(replyDestinationType != null) {
                 setReplyDestinationType(replyDestinationType);
             }
-            String replyDestinationName = properties.get(JMSConstants.REPLY_PARAM);
-            if(replyDestinationName != null) {
-                setReplyDestinationName(replyDestinationName);
-            }
+            replyDestinationName = properties.get(JMSConstants.REPLY_PARAM);
+            contentTypeProperty = properties.get(JMSConstants.CONTENT_TYPE_PROPERTY_PARAM);
             try {
                 context = new InitialContext(properties);
             } catch (NamingException e) {
@@ -276,5 +279,13 @@ public class JMSOutTransportInfo implements OutTransportInfo {
 
     public void setReplyDestinationName(String replyDestinationName) {
         this.replyDestinationName = replyDestinationName;
+    }
+
+    public String getContentTypeProperty() {
+        return contentTypeProperty;
+    }
+
+    public void setContentTypeProperty(String contentTypeProperty) {
+        this.contentTypeProperty = contentTypeProperty;
     }
 }

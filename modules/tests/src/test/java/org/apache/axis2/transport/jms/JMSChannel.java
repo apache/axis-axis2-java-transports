@@ -132,7 +132,8 @@ public abstract class JMSChannel implements AxisServiceConfigurator {
         return new EndpointReference(
                 "jms:/" + jndiName + "?transport.jms.DestinationType=" + destinationType +
                 "&java.naming.factory.initial=org.mockejb.jndi.MockContextFactory" +
-                "&transport.jms.ConnectionFactoryJNDIName=" + connectionFactoryJNDIName);
+                "&transport.jms.ConnectionFactoryJNDIName=" + connectionFactoryJNDIName +
+                "&" + JMSConstants.CONTENT_TYPE_PROPERTY_PARAM + "=Content-Type");
     }
 
     public void setupService(AxisService service, boolean isClientSide) throws Exception {

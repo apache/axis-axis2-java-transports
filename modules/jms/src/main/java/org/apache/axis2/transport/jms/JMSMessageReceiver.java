@@ -21,6 +21,7 @@ import org.apache.axis2.transport.base.threads.WorkerPool;
 import org.apache.axis2.transport.base.BaseUtils;
 import org.apache.axis2.transport.base.BaseConstants;
 import org.apache.axis2.transport.base.MetricsCollector;
+import org.apache.axis2.transport.jms.ctype.ContentTypeInfo;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.AxisOperation;
@@ -174,39 +175,38 @@ public class JMSMessageReceiver implements MessageListener {
                     msgContext.setSoapAction("urn:" + operation.getName().getLocalPart());
                 }
 
-                // set the message property OUT_TRANSPORT_INFO
-                // the reply is assumed to be over the JMSReplyTo destination, using
-                // the same incoming connection factory, if a JMSReplyTo is available
-                if (message.getJMSReplyTo() != null) {
-                    msgContext.setProperty(
-                        Constants.OUT_TRANSPORT_INFO,
-                        new JMSOutTransportInfo(jmsConnectionFactory, message.getJMSReplyTo()));
-
-                } else if (service != null) {
-                    // does the service specify a default reply destination ?
-                    Parameter param = service.getParameter(JMSConstants.REPLY_PARAM);
-                    if (param != null && param.getValue() != null) {
-                        msgContext.setProperty(
-                            Constants.OUT_TRANSPORT_INFO,
-                            new JMSOutTransportInfo(
-                                jmsConnectionFactory,
-                                jmsConnectionFactory.getDestination((String) param.getValue())));
-                    }
-                }
-
-                String contentType = endpoint.getContentTypeRuleSet().getContentType(message);
-                if (contentType == null) {
+                ContentTypeInfo contentTypeInfo =
+                        endpoint.getContentTypeRuleSet().getContentTypeInfo(message);
+                if (contentTypeInfo == null) {
                     throw new AxisFault("Unable to determine content type for message " +
                             msgContext.getMessageID());
                 }
                 
-                JMSUtils.setSOAPEnvelope(message, msgContext, contentType);
+                // set the message property OUT_TRANSPORT_INFO
+                // the reply is assumed to be over the JMSReplyTo destination, using
+                // the same incoming connection factory, if a JMSReplyTo is available
+                Destination replyTo = message.getJMSReplyTo();
+                if (replyTo == null) {
+                    // does the service specify a default reply destination ?
+                    Parameter param = service.getParameter(JMSConstants.REPLY_PARAM);
+                    if (param != null && param.getValue() != null) {
+                        replyTo = jmsConnectionFactory.getDestination((String) param.getValue());
+                    }
+                    
+                }
+                if (replyTo != null) {
+                    msgContext.setProperty(Constants.OUT_TRANSPORT_INFO,
+                            new JMSOutTransportInfo(jmsConnectionFactory, replyTo,
+                                                    contentTypeInfo.getPropertyName()));
+                }
+
+                JMSUtils.setSOAPEnvelope(message, msgContext, contentTypeInfo.getContentType());
 
                 jmsListener.handleIncomingMessage(
                     msgContext,
                     JMSUtils.getTransportHeaders(message),
                     soapAction,
-                    contentType
+                    contentTypeInfo.getContentType()
                 );
                 metrics.incrementMessagesReceived();
 

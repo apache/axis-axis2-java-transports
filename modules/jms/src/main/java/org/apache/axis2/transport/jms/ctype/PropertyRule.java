@@ -28,7 +28,12 @@ public class PropertyRule implements ContentTypeRule {
         this.propertyName = propertyName;
     }
 
-    public String getContentType(Message message) throws JMSException {
-        return message.getStringProperty(propertyName);
+    public ContentTypeInfo getContentType(Message message) throws JMSException {
+        String value = message.getStringProperty(propertyName);
+        return value == null ? null : new ContentTypeInfo(propertyName, value);
+    }
+
+    public String getExpectedContentTypeProperty() {
+        return propertyName;
     }
 }

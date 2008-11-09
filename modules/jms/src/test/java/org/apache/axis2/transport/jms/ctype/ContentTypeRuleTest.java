@@ -51,26 +51,34 @@ public class ContentTypeRuleTest extends TestCase {
         ruleSet = ContentTypeRuleFactory.parse(service.getParameter("test"));
     }
     
+    private void assertContentTypeInfo(String propertyName, String contentType, Message message)
+            throws Exception {
+        
+        ContentTypeInfo contentTypeInfo = ruleSet.getContentTypeInfo(message);
+        assertEquals(propertyName, contentTypeInfo.getPropertyName());
+        assertEquals(contentType, contentTypeInfo.getContentType());
+    }
+    
     public void test1() throws Exception {
         Message message = new BytesMessageImpl();
         message.setStringProperty("contentType", "application/xml");
-        assertEquals("application/xml", ruleSet.getContentType(message));
+        assertContentTypeInfo("contentType", "application/xml", message);
         
-        assertEquals("text/plain", ruleSet.getContentType(new TextMessageImpl()));
-        assertEquals("application/octet-stream", ruleSet.getContentType(new BytesMessageImpl()));
-        assertEquals(null, ruleSet.getContentType(new ObjectMessageImpl()));
+        assertContentTypeInfo(null, "text/plain", new TextMessageImpl());
+        assertContentTypeInfo(null, "application/octet-stream", new BytesMessageImpl());
+        assertEquals(null, ruleSet.getContentTypeInfo(new ObjectMessageImpl()));
     }
     
     public void test2() throws Exception {
         Message message = new BytesMessageImpl();
         message.setStringProperty("contentType", "application/xml");
-        assertEquals("application/xml", ruleSet.getContentType(message));
+        assertContentTypeInfo("contentType", "application/xml", message);
         
         message = new TextMessageImpl();
         message.setStringProperty("ctype", "application/xml");
-        assertEquals("application/xml", ruleSet.getContentType(message));
+        assertContentTypeInfo("ctype", "application/xml", message);
 
-        assertEquals("text/xml", ruleSet.getContentType(new TextMessageImpl()));
-        assertEquals("text/xml", ruleSet.getContentType(new BytesMessageImpl()));
+        assertContentTypeInfo(null, "text/xml", new TextMessageImpl());
+        assertContentTypeInfo(null, "text/xml", new BytesMessageImpl());
     }
 }

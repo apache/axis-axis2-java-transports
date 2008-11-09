@@ -56,6 +56,10 @@ public class JMSConstants {
      * The Parameter name indicating the response JMS destination. i.e. DESTINATION_TYPE_QUEUE, DESTINATION_TYPE_TOPIC
      */
     public static final String REPLY_PARAM_TYPE = "transport.jms.ReplyDestinationType";
+    /**
+     * The EPR parameter name indicating the message property to use to store the content type.
+     */
+    public static final String CONTENT_TYPE_PROPERTY_PARAM = "transport.jms.ContentTypeProperty";
     
     /**
      * Values used for DEST_PARAM_TYPE, REPLY_PARAM_TYPE

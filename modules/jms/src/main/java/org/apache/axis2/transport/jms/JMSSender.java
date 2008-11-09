@@ -171,12 +171,22 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
             // defined JMS connection factory, we need to synchronize as sessions are not
             // thread safe
             synchronized(session) {
+                // The message property to be used to send the content type is determined by
+                // the out transport info, i.e. either from the EPR if we are sending a request,
+                // or, if we are sending a response, from the configuration of the service that
+                // received the request). The property name can be overridden by a message
+                // context property.
+                String contentTypeProperty =
+                        (String)msgCtx.getProperty(JMSConstants.CONTENT_TYPE_PROPERTY_PARAM);
+                if (contentTypeProperty == null) {
+                    contentTypeProperty = jmsOut.getContentTypeProperty();
+                }
 
                 // convert the axis message context into a JMS Message that we can send over JMS
                 Message message = null;
                 String correlationId = null;
                 try {
-                    message = createJMSMessage(msgCtx, session);
+                    message = createJMSMessage(msgCtx, session, contentTypeProperty);
                 } catch (JMSException e) {
                     handleException("Error creating a JMS message from the axis message context", e);
                 }
@@ -238,8 +248,12 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
                     try {
                         correlationId = message.getJMSMessageID();
                     } catch(JMSException ignore) {}
-                        waitForResponseAndProcess(session, replyDestination,
-                                jmsOut.getReplyDestinationType(), msgCtx, correlationId);
+                    
+                    // We assume here that the response uses the same message property to
+                    // specify the content type of the message.
+                    waitForResponseAndProcess(session, replyDestination,
+                            jmsOut.getReplyDestinationType(), msgCtx, correlationId,
+                            contentTypeProperty);
                 }
             }
 
@@ -259,10 +273,13 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
      * @param session the session to use to listen for the response
      * @param replyDestination the JMS reply Destination
      * @param msgCtx the outgoing message for which we are expecting the response
+     * @param contentTypeProperty the message property used to determine the content type
+     *                            of the response message
      * @throws AxisFault on error
      */
     private void waitForResponseAndProcess(Session session, Destination replyDestination,
-        String replyDestinationType, MessageContext msgCtx, String correlationId) throws AxisFault {
+            String replyDestinationType, MessageContext msgCtx, String correlationId,
+            String contentTypeProperty) throws AxisFault {
 
         try {
             MessageConsumer consumer;
@@ -299,7 +316,7 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
                 }
 
                 try {
-                    processSyncResponse(msgCtx, reply);
+                    processSyncResponse(msgCtx, reply, contentTypeProperty);
                     metrics.incrementMessagesReceived();
                 } catch (AxisFault e) {
                     metrics.incrementFaultsReceiving();
@@ -326,12 +343,14 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
      *
      * @param msgContext the MessageContext
      * @param session    the JMS session
+     * @param contentTypeProperty the message property to be used to store the
+     *                            content type
      * @return a JMS message from the context and session
      * @throws JMSException on exception
      * @throws AxisFault on exception
      */
-    private Message createJMSMessage(MessageContext msgContext, Session session)
-            throws JMSException, AxisFault {
+    private Message createJMSMessage(MessageContext msgContext, Session session,
+            String contentTypeProperty) throws JMSException, AxisFault {
 
         Message message = null;
         String msgType = getProperty(msgContext, JMSConstants.JMS_MESSAGE_TYPE);
@@ -388,7 +407,10 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
                 txtMsg.setText(sw.toString());
                 message = txtMsg;
             }
-            message.setStringProperty(BaseConstants.CONTENT_TYPE, contentType);
+            
+            if (contentTypeProperty != null) {
+                message.setStringProperty(contentTypeProperty, contentType);
+            }
 
         } else if (JMSConstants.JMS_BYTE_MESSAGE.equals(jmsPayloadType)) {
             message = session.createBytesMessage();
@@ -462,9 +484,12 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
      *
      * @param outMsgCtx the outgoing message for which we are expecting the response
      * @param message the JMS response message received
+     * @param contentTypeProperty the message property used to determine the content type
+     *                            of the response message
      * @throws AxisFault on error
      */
-    private void processSyncResponse(MessageContext outMsgCtx, Message message) throws AxisFault {
+    private void processSyncResponse(MessageContext outMsgCtx, Message message,
+            String contentTypeProperty) throws AxisFault {
 
         MessageContext responseMsgCtx = createResponseMessageContext(outMsgCtx);
 
@@ -477,7 +502,9 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
         // workaround as Axis2 1.2 is about to be released and Synapse 1.0
         responseMsgCtx.setServerSide(false);
 
-        String contentType = JMSUtils.getProperty(message, BaseConstants.CONTENT_TYPE);
+        String contentType =
+                contentTypeProperty == null ? null
+                        : JMSUtils.getProperty(message, contentTypeProperty);
 
         try {
             JMSUtils.setSOAPEnvelope(message, responseMsgCtx, contentType);

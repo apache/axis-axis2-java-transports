@@ -169,6 +169,10 @@ param = param-name "=" param-value
                     <td></td>
                 </tr>  
                 <tr>
+                    <td>transport.jms.ContentTypeProperty</td>
+                    <td>The name of the message property to store the content type of messages sent to the endpoint.</td>
+                </tr>
+                <tr>
                     <td>java.naming.factory.initial</td>
                     <td></td>
                 </tr>  
@@ -185,6 +189,23 @@ param = param-name "=" param-value
                     <td></td>
                 </tr>
             </table>
+        </section>
+        <section name="Content type detection">
+            <dl>
+                <dt>Incoming requests</dt>
+                <dd>The content type of the message is determined according to the settings specified in
+                the <tt>transport.jms.ContentType</tt> service parameter.</dd>
+                <dt>Outgoing responses</dt>
+                <dd>If the content type of the request was determined using the value of a message property, the
+                content type of the response will stored in the same message property.</dd>
+                <dt>Outgoing requests</dt>
+                <dd>The content type will be stored in the message property specified by
+                the <tt>transport.jms.ContentTypeProperty</tt> message context property or
+                the <tt>transport.jms.ContentTypeProperty</tt> parameter of the endpoint reference.</dd>
+                <dt>Incoming responses</dt>
+                <dd>The content type will be extracted from the message property that was used to
+                store the content type of the outgoing request.</dd>
+            </dl>
         </section>
     </body>
 </document>

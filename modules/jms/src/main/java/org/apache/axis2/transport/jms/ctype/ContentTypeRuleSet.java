@@ -26,6 +26,7 @@ import javax.jms.Message;
  */
 public class ContentTypeRuleSet {
     private final List<ContentTypeRule> rules = new ArrayList<ContentTypeRule>();
+    private String defaultContentTypeProperty;
     
     /**
      * Add a content type rule to this set.
@@ -34,6 +35,9 @@ public class ContentTypeRuleSet {
      */
     public void addRule(ContentTypeRule rule) {
         rules.add(rule);
+        if (defaultContentTypeProperty == null) {
+            defaultContentTypeProperty = rule.getExpectedContentTypeProperty();
+        }
     }
     
     /**
@@ -41,16 +45,20 @@ public class ContentTypeRuleSet {
      * This method will try the registered rules in turn until the first rule matches.
      * 
      * @param message the message
-     * @return the content type of the message or null if none of the rules matches
+     * @return the content type information for the message or null if none of the rules matches
      * @throws JMSException
      */
-    public String getContentType(Message message) throws JMSException {
+    public ContentTypeInfo getContentTypeInfo(Message message) throws JMSException {
         for (ContentTypeRule rule : rules) {
-            String contentType = rule.getContentType(message);
-            if (contentType != null) {
-                return contentType;
+            ContentTypeInfo contentTypeInfo = rule.getContentType(message);
+            if (contentTypeInfo != null) {
+                return contentTypeInfo;
             }
         }
         return null;
+    }
+
+    public String getDefaultContentTypeProperty() {
+        return defaultContentTypeProperty;
     }
 }

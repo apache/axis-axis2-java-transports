@@ -137,12 +137,20 @@ public class JMSUtils extends BaseUtils {
      * @return the EPR as a String
      */
     // TODO: duplicate code (see JMSConnectionFactory#getEPRForDestination)
-    static String getEPR(JMSConnectionFactory cf, String destinationType, String destination) {
+    static String getEPR(JMSConnectionFactory cf, JMSEndpoint endpoint) {
         StringBuffer sb = new StringBuffer();
-        sb.append(JMSConstants.JMS_PREFIX).append(destination);
-        sb.append("?").append(JMSConstants.DEST_PARAM_TYPE).append("=").append(destinationType);
+        sb.append(JMSConstants.JMS_PREFIX).append(endpoint.getJndiDestinationName());
+        sb.append("?").append(JMSConstants.DEST_PARAM_TYPE);
+        sb.append("=").append(endpoint.getDestinationType());
         for (Map.Entry<String,String> entry : cf.getJndiProperties().entrySet()) {
             sb.append("&").append(entry.getKey()).append("=").append(entry.getValue());
+        }
+        String contentTypeProperty = endpoint.getContentTypeRuleSet().getDefaultContentTypeProperty();
+        if (contentTypeProperty != null) {
+            sb.append("&");
+            sb.append(JMSConstants.CONTENT_TYPE_PROPERTY_PARAM);
+            sb.append("=");
+            sb.append(contentTypeProperty);
         }
         return sb.toString();
     }

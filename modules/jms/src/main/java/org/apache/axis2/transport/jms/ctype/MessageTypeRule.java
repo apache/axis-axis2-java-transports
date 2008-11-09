@@ -29,7 +29,11 @@ public class MessageTypeRule implements ContentTypeRule {
         this.contentType = contentType;
     }
 
-    public String getContentType(Message message) {
-        return messageType.isInstance(message) ? contentType : null;
+    public ContentTypeInfo getContentType(Message message) {
+        return messageType.isInstance(message) ? new ContentTypeInfo(null, contentType) : null;
+    }
+
+    public String getExpectedContentTypeProperty() {
+        return null;
     }
 }

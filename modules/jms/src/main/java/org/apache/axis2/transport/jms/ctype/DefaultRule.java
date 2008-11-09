@@ -27,7 +27,11 @@ public class DefaultRule implements ContentTypeRule {
         this.contentType = contentType;
     }
 
-    public String getContentType(Message message) {
-        return contentType;
+    public ContentTypeInfo getContentType(Message message) {
+        return new ContentTypeInfo(null, contentType);
+    }
+
+    public String getExpectedContentTypeProperty() {
+        return null;
     }
 }

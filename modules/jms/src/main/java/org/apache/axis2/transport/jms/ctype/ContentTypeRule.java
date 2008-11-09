@@ -26,8 +26,18 @@ public interface ContentTypeRule {
      * Attempt to determine the content type of the given JMS message.
      * 
      * @param message the message
-     * @return the content type of the message, or null if the rule doesn't match
+     * @return If the rule matches, the return value encapsulates the content type of the
+     *         message and the message property name from which is was extracted
+     *         (if applicable). If the rule doesn't match, the method returns null.
      * @throws JMSException
      */
-    String getContentType(Message message) throws JMSException;
+    ContentTypeInfo getContentType(Message message) throws JMSException;
+    
+    /**
+     * Get the name of the message property used to extract the content type from,
+     * if applicable.
+     * 
+     * @return the property name or null if not applicable
+     */
+    String getExpectedContentTypeProperty();
 }
