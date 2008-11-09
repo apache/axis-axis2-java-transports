@@ -46,50 +46,15 @@ public class XMPPConnectionFactory {
 	 * @throws XMPPException 
 	 */
 	public void connect(final XMPPServerCredentials serverCredentials) throws AxisFault {
+		//XMPPConnection.DEBUG_ENABLED = true;		
 		if(XMPPConstants.XMPP_SERVER_TYPE_JABBER.equals(serverCredentials.getServerType())){
-			ConnectionListener connectionListener = null;
-			try 
-			{
-				//XMPPConnection.DEBUG_ENABLED = true;
-				xmppConnection = new XMPPConnection(serverCredentials.getServerUrl());
+			xmppConnection = new XMPPConnection(serverCredentials.getServerUrl());
+			try {
 				xmppConnection.connect();
-				connectionListener = new ConnectionListener(){
-
-					public void connectionClosed() {
-						log.debug("Connection closed normally");
-					}
-
-					public void connectionClosedOnError(
-							Exception e1) {
-						log.debug("Connection to "+serverCredentials.getServerUrl()
-								+ " closed with error.",e1);
-						log.debug("Retrying to connect in 2 secs");
-						try
-						{
-							Thread.sleep(2000);
-							xmppConnection = new XMPPConnection(serverCredentials.getServerUrl());
-							log.debug("connected to "+serverCredentials.getServerUrl());
-						} catch (InterruptedException e2) {
-							log.debug("Sleep interrupted.",e2);
-						}
-					}
-
-					public void reconnectingIn(int seconds) {			
-					}
-
-					public void reconnectionFailed(Exception e) {
-					}
-
-					public void reconnectionSuccessful() {
-					}
-				};
-				xmppConnection.addConnectionListener(connectionListener);
-			}
-			catch(XMPPException e){
+			} catch (XMPPException e) {
 				log.error("Failed to connect to server :"+serverCredentials.getServerUrl(), e);
 				throw new AxisFault("Failed to connect to server :"+serverCredentials.getServerUrl());
 			}
-
 			//Pause for a small time before trying to login.
 			//This prevents random ssl exception from Smack API
 			try {
@@ -132,16 +97,16 @@ public class XMPPConnectionFactory {
 					//		new FromContainsFilter(serverCredentials.getServerUrl()));
 					packetFilter = new FromContainsFilter(serverCredentials.getServerUrl());					
 				}
-			}
+			}		
+			
 		}else if(XMPPConstants.XMPP_SERVER_TYPE_GOOGLETALK.equals(serverCredentials.getServerType())){
+			ConnectionConfiguration connectionConfiguration = 
+				new ConnectionConfiguration(XMPPConstants.GOOGLETALK_URL
+					,XMPPConstants.GOOGLETALK_PORT
+					,XMPPConstants.GOOGLETALK_SERVICE_NAME);				
+			xmppConnection = new XMPPConnection(connectionConfiguration);
 			try {
-				ConnectionConfiguration connectionConfiguration = 
-					new ConnectionConfiguration(XMPPConstants.GOOGLETALK_URL
-						,XMPPConstants.GOOGLETALK_PORT
-						,XMPPConstants.GOOGLETALK_SERVICE_NAME);				
-				xmppConnection = new XMPPConnection(connectionConfiguration);
 				xmppConnection.connect();
-
 				xmppConnection.login(serverCredentials.getAccountName()
 						, serverCredentials.getPassword()
 						,serverCredentials.getResource(),
@@ -154,7 +119,32 @@ public class XMPPConnectionFactory {
 			} catch (XMPPException e1) {
 				log.error("Error occured while connecting to Googletalk server.",e1);
 				throw new AxisFault("Error occured while connecting to Googletalk server.");
+			}	
+		}
+		
+		ConnectionListener connectionListener = null;
+		connectionListener = new ConnectionListener(){
+			public void connectionClosed() {
+				log.debug("Connection closed normally");
 			}
+			public void connectionClosedOnError(
+					Exception e1) {
+				log.debug("Connection to "+serverCredentials.getServerUrl()
+						+ " closed with error.",e1);
+			}
+			public void reconnectingIn(int seconds) {
+				log.debug("Connection to "+serverCredentials.getServerUrl() 
+						+" failed. Reconnecting in "+seconds+"s");
+			}
+			public void reconnectionFailed(Exception e) {
+				log.debug("Reconnection to "+serverCredentials.getServerUrl()+" failed.",e);
+			}
+			public void reconnectionSuccessful() {
+				log.debug("Reconnection to "+serverCredentials.getServerUrl()+" successful.");
+			}
+		};
+		if(xmppConnection != null){
+			xmppConnection.addConnectionListener(connectionListener);			
 		}
 	} 
 
