@@ -160,26 +160,14 @@ public abstract class AbstractPollingTransportListener<T extends AbstractPollTab
     }
     
     @Override
-    protected void startListeningForService(AxisService service) {
-        T entry;
-        try {
-            entry = createPollTableEntry(service);
-            if (entry == null) {
-                log.warn("The service " + service.getName() + " has no configuration for the " +
-                        getTransportName() + " transport and will be disabled for that transport");
-            }
-        } catch (AxisFault ex) {
-            log.warn("Error configuring the " + getTransportName() + " transport for Service : " +
-                    service.getName() + " :: " + ex.getMessage());
-            entry = null;
-        }
+    protected void startListeningForService(AxisService service) throws AxisFault {
+        T entry = createPollTableEntry(service);
         if (entry == null) {
-            disableTransportForService(service);
-        } else {
-            entry.setService(service);
-            schedulePoll(entry, getPollInterval(service));
-            pollTable.add(entry);
+            throw new AxisFault("The service has no configuration for the transport");
         }
+        entry.setService(service);
+        schedulePoll(entry, getPollInterval(service));
+        pollTable.add(entry);
     }
     
     /**

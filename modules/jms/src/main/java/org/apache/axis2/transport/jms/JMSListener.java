@@ -144,17 +144,11 @@ public class JMSListener extends AbstractTransportListener implements Management
      *
      * @param service the service for which to listen for messages
      */
-    protected void startListeningForService(AxisService service) {
+    protected void startListeningForService(AxisService service) throws AxisFault {
         JMSConnectionFactory cf = getConnectionFactory(service);
         if (cf == null) {
-            String msg = "Service " + service.getName() + " does not specify" +
-                         "a JMS connection factory or refers to an invalid factory. " +
-                         "This service is being marked as faulty and will not be " +
-                         "available over the JMS transport";
-            log.warn(msg);
-            BaseUtils.markServiceAsFaulty(service.getName(), msg, service.getAxisConfiguration());
-            disableTransportForService(service);
-            return;
+            throw new AxisFault("The service doesn't specify a JMS connection factory or refers " +
+            		"to an invalid factory.");
         }
 
         JMSEndpoint endpoint = new JMSEndpoint();
@@ -175,7 +169,7 @@ public class JMSListener extends AbstractTransportListener implements Management
                     JMSConstants.DESTINATION_TYPE_TOPIC.equals(paramValue) )  {
                 endpoint.setDestinationType(paramValue);
             } else {
-                throw new AxisJMSException("Invalid destinaton type value " + paramValue);
+                throw new AxisFault("Invalid destinaton type value " + paramValue);
             }
         } else {
             log.debug("JMS destination type not given. default queue");
@@ -195,12 +189,7 @@ public class JMSListener extends AbstractTransportListener implements Management
             contentTypeRuleSet.addRule(new MessageTypeRule(TextMessage.class, "text/plain"));
             endpoint.setContentTypeRuleSet(contentTypeRuleSet);
         } else {
-            try {
-                endpoint.setContentTypeRuleSet(ContentTypeRuleFactory.parse(contentTypeParam));
-            } catch (AxisFault ex) {
-                // TODO: this is ugly; we should allow startListeningForService to throw AxisFaults
-                throw new AxisJMSException("Invalid value in parameter " + JMSConstants.CONTENT_TYPE_PARAM, ex);
-            }
+            endpoint.setContentTypeRuleSet(ContentTypeRuleFactory.parse(contentTypeParam));
         }
         
         log.info("Starting to listen on destination : " + endpoint.getJndiDestinationName() + " of type "

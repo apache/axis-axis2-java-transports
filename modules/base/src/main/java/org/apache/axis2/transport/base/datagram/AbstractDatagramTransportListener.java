@@ -61,29 +61,19 @@ public abstract class AbstractDatagramTransportListener<E extends DatagramEndpoi
     }
 	
     @Override
-    protected void startListeningForService(AxisService service) {
-        E endpoint;
-        try {
-        	endpoint = createEndpoint(service);
-            endpoint.setListener(this);
-            endpoint.setService(service);
-            endpoint.setContentType(ParamUtils.getRequiredParam(
-                    service, "transport." + getTransportName() + ".contentType"));
-            endpoint.setMetrics(metrics);
-        } catch (AxisFault ex) {
-            log.warn("Error configuring the " + getTransportName()
-                    + " transport for service '" + service.getName() + "': " + ex.getMessage());
-            disableTransportForService(service);
-            return;
-        }
+    protected void startListeningForService(AxisService service) throws AxisFault {
+        E endpoint = createEndpoint(service);
+        endpoint.setListener(this);
+        endpoint.setService(service);
+        endpoint.setContentType(ParamUtils.getRequiredParam(
+                service, "transport." + getTransportName() + ".contentType"));
+        endpoint.setMetrics(metrics);
         
         try {
             dispatcher.addEndpoint(endpoint);
         } catch (IOException ex) {
-            log.error("Unable to listen on endpoint "
+            throw new AxisFault("Unable to listen on endpoint "
                     + endpoint.getEndpointReference(defaultIp), ex);
-            disableTransportForService(service);
-            return;
         }
         if (log.isDebugEnabled()) {
             log.debug("Started listening on endpoint " + endpoint.getEndpointReference(defaultIp)

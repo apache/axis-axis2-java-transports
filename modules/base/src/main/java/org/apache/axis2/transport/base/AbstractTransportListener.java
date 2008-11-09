@@ -196,8 +196,28 @@ public abstract class AbstractTransportListener implements TransportListener {
     }
 
     private void internalStartListeningForService(AxisService service) {
-        startListeningForService(service);
         String serviceName = service.getName();
+        try {
+            startListeningForService(service);
+        } catch (AxisFault ex) {
+            String transportName = getTransportName().toUpperCase();
+            String msg = "Unable to configure the service " + serviceName + " for the " +
+                    transportName + " transport: " + ex.getMessage() + ". " + 
+                    "This service is being marked as faulty and will not be available over the " +
+                    transportName + " transport.";
+            log.warn(msg, ex);
+            BaseUtils.markServiceAsFaulty(serviceName, msg, service.getAxisConfiguration());
+            disableTransportForService(service);
+            return;
+        } catch (Throwable ex) {
+            String msg = "Unexpected error when configuring service " + serviceName +
+                    " for the " + getTransportName().toUpperCase() + " transport. It will be" +
+                    " disabled for this transport and marked as faulty.";
+            log.error(msg, ex);
+            BaseUtils.markServiceAsFaulty(serviceName, msg, service.getAxisConfiguration());
+            disableTransportForService(service);
+            return;
+        }
         registerMBean(new TransportListenerEndpointView(this, serviceName),
                       getEndpointMBeanName(serviceName));
     }
@@ -207,7 +227,7 @@ public abstract class AbstractTransportListener implements TransportListener {
         stopListeningForService(service);
     }
     
-    protected abstract void startListeningForService(AxisService service);
+    protected abstract void startListeningForService(AxisService service) throws AxisFault;
 
     protected abstract void stopListeningForService(AxisService service);
 
