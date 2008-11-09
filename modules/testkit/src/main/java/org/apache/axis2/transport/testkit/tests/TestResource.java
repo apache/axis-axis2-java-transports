@@ -21,6 +21,7 @@ package org.apache.axis2.transport.testkit.tests;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.HashSet;
@@ -48,7 +49,18 @@ public class TestResource {
         }
         
         public void execute(Object object) throws Exception {
-            method.invoke(object, args);
+            try {
+                method.invoke(object, args);
+            } catch (InvocationTargetException ex) {
+                Throwable cause = ex.getCause();
+                if (cause instanceof Error) {
+                    throw (Error)cause;
+                } else if (cause instanceof Exception) {
+                    throw (Exception)cause;
+                } else {
+                    throw ex;
+                }
+            }
         }
     }
     

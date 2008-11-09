@@ -48,7 +48,7 @@ import org.apache.axis2.transport.testkit.tests.Transient;
 public class AxisTestEndpointContext {
     public static final AxisTestEndpointContext INSTANCE = new AxisTestEndpointContext();
     
-    private @Transient TransportListener listener;
+    private @Transient TransportInDescription trpInDesc;
     private @Transient UtilsTransportServer server;
     
     private AxisTestEndpointContext() {}
@@ -59,8 +59,7 @@ public class AxisTestEndpointContext {
         server = new UtilsTransportServer();
         
         TransportOutDescription trpOutDesc = tdf.createTransportOutDescription();
-        TransportInDescription trpInDesc = tdf.createTransportInDescription();
-        listener = trpInDesc.getReceiver();
+        trpInDesc = tdf.createTransportInDescription();
         server.addTransport(trpInDesc, trpOutDesc);
         
         for (AxisTestEndpointContextConfigurator configurator : configurators) {
@@ -87,12 +86,16 @@ public class AxisTestEndpointContext {
     }
 
     public TransportListener getTransportListener() {
-        return listener;
+        return trpInDesc.getReceiver();
+    }
+    
+    public String getTransportName() {
+        return trpInDesc.getName();
     }
 
     public String getEPR(AxisService service) throws AxisFault {
         EndpointReference[] endpointReferences =
-            listener.getEPRsForService(service.getName(), "localhost");
+            trpInDesc.getReceiver().getEPRsForService(service.getName(), "localhost");
         return endpointReferences != null && endpointReferences.length > 0
                             ? endpointReferences[0].getAddress() : null;
     }

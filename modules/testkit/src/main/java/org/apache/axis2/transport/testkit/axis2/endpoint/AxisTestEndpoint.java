@@ -19,18 +19,19 @@
 
 package org.apache.axis2.transport.testkit.axis2.endpoint;
 
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+
+import junit.framework.Assert;
 
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.transport.TransportListener;
+import org.apache.axis2.transport.base.BaseUtils;
 import org.apache.axis2.transport.base.event.TransportError;
 import org.apache.axis2.transport.base.event.TransportErrorListener;
 import org.apache.axis2.transport.base.event.TransportErrorSource;
@@ -101,6 +102,11 @@ public abstract class AxisTestEndpoint implements TransportErrorListener {
         service.addParameter(AxisService.SUPPORT_SINGLE_OP, true);
         
         context.getAxisConfiguration().addService(service);
+        
+        // The transport may disable the service. In that case, fail directly.
+        if (!BaseUtils.isUsingTransport(service, context.getTransportName())) {
+            Assert.fail("The service has been disabled by the transport");
+        }
     }
     
     @TearDown @SuppressWarnings("unused")
