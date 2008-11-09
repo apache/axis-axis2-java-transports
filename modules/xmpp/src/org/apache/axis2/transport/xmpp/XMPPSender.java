@@ -50,7 +50,7 @@ import org.jivesoftware.smack.packet.Message;
 import org.apache.axis2.description.AxisOperation;
 
 public class XMPPSender extends AbstractHandler implements TransportSender {
-	Log log = null;
+	static Log log = null;
     XMPPConnectionFactory connectionFactory;
     XMPPServerCredentials serverCredentials;    
 	
@@ -150,8 +150,11 @@ public class XMPPSender extends AbstractHandler implements TransportSender {
 		if(msgCtx.isServerSide()){
 			message.setProperty(XMPPConstants.IS_SERVER_SIDE, new Boolean(false));
 			message.setProperty(XMPPConstants.IN_REPLY_TO, xmppOutTransportInfo.getInReplyTo());
-		}else{			
+		}else{
+			//message is going to be processed on server side
 			message.setProperty(XMPPConstants.IS_SERVER_SIDE,new Boolean(true));
+			//we are sending a soap envelope as a message
+			message.setProperty(XMPPConstants.CONTAINS_SOAP_ENVELOPE, new Boolean(true));
 			message.setProperty(XMPPConstants.SERVICE_NAME, serviceName);
 			String action = options.getAction();
 			if (action == null) {
@@ -174,20 +177,16 @@ public class XMPPSender extends AbstractHandler implements TransportSender {
 		
 		try 
 		{
-			OMElement msgElement = msgCtx.getEnvelope();
-			//if (msgCtx.isDoingREST()) {
-			//	msgElement = msgCtx.getEnvelope().getBody().getFirstElement();
-			//}
 			boolean waitForResponse =
 				msgCtx.getOperationContext() != null &&
 				WSDL2Constants.MEP_URI_OUT_IN.equals(
 						msgCtx.getOperationContext().getAxisOperation().getMessageExchangePattern());
 			
-			
+			OMElement msgElement = msgCtx.getEnvelope();			
 			String soapMessage = msgElement.toString();
 			//int endOfXMLDeclaration = soapMessage.indexOf("?>");
 			//String modifiedSOAPMessage = soapMessage.substring(endOfXMLDeclaration+2);
-			message.setBody(soapMessage);	
+			message.setBody(soapMessage);				
 			
 			XMPPClientSidePacketListener xmppClientSidePacketListener = null;
 			if(waitForResponse && !msgCtx.isServerSide()){
@@ -223,7 +222,72 @@ public class XMPPSender extends AbstractHandler implements TransportSender {
 		}
     }	
     
+    /**
+     * Process message requests that came in through chat clients
+     * @param msgCtx
+     * @throws AxisFault
+     */
+    public static void processChatMessage(MessageContext msgCtx) throws AxisFault {
+    	Object obj = msgCtx.getProperty(XMPPConstants.MESSAGE_FROM_CHAT);
+    	if(obj != null){
+        	String message = (String)obj;
+        	String response = "";
+        	if(("help".compareToIgnoreCase(message.trim()) == 0)
+        			|| "?".equals(message)){
+        		response = prepareHelpTextForChat();        		
+        	}
+        	sendChatMessage(msgCtx,response);    		
+    	}
+    }
     
+    /**
+     * Generate help text for chat client
+     * @return {@link String}
+     */
+    private static String prepareHelpTextForChat(){
+    	StringBuffer helpText = new StringBuffer();
+    	helpText.append("Following commands are supported :"+"\n");
+    	helpText.append("-----------------------------------"+"\n");
+    	helpText.append("1. listServices"+"\n");
+    	helpText.append("2. getOperations <service-name>"+"\n");
+    	helpText.append("3. call <service-name>:<operation>(<param1>,<param2>,...)"+"\n");
+    	return helpText.toString();
+    }
+    
+    /**
+     * Replies to IM clients via a chat message. The reply contains the invocation response as a string. 
+     * @param msgCtx
+     * @param responseMsg
+     * @throws AxisFault
+     */
+    private static void sendChatMessage(MessageContext msgCtx,String responseMsg) throws AxisFault {
+    		XMPPConnection xmppConnection = null;
+    		XMPPOutTransportInfo xmppOutTransportInfo = null;    		
+    		Message message = new Message();
+        	
+   			xmppOutTransportInfo = (XMPPOutTransportInfo)msgCtx.getProperty(Constants.OUT_TRANSPORT_INFO);
+   			if(xmppOutTransportInfo != null){
+   				message.setProperty(XMPPConstants.IN_REPLY_TO, xmppOutTransportInfo.getInReplyTo());
+   	    		xmppConnection = xmppOutTransportInfo.getConnectionFactory().getXmppConnection();
+   	        	if(xmppConnection == null){
+   	        		handleException("Connection to XMPP Server is not established.");    		
+   	        	}   	    		
+   			}else{
+   				handleException("Could not find message sender details.");
+   			}   			
+    		
+    		//initialize the chat manager using connection
+    		ChatManager chatManager = xmppConnection.getChatManager();
+    		Chat chat = chatManager.createChat(xmppOutTransportInfo.getDestinationAccount(), null);    		
+    		try{   			
+   				message.setBody(responseMsg);		
+    			chat.sendMessage(message);
+    			log.debug("Sent message :"+message.toXML());
+    		} catch (XMPPException e) {
+    			XMPPSender.handleException("Error occurred while sending the message : "+message.toXML(),e);
+    		}
+        }	
+
     /**
      * Extract connection details from axis2.xml's transportsender section
      * @param serverCredentials
@@ -275,11 +339,11 @@ public class XMPPSender extends AbstractHandler implements TransportSender {
 		}		
 	}  
 	
-    private void handleException(String msg, Exception e) throws AxisFault {
+    private static void handleException(String msg, Exception e) throws AxisFault {
         log.error(msg, e);
         throw new AxisFault(msg, e);
     }
-    private void handleException(String msg) throws AxisFault {
+    private static void handleException(String msg) throws AxisFault {
         log.error(msg);
         throw new AxisFault(msg);
     }

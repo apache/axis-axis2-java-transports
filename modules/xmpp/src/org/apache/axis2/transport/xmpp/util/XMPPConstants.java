@@ -46,4 +46,8 @@ public class XMPPConstants {
     public static final String IN_REPLY_TO = "inReplyTo";
     public static final String SERVICE_NAME = "ServiceName";
     public static final String ACTION = "Action";
+    //This is set to true, if a request message is sent through XMPPSender
+    //Used to distinguish messages coming from chat clients.
+    public static final String CONTAINS_SOAP_ENVELOPE = "transport.xmpp.containsSOAPEnvelope";
+    public static final String MESSAGE_FROM_CHAT = "transport.xmpp.message.from.chat";
 }

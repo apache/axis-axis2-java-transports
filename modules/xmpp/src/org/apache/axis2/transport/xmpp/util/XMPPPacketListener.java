@@ -31,6 +31,7 @@ import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.transport.TransportUtils;
+import org.apache.axis2.transport.xmpp.XMPPSender;
 import org.apache.axis2.util.MessageContextBuilder;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
@@ -77,7 +78,7 @@ public class XMPPPacketListener implements PacketListener {
 	 * @throws AxisFault
 	 */
 	private MessageContext createMessageContext(Packet packet) throws AxisFault {
-		Message message = (Message) packet;
+		Message message = (Message) packet;		
 
 		Boolean isServerSide = (Boolean) message
 				.getProperty(XMPPConstants.IS_SERVER_SIDE);
@@ -155,36 +156,39 @@ public class XMPPPacketListener implements PacketListener {
      * @throws AxisFault
      */
 	private void buildSOAPEnvelope(Packet packet, MessageContext msgContext) throws AxisFault{
-		Message message = (Message)packet;
-		String xml = StringEscapeUtils.unescapeXml(message.getBody());
-		InputStream inputStream = new ByteArrayInputStream(xml.getBytes());
+		Message message = (Message)packet;		
+		String logMsg = "Trying to create " +
+		"message content using XMPP message received :"+packet.toXML();
+			
+		String messageBody = StringEscapeUtils.unescapeXml(message.getBody());
+		if(msgContext.isServerSide()){
+			log.info("Received Envelope : "+messageBody);
+		}
+		
+		InputStream inputStream = new ByteArrayInputStream(messageBody.getBytes());
 		SOAPEnvelope envelope;
 		try {
-			envelope = TransportUtils.createSOAPMessage(msgContext, inputStream, "text/xml");
-			if(msgContext.isServerSide()){
-				log.info("Received Envelope : "+xml);
+			Object obj = message.getProperty(XMPPConstants.CONTAINS_SOAP_ENVELOPE); 
+			if(obj != null && ((Boolean)obj).booleanValue()){
+				envelope = TransportUtils.createSOAPMessage(msgContext, inputStream, "text/xml");
+				msgContext.setEnvelope(envelope);
+				msgContext.setProperty(XMPPConstants.CONTAINS_SOAP_ENVELOPE, new Boolean(true));
+			}else{
+				//A text message has been received from a chat client, send it along with message context
+				msgContext.setProperty(XMPPConstants.MESSAGE_FROM_CHAT, messageBody);
 			}
-			msgContext.setEnvelope(envelope);
 		}catch (OMException e) {
-			log.error("Error occured while trying to create " +
-					"message content using XMPP message received :"+packet.toXML(), e);
-			throw new AxisFault("Error occured while trying to create " +
-					"message content using XMPP message received :"+packet.toXML());
+			log.error(logMsg, e);
+			throw new AxisFault(logMsg);
 		}catch (XMLStreamException e) {
-			log.error("Error occured while trying to create " +
-					"message content using XMPP message received :"+packet.toXML(), e);
-			throw new AxisFault("Error occured while trying to create " +
-					"message content using XMPP message received :"+packet.toXML());
+			log.error(logMsg, e);
+			throw new AxisFault(logMsg);
 		}catch (FactoryConfigurationError e) {
-			log.error("Error occured while trying to create " +
-					"message content using XMPP message received :"+packet.toXML(), e);
-			throw new AxisFault("Error occured while trying to create " +
-					"message content using XMPP message received :"+packet.toXML());
+			log.error(logMsg, e);
+			throw new AxisFault(logMsg);
 		}catch (AxisFault e){
-			log.error("Error occured while trying to create " +
-					"message content using XMPP message received :"+packet.toXML(), e);
-			throw new AxisFault("Error occured while trying to create " +
-					"message content using XMPP message received :"+packet.toXML());
+			log.error(logMsg, e);
+			throw new AxisFault(logMsg);
 		}
 	}
 
@@ -203,10 +207,16 @@ public class XMPPPacketListener implements PacketListener {
 			MessageContext msgCtx = null;
 			try {
 				msgCtx = createMessageContext(packet);
-				if(msgCtx.isProcessingFault() && msgCtx.isServerSide()){
-					AxisEngine.sendFault(msgCtx);
+				Object obj = msgCtx.getProperty(XMPPConstants.CONTAINS_SOAP_ENVELOPE);
+				if(obj != null && ((Boolean)obj).booleanValue()){
+					if(msgCtx.isProcessingFault() && msgCtx.isServerSide()){
+						AxisEngine.sendFault(msgCtx);
+					}else{
+						AxisEngine.receive(msgCtx);
+					}					
 				}else{
-					AxisEngine.receive(msgCtx);	
+					//Send a text reply message to chat client
+					XMPPSender.processChatMessage(msgCtx);
 				}
 			} catch (AxisFault e) {
 				log.error("Error occurred while sending message"+e);
