@@ -83,6 +83,8 @@ public class DefaultConnectionListener implements IOProcessor {
                     }
                     AxisHttpConnection conn = new AxisHttpConnectionImpl(socket, this.params);
                     this.connmanager.process(conn);
+                } catch(java.io.InterruptedIOException ie) {
+                    break; 
                 } catch (Throwable ex) {
                     if (Thread.interrupted()) {
                         break;
