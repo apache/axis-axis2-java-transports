@@ -388,5 +388,6 @@
     <properties>
         <transport.version>SNAPSHOT</transport.version>
         <axis2.version>SNAPSHOT</axis2.version>
+        <failIfNoTests>false</failIfNoTests>
     </properties>
 </project>
