@@ -84,6 +84,8 @@ public abstract class AxisTestEndpoint implements TransportErrorListener {
         }
         
         // Output service parameters to log file
+        // FIXME: This actually doesn't give the expected result because the AxisTestEndpoint might be reused
+        //        by several test cases and in that case the log file is only produced once
         List<Parameter> params = (List<Parameter>)service.getParameters();
         if (!params.isEmpty()) {
             PrintWriter log = new PrintWriter(logManager.createLog("service-parameters"), false);
