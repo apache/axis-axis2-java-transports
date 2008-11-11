@@ -34,6 +34,7 @@ import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.transport.OutTransportInfo;
 import org.apache.axis2.transport.MessageFormatter;
 import org.apache.axiom.om.OMOutputFormat;
+import org.apache.axiom.om.util.CommonUtils;
 
 import javax.mail.*;
 import javax.mail.internet.*;
@@ -414,26 +415,34 @@ public class MailTransportSender extends AbstractTransportSender
             log.debug("Using mail format '" + mFormat + "'");
         }
 
+        MimePart mainPart;
         if (MailConstants.TRANSPORT_FORMAT_MP.equals(mFormat)) {
             mimeMultiPart = new MimeMultipart();
             MimeBodyPart mimeBodyPart1 = new MimeBodyPart();
             mimeBodyPart1.setContent("Web Service Message Attached","text/plain");
             MimeBodyPart mimeBodyPart2 = new MimeBodyPart();
-            mimeBodyPart2.setDataHandler(dataHandler);
-            mimeBodyPart2.setHeader(BaseConstants.SOAPACTION, msgContext.getSoapAction());
             mimeMultiPart.addBodyPart(mimeBodyPart1);
             mimeMultiPart.addBodyPart(mimeBodyPart2);
-
+            message.setContent(mimeMultiPart);
+            mainPart = mimeBodyPart2;
         } else {
-            message.setHeader(BaseConstants.SOAPACTION, msgContext.getSoapAction());
+            mainPart = message;
         }
 
         try {
-            if (mimeMultiPart == null) {
-                message.setDataHandler(dataHandler);
-            } else {
-                message.setContent(mimeMultiPart);
+            mainPart.setHeader(BaseConstants.SOAPACTION, msgContext.getSoapAction());
+            mainPart.setDataHandler(dataHandler);
+            
+            // AXIOM's idea of what is textual also includes application/xml and
+            // application/soap+xml (which JavaMail considers as binary). For these content types
+            // always use quoted-printable transfer encoding. Note that JavaMail is a bit smarter
+            // here because it can choose between 7bit and quoted-printable automatically, but it
+            // needs to scan the entire content to determine this.
+            String contentType = dataHandler.getContentType().toLowerCase();
+            if (!contentType.startsWith("multipart/") && CommonUtils.isTextualPart(contentType)) {
+                mainPart.setHeader("Content-Transfer-Encoding", "quoted-printable");
             }
+            
             log.debug("Sending message");
             Transport.send(message);
 
