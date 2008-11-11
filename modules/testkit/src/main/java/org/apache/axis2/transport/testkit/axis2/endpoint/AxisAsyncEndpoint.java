@@ -31,6 +31,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.InOnlyAxisOperation;
+import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.engine.MessageReceiver;
 import org.apache.axis2.transport.testkit.axis2.MessageContextValidator;
 import org.apache.axis2.transport.testkit.endpoint.AsyncEndpoint;
@@ -44,11 +45,13 @@ public class AxisAsyncEndpoint extends AxisTestEndpoint implements AsyncEndpoint
         IncomingMessage<AxisMessage> process() throws Throwable;
     }
     
+    private @Transient AxisTestEndpointContext context;
     private @Transient MessageContextValidator[] validators;
     private @Transient BlockingQueue<Event> queue;
     
     @Setup @SuppressWarnings("unused")
     private void setUp(AxisTestEndpointContext context, MessageContextValidator[] validators) {
+        this.context = context;
         this.validators = validators;
         queue = new LinkedBlockingQueue<Event>();
     }
@@ -64,6 +67,13 @@ public class AxisAsyncEndpoint extends AxisTestEndpoint implements AsyncEndpoint
         final AxisMessage messageData;
         try {
             Assert.assertTrue(messageCtx.isServerSide());
+            
+            TransportInDescription transportIn = messageCtx.getTransportIn();
+            Assert.assertNotNull("transportIn not set on message context", transportIn);
+            Assert.assertEquals(context.getTransportName(), transportIn.getName());
+            
+            Assert.assertEquals(context.getTransportName(), messageCtx.getIncomingTransportName());
+            
             for (MessageContextValidator validator : validators) {
                 validator.validate(messageCtx, false);
             }
