@@ -116,6 +116,50 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>extract-resource-info</id>
+                        <phase>pre-site</phase>
+                        <goals>
+                            <goal>javadoc</goal>
+                        </goals>
+                        <configuration>
+                            <docletArtifacts>
+                                <docletArtifact>
+                                    <groupId>${pom.groupId}</groupId>
+                                    <artifactId>${pom.artifactId}</artifactId>
+                                    <version>${pom.version}</version>
+                                </docletArtifact>
+                            </docletArtifacts>
+                            <doclet>org.apache.axis2.transport.testkit.doclet.ResourceInfoDoclet</doclet>
+                            <show>private</show>
+                            <additionalparam>-out ${project.build.directory}/resource-info.dat</additionalparam>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <docletArtifacts>
+                        <docletArtifact>
+                            <groupId>${pom.groupId}</groupId>
+                            <artifactId>${pom.artifactId}</artifactId>
+                            <version>${pom.version}</version>
+                        </docletArtifact>
+                    </docletArtifacts>
+                    <doclet>org.apache.axis2.transport.testkit.doclet.TestkitJavadocDoclet</doclet>
+                    <useStandardDocletOptions>true</useStandardDocletOptions>
+                    <additionalparam>-resource-info ${project.build.directory}/resource-info.dat</additionalparam>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
 </project>
