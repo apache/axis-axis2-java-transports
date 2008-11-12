@@ -19,9 +19,10 @@
 
 package org.apache.axis2.transport.xmpp;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+
+import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
@@ -29,6 +30,7 @@ import org.apache.axis2.Constants;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.AxisMessage;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
@@ -44,8 +46,16 @@ import org.apache.axis2.transport.xmpp.util.XMPPOutTransportInfo;
 import org.apache.axis2.transport.xmpp.util.XMPPServerCredentials;
 import org.apache.axis2.transport.xmpp.util.XMPPUtils;
 import org.apache.axis2.util.Utils;
+import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ws.commons.schema.XmlSchemaAll;
+import org.apache.ws.commons.schema.XmlSchemaComplexType;
+import org.apache.ws.commons.schema.XmlSchemaElement;
+import org.apache.ws.commons.schema.XmlSchemaGroupBase;
+import org.apache.ws.commons.schema.XmlSchemaParticle;
+import org.apache.ws.commons.schema.XmlSchemaSequence;
+import org.apache.ws.commons.schema.XmlSchemaType;
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManager;
 import org.jivesoftware.smack.XMPPConnection;
@@ -187,11 +197,31 @@ public class XMPPSender extends AbstractHandler implements TransportSender {
 				WSDL2Constants.MEP_URI_OUT_IN.equals(
 						msgCtx.getOperationContext().getAxisOperation().getMessageExchangePattern());
 			
-			OMElement msgElement = msgCtx.getEnvelope();			
-			String soapMessage = msgElement.toString();
 			//int endOfXMLDeclaration = soapMessage.indexOf("?>");
 			//String modifiedSOAPMessage = soapMessage.substring(endOfXMLDeclaration+2);
-			message.setBody(soapMessage);				
+
+			OMElement msgElement;			
+			String messageToBeSent = "";
+			
+			//TODO : need to read from a constant
+			if("xmpp/text".equals(xmppOutTransportInfo.getContentType())){
+				//if request is received from a chat client, whole soap envelope
+				//should not be sent.
+				OMElement soapBodyEle = msgCtx.getEnvelope().getBody();
+				OMElement responseEle = soapBodyEle.getFirstElement();
+				if(responseEle != null){
+					msgElement = responseEle.getFirstElement();					
+				}else{
+					msgElement = responseEle;
+				}
+			}else{
+				//if request received from a ws client whole soap envelope 
+				//must be sent.
+				msgElement = msgCtx.getEnvelope();
+			}	
+			messageToBeSent = msgElement.toString();
+			message.setBody(messageToBeSent);
+			
 			
 			XMPPClientSidePacketListener xmppClientSidePacketListener = null;
 			if(waitForResponse && !msgCtx.isServerSide()){
@@ -236,22 +266,21 @@ public class XMPPSender extends AbstractHandler implements TransportSender {
     	Object obj = msgCtx.getProperty(XMPPConstants.MESSAGE_FROM_CHAT);
     	if(obj != null){
         	String message = (String)obj;
-        	String response = "";
-        	if(("help".compareToIgnoreCase(message.trim()) == 0)
-        			|| "?".equals(message)){
-        		response = prepareHelpTextForChat();        		
-        	}else if("listServices".equals(message.trim())){
-        		response = prepareServicesList(msgCtx);        		
-        	}else if (message.trim().startsWith("getOperations")){
-        		response = prepareOperationList(msgCtx,message);
+        	String response = "";       	
+        	
+    		if(message.trim().startsWith("help")){
+    			response = prepareHelpTextForChat();						
+    		}else if(message.trim().startsWith("listServices")){
+    			response = prepareServicesList(msgCtx);
+    		}else if (message.trim().startsWith("getOperations")){
+    			response = prepareOperationList(msgCtx,message);
         	}else{
         		//TODO add support for more help commands
         	}
-        	sendChatMessage(msgCtx,response);    		
+    		sendChatMessage(msgCtx,response);       	
     	}
-    }
-
-    
+    }    
+   
     /**
      * Prepares a list of service names deployed in current runtime
      * @param msgCtx
@@ -272,13 +301,7 @@ public class XMPPSender extends AbstractHandler implements TransportSender {
 			int index = 1;
 			while(itrOperations.hasNext()){
 				AxisOperation operation = (AxisOperation)itrOperations.next();
-				//ArrayList params = operation.getParameters();
-				//Iterator itrParams = params.iterator();
-				String parameterList = "";
-				//while(itrParams.hasNext()){
-				//	Parameter param = (Parameter) itrParams.next();
-				//	parameterList = param.getName()+",";
-				//}
+				String parameterList = getParameterListForOperation(operation);				
 				sb.append(index +"."+operation.getName().getLocalPart()+"("+parameterList+")"+"\n");
 				index++;
 			}
@@ -287,6 +310,47 @@ public class XMPPSender extends AbstractHandler implements TransportSender {
 			sb.append("Error occurred while retrieving operations for service : "+serviceName);
 		}		
 		return sb.toString();
+	}
+
+	/**
+	 * Retrieves list of parameter names & their type for a given operation
+	 * @param operation
+	 */
+	private static String getParameterListForOperation(AxisOperation operation) {
+		//Logic copied from BuilderUtil.buildsoapMessage(...)
+		StringBuffer paramList = new StringBuffer();
+		AxisMessage axisMessage =
+		    operation.getMessage(WSDLConstants.MESSAGE_LABEL_IN_VALUE);
+		XmlSchemaElement xmlSchemaElement = axisMessage.getSchemaElement();
+		if(xmlSchemaElement != null){			
+		    XmlSchemaType schemaType = xmlSchemaElement.getSchemaType();
+		    if (schemaType instanceof XmlSchemaComplexType) {
+		        XmlSchemaComplexType complexType = ((XmlSchemaComplexType)schemaType);
+		        XmlSchemaParticle particle = complexType.getParticle();
+		        if (particle instanceof XmlSchemaSequence || particle instanceof XmlSchemaAll) {
+		            XmlSchemaGroupBase xmlSchemaGroupBase = (XmlSchemaGroupBase)particle;
+		            Iterator iterator = xmlSchemaGroupBase.getItems().getIterator();
+
+		            while (iterator.hasNext()) {
+		                XmlSchemaElement innerElement = (XmlSchemaElement)iterator.next();
+		                QName qName = innerElement.getQName();
+		                if (qName == null && innerElement.getSchemaTypeName()
+		                        .equals(org.apache.ws.commons.schema.constants.Constants.XSD_ANYTYPE)) {
+		                    break;
+		                }
+		                long minOccurs = innerElement.getMinOccurs();
+		                boolean nillable = innerElement.isNillable();
+		                String name =
+		                        qName != null ? qName.getLocalPart() : innerElement.getName();
+		                String type = innerElement.getSchemaTypeName().toString();
+		                paramList.append(","+type +" " +name);
+		            }
+		        }
+		   }	            	
+		}
+		//remove first ","
+		String list = paramList.toString();		
+		return list.replaceFirst(",", "");
 	}
 
 	

@@ -19,13 +19,26 @@
 
 package org.apache.axis2.transport.xmpp.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.StringTokenizer;
+import java.util.concurrent.Executor;
+
+import javax.xml.parsers.FactoryConfigurationError;
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.axiom.om.OMException;
 import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.soap.SOAPFactory;
+import org.apache.axiom.soap.impl.llom.soap11.SOAP11Factory;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.EndpointReference;
+import org.apache.axis2.builder.BuilderUtil;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.description.TransportOutDescription;
@@ -33,19 +46,13 @@ import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.transport.TransportUtils;
 import org.apache.axis2.transport.xmpp.XMPPSender;
 import org.apache.axis2.util.MessageContextBuilder;
+import org.apache.axis2.util.MultipleEntryHashMap;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
-
-import javax.xml.parsers.FactoryConfigurationError;
-import javax.xml.stream.XMLStreamException;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.concurrent.Executor;
 
 public class XMPPPacketListener implements PacketListener {
 	private static final Log log = LogFactory.getLog(XMPPPacketListener.class);
@@ -166,16 +173,21 @@ public class XMPPPacketListener implements PacketListener {
 		}
 		
 		InputStream inputStream = new ByteArrayInputStream(messageBody.getBytes());
-		SOAPEnvelope envelope;
+		SOAPEnvelope envelope = null;
 		try {
 			Object obj = message.getProperty(XMPPConstants.CONTAINS_SOAP_ENVELOPE); 
 			if(obj != null && ((Boolean)obj).booleanValue()){
 				envelope = TransportUtils.createSOAPMessage(msgContext, inputStream, "text/xml");
-				msgContext.setEnvelope(envelope);
 				msgContext.setProperty(XMPPConstants.CONTAINS_SOAP_ENVELOPE, new Boolean(true));
 			}else{
-				//A text message has been received from a chat client, send it along with message context
-				msgContext.setProperty(XMPPConstants.MESSAGE_FROM_CHAT, messageBody);
+				//A text message has been received from a chat client
+				//This message could either be a service call or a help command
+				if(!(messageContainsCommandsFromChat(messageBody,msgContext))){
+					envelope = createSOAPEnvelopeForRawMessage(msgContext, messageBody);					
+				}				
+			}
+			if(envelope != null){
+				msgContext.setEnvelope(envelope);				
 			}
 		}catch (OMException e) {
 			log.error(logMsg, e);
@@ -192,6 +204,94 @@ public class XMPPPacketListener implements PacketListener {
 		}
 	}
 
+	/**
+	 * In the direct chat client scenario, client can send commands & retrieve details
+	 * on available services, operations,etc. This method checks if a client has sent
+	 * such command. Only limited set of commands are available as of now. 
+	 * @param message
+	 * @param msgContext
+	 * @return
+	 */
+	private boolean messageContainsCommandsFromChat(String message,MessageContext msgContext){
+		boolean containsKnownCommand = false;
+		if(message.trim().startsWith("help")){
+			containsKnownCommand = true;						
+		}else if(message.trim().startsWith("listServices")){
+			containsKnownCommand = true;
+		}else if (message.trim().startsWith("getOperations")){
+			containsKnownCommand = true;
+		}
+		
+		if(containsKnownCommand){
+			msgContext.setProperty(XMPPConstants.MESSAGE_FROM_CHAT,message.trim());	
+		}
+		return containsKnownCommand;
+	}
+	
+	/**
+	 * Creates a SOAP envelope using details found in chat message.
+	 * @param msgCtx
+	 * @param chatMessage
+	 * @return
+	 */
+	private SOAPEnvelope createSOAPEnvelopeForRawMessage(MessageContext msgCtx,String chatMessage)
+	throws AxisFault{
+		//TODO : need to add error handling logic 
+    	String callRemoved = chatMessage.replaceFirst("call", "");
+    	//extract Service name
+    	String serviceName = callRemoved.trim().substring(0, callRemoved.indexOf(":")-1);
+    	String operationName = callRemoved.trim().substring(callRemoved.indexOf(":"), callRemoved.indexOf("(")-1);
+
+    	//Extract parameters from IM message
+    	String parameterList = callRemoved.trim().substring(callRemoved.indexOf("("),callRemoved.trim().length()-1); 	
+    	StringTokenizer st = new StringTokenizer(parameterList,",");
+		MultipleEntryHashMap parameterMap = new MultipleEntryHashMap();
+    	while(st.hasMoreTokens()){
+    		String token = st.nextToken();
+    		String name = token.substring(0, token.indexOf("="));
+    		String value = token.substring(token.indexOf("=")+1);
+    		parameterMap.put(name, value);
+    	}
+    	
+		SOAPEnvelope envelope = null;
+		try {
+			msgCtx.setProperty(XMPPConstants.CONTAINS_SOAP_ENVELOPE, new Boolean(true));
+			if(serviceName != null && serviceName.trim().length() > 0){
+				AxisService axisService = msgCtx.getConfigurationContext().getAxisConfiguration().getService(serviceName);
+				msgCtx.setAxisService(axisService);	
+				
+				AxisOperation axisOperation = axisService.getOperationBySOAPAction("urn:"+operationName);
+				if(axisOperation != null){
+					msgCtx.setAxisOperation(axisOperation);
+				}
+			}
+	    	
+			if(operationName != null && operationName.trim().length() > 0){
+				msgCtx.setSoapAction("urn:"+operationName);
+			}
+			
+			XMPPOutTransportInfo xmppOutTransportInfo = (XMPPOutTransportInfo)msgCtx.getProperty(
+					org.apache.axis2.Constants.OUT_TRANSPORT_INFO);
+			//This should be only set for messages received via chat.
+			//TODO : need to read from a constant
+			xmppOutTransportInfo.setContentType("xmpp/text");
+			
+			msgCtx.setServerSide(true);
+			
+			//TODO : need to support SOAP12 as well
+			SOAPFactory soapFactory = new SOAP11Factory();
+			envelope = BuilderUtil.buildsoapMessage(msgCtx, parameterMap,
+                    soapFactory);
+			//TODO : improve error handling & messages
+		} catch (AxisFault e) {
+			throw new AxisFault(e.getMessage());
+		} catch (OMException e) {
+			throw new AxisFault(e.getMessage());
+		} catch (FactoryConfigurationError e) {
+			throw new AxisFault(e.getMessage());
+		}		
+		return envelope;
+	}
 
 	/**
 	 * The actual Runnable Worker implementation which will process the
@@ -215,7 +315,7 @@ public class XMPPPacketListener implements PacketListener {
 						AxisEngine.receive(msgCtx);
 					}					
 				}else{
-					//Send a text reply message to chat client
+					//Send a text reply message to command received from chat client
 					XMPPSender.processChatMessage(msgCtx);
 				}
 			} catch (AxisFault e) {
