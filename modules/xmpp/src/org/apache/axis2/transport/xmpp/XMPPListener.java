@@ -35,7 +35,9 @@ import org.apache.axis2.transport.xmpp.util.XMPPPacketListener;
 import org.apache.axis2.transport.xmpp.util.XMPPServerCredentials;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.Roster.SubscriptionMode;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -76,6 +78,8 @@ public class XMPPListener implements TransportListener {
     public void init(ConfigurationContext configurationCtx, TransportInDescription transportIn)
             throws AxisFault {
     	log.info("Initializing XMPPListener...");
+    	//allow anyone to send message to listening account
+    	Roster.setDefaultSubscriptionMode(SubscriptionMode.accept_all);
         configurationContext = configurationCtx;
         initializeConnectionFactories(transportIn);
         if (connectionFactories.isEmpty()) {
