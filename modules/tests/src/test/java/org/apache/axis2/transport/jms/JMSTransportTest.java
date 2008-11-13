@@ -46,7 +46,8 @@ public class JMSTransportTest extends TestCase {
         //  * Only use a small set of message types for the other setups.
         suite.addExclude("(!(|(&(broker=qpid)(singleCF=false)(cfOnSender=false)(!(|(destType=topic)(replyDestType=topic))))" +
         		             "(&(test=AsyncXML)(messageType=SOAP11)(data=ASCII))" +
-        		             "(&(test=EchoXML)(messageType=POX)(data=ASCII))))");
+        		             "(&(test=EchoXML)(messageType=POX)(data=ASCII))" +
+        		             "(test=MinConcurrency)))");
         
         // SYNAPSE-436:
         suite.addExclude("(&(test=EchoXML)(replyDestType=topic)(endpoint=axis))");
