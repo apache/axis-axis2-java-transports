@@ -102,7 +102,7 @@
             <activation>
                 <property>
                     <name>java.vendor</name>
-                    <value>IBM Corporation  </value>
+                    <value>IBM Corporation</value>
                 </property>
             </activation>
             <dependencies>
