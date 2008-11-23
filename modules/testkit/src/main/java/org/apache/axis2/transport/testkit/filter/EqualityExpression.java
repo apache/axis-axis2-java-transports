@@ -21,6 +21,9 @@ package org.apache.axis2.transport.testkit.filter;
 
 import java.util.Map;
 
+/**
+ * Implementation of the <em>equal</em> (<tt>=</tt>) operator.
+ */
 public class EqualityExpression implements FilterExpression {
     private final String key;
     private final String value;

@@ -21,6 +21,9 @@ package org.apache.axis2.transport.testkit.filter;
 
 import java.util.Map;
 
+/**
+ * Implementation of the <em>not</em> (<tt>!</tt>) operator.
+ */
 public class NotExpression implements FilterExpression {
     private final FilterExpression operand;
     

@@ -30,6 +30,9 @@ import org.apache.directory.shared.ldap.filter.NotNode;
 import org.apache.directory.shared.ldap.filter.OrNode;
 import org.apache.directory.shared.ldap.filter.PresenceNode;
 
+/**
+ * Parser for LDAP filter expressions.
+ */
 public class FilterExpressionParser {
     private FilterExpressionParser() {}
     
@@ -59,6 +62,13 @@ public class FilterExpressionParser {
         }
     }
     
+    /**
+     * Parse an LDAP filter expression.
+     * 
+     * @param filter an LDAP filter as defined by <a href="http://www.ietf.org/rfc/rfc2254.txt">RFC2254</a>
+     * @return the parsed filter
+     * @throws ParseException if the filter is syntactically incorrect
+     */
     public static FilterExpression parse(String filter) throws ParseException {
         return buildExpression(FilterParser.parse(filter));
     }

@@ -30,6 +30,7 @@ import junit.framework.Assert;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
+import org.apache.axis2.engine.MessageReceiver;
 import org.apache.axis2.transport.TransportListener;
 import org.apache.axis2.transport.base.BaseUtils;
 import org.apache.axis2.transport.base.event.TransportError;
@@ -43,11 +44,15 @@ import org.apache.axis2.transport.testkit.tests.TearDown;
 import org.apache.axis2.transport.testkit.tests.Transient;
 import org.apache.axis2.transport.testkit.util.LogManager;
 
+/**
+ * Base class for Axis2 based test endpoints.
+ */
 @Name("axis")
-public abstract class AxisTestEndpoint implements TransportErrorListener {
+public abstract class AxisTestEndpoint {
     private @Transient AxisTestEndpointContext context;
     private @Transient TransportErrorSource transportErrorSource;
-    private @Transient AxisService service;
+    private @Transient TransportErrorListener errorListener;
+    @Transient AxisService service;
     
     @Setup @SuppressWarnings("unused")
     private void setUp(LogManager logManager, AxisTestEndpointContext context, Channel channel,
@@ -58,7 +63,15 @@ public abstract class AxisTestEndpoint implements TransportErrorListener {
         TransportListener listener = context.getTransportListener();
         if (listener instanceof TransportErrorSource) {
             transportErrorSource = (TransportErrorSource)listener;
-            transportErrorSource.addErrorListener(this);
+            errorListener = new TransportErrorListener() {
+                public void error(TransportError error) {
+                    AxisService s = error.getService();
+                    if (s == null || s == service) {
+                        onTransportError(error.getException());
+                    }
+                }
+            };
+            transportErrorSource.addErrorListener(errorListener);
         } else {
             transportErrorSource = null;
         }
@@ -114,19 +127,25 @@ public abstract class AxisTestEndpoint implements TransportErrorListener {
     @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
         if (transportErrorSource != null) {
-            transportErrorSource.removeErrorListener(this);
+            transportErrorSource.removeErrorListener(errorListener);
         }
         context.getAxisConfiguration().removeService(service.getName());
     }
     
-    public void error(TransportError error) {
-        AxisService s = error.getService();
-        if (s == null || s == service) {
-            onTransportError(error.getException());
-        }
-    }
-
+    /**
+     * Create an operation appropriate for the message exchange pattern implemented
+     * by the test endpoint. The operation returned should have a 
+     * {@link MessageReceiver} set.
+     * 
+     * @return the operation
+     */
     protected abstract AxisOperation createOperation();
     
+    /**
+     * Process a transport error. Note that this method will only be called if
+     * the underlying transport supports reporting of transport errors.
+     * 
+     * @param ex the exception describing the transport error
+     */
     protected abstract void onTransportError(Throwable ex);
 }

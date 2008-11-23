@@ -21,6 +21,15 @@ package org.apache.axis2.transport.testkit.filter;
 
 import java.util.Map;
 
+/**
+ * Interface representing an abstract filter expression.
+ */
 public interface FilterExpression {
+    /**
+     * Evaluate the filter expression.
+     * 
+     * @param map the data on which the filter expression is evaluated
+     * @return true if the data matches the filter represented by this object
+     */
     boolean matches(Map<String,String> map);
 }

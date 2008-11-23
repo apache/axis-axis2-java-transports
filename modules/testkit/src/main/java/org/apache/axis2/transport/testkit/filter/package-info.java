@@ -17,17 +17,14 @@
  *  under the License.
  */
 
-package org.apache.axis2.transport.testkit.endpoint;
-
-import org.apache.axis2.transport.testkit.name.Key;
-
 /**
- * Interface implemented by in-out test endpoints.
+ * Provides classes to evaluate LDAP filters against {@link java.util.Map} objects.
+ * <p>
+ * LDAP filter expressions are parsed using
+ * {@link org.apache.axis2.transport.testkit.filter.FilterExpressionParser#parse(String)}.
+ * The resulting {@link org.apache.axis2.transport.testkit.filter.FilterExpression} object can
+ * then be used to evaluate the filter against a given {@link java.util.Map} object.
  * 
- * @see org.apache.axis2.transport.testkit.endpoint
+ * @see <a href="http://www.ietf.org/rfc/rfc2254.txt">RFC2254: The String Representation of LDAP Search Filters</a>
  */
-@Key("endpoint")
-public interface InOutEndpoint {
-    void addEndpointErrorListener(EndpointErrorListener listener);
-    void removeEndpointErrorListener(EndpointErrorListener listener);
-}
+package org.apache.axis2.transport.testkit.filter;

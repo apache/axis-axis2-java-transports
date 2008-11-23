@@ -20,11 +20,9 @@
 package org.apache.axis2.transport.testkit.http;
 
 import java.io.IOException;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.axis2.transport.testkit.endpoint.AsyncEndpoint;
+import org.apache.axis2.transport.testkit.endpoint.InOnlyEndpointSupport;
 import org.apache.axis2.transport.testkit.message.IncomingMessage;
 import org.apache.axis2.transport.testkit.name.Name;
 import org.apache.axis2.transport.testkit.tests.Setup;
@@ -35,27 +33,27 @@ import org.mortbay.http.HttpResponse;
 
 @Name("jetty")
 public abstract class JettyAsyncEndpoint<M> extends JettyEndpoint implements AsyncEndpoint<M> {
-    private @Transient BlockingQueue<IncomingMessage<M>> queue;
+    private @Transient InOnlyEndpointSupport<M> support;
     
     @Setup @SuppressWarnings("unused")
     private void setUp() throws Exception {
-        queue = new LinkedBlockingQueue<IncomingMessage<M>>();
+        support = new InOnlyEndpointSupport<M>();
     }
     
     @Override
     protected void handle(String pathParams, HttpRequest request, HttpResponse response)
             throws HttpException, IOException {
         
-        queue.add(handle(request));
+        support.putMessage(handle(request));
     }
     
     protected abstract IncomingMessage<M> handle(HttpRequest request) throws HttpException, IOException;
     
     public void clear() throws Exception {
-        queue.clear();
+        support.clear();
     }
 
     public IncomingMessage<M> waitForMessage(int timeout) throws Throwable {
-        return queue.poll(timeout, TimeUnit.MILLISECONDS);
+        return support.waitForMessage(timeout);
     }
 }

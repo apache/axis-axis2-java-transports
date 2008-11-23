@@ -29,7 +29,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class Relay implements Runnable {
+class Relay implements Runnable {
     private static final Log log = LogFactory.getLog(Relay.class);
     
     private final String tag;

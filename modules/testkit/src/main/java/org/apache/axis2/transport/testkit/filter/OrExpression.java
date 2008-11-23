@@ -21,6 +21,9 @@ package org.apache.axis2.transport.testkit.filter;
 
 import java.util.Map;
 
+/**
+ * Implementation of the <em>or</em> (<tt>|</tt>) operator.
+ */
 public class OrExpression implements FilterExpression {
     private final FilterExpression[] operands;
 

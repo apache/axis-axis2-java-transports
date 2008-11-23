@@ -19,51 +19,47 @@
 
 package org.apache.axis2.transport.testkit.axis2.endpoint;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-
 import javax.xml.namespace.QName;
 
 import junit.framework.Assert;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.InOnlyAxisOperation;
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.engine.MessageReceiver;
 import org.apache.axis2.transport.testkit.axis2.MessageContextValidator;
 import org.apache.axis2.transport.testkit.endpoint.AsyncEndpoint;
+import org.apache.axis2.transport.testkit.endpoint.InOnlyEndpointSupport;
 import org.apache.axis2.transport.testkit.message.AxisMessage;
 import org.apache.axis2.transport.testkit.message.IncomingMessage;
 import org.apache.axis2.transport.testkit.tests.Setup;
 import org.apache.axis2.transport.testkit.tests.Transient;
 
-public class AxisAsyncEndpoint extends AxisTestEndpoint implements AsyncEndpoint<AxisMessage>, MessageReceiver {
-    private interface Event {
-        IncomingMessage<AxisMessage> process() throws Throwable;
-    }
-    
+public class AxisAsyncEndpoint extends AxisTestEndpoint implements AsyncEndpoint<AxisMessage> {
     private @Transient AxisTestEndpointContext context;
     private @Transient MessageContextValidator[] validators;
-    private @Transient BlockingQueue<Event> queue;
+    private @Transient InOnlyEndpointSupport<AxisMessage> support;
     
     @Setup @SuppressWarnings("unused")
     private void setUp(AxisTestEndpointContext context, MessageContextValidator[] validators) {
         this.context = context;
         this.validators = validators;
-        queue = new LinkedBlockingQueue<Event>();
+        support = new InOnlyEndpointSupport<AxisMessage>();
     }
     
     @Override
-    protected AxisOperation createOperation() {
-        AxisOperation operation = new InOnlyAxisOperation(new QName("default"));
-        operation.setMessageReceiver(this);
+    protected InOnlyAxisOperation createOperation() {
+        InOnlyAxisOperation operation = new InOnlyAxisOperation(new QName("default"));
+        operation.setMessageReceiver(new MessageReceiver() {
+            public void receive(MessageContext messageCtx) throws AxisFault {
+                AxisAsyncEndpoint.this.receive(messageCtx);
+            }
+        });
         return operation;
     }
 
-    public void receive(MessageContext messageCtx) throws AxisFault {
+    void receive(MessageContext messageCtx) throws AxisFault {
         final AxisMessage messageData;
         try {
             Assert.assertTrue(messageCtx.isServerSide());
@@ -79,36 +75,23 @@ public class AxisAsyncEndpoint extends AxisTestEndpoint implements AsyncEndpoint
             }
             messageData = new AxisMessage(messageCtx);
         }
-        catch (final Throwable ex) {
-            queue.add(new Event() {
-                public IncomingMessage<AxisMessage> process() throws Throwable {
-                    throw ex;
-                }
-            });
+        catch (Throwable ex) {
+            support.putException(ex);
             return;
         }
-        queue.add(new Event() {
-            public IncomingMessage<AxisMessage> process() throws Throwable {
-                return new IncomingMessage<AxisMessage>(null, messageData);
-            }
-        });
+        support.putMessage(null, messageData);
     }
 
     @Override
-    protected void onTransportError(final Throwable ex) {
-        queue.add(new Event() {
-            public IncomingMessage<AxisMessage> process() throws Throwable {
-                throw ex;
-            }
-        });
+    protected void onTransportError(Throwable ex) {
+        support.putException(ex);
     }
     
     public void clear() throws Exception {
-        queue.clear();
+        support.clear();
     }
 
     public IncomingMessage<AxisMessage> waitForMessage(int timeout) throws Throwable {
-        Event event = queue.poll(timeout, TimeUnit.MILLISECONDS);
-        return event == null ? null : event.process();
+        return support.waitForMessage(timeout);
     }
 }

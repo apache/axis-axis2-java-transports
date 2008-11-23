@@ -21,6 +21,9 @@ package org.apache.axis2.transport.testkit.filter;
 
 import java.util.Map;
 
+/**
+ * Implementation of the <em>and</em> (<tt>&amp;</tt>) operator.
+ */
 public class AndExpression implements FilterExpression {
     private final FilterExpression[] operands;
 

@@ -21,6 +21,9 @@ package org.apache.axis2.transport.testkit.filter;
 
 import java.util.Map;
 
+/**
+ * Implementation of the <em>present</em> (<tt>=*</tt>) operator.
+ */
 public class PresenceExpression implements FilterExpression {
     private final String key;
 

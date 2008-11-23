@@ -23,7 +23,6 @@ import javax.xml.namespace.QName;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.InOutAxisOperation;
 import org.apache.axis2.receivers.AbstractInOutMessageReceiver;
 import org.apache.axis2.transport.testkit.endpoint.EndpointErrorListener;
@@ -34,8 +33,8 @@ public class AxisEchoEndpoint extends AxisTestEndpoint implements InOutEndpoint 
     private final InOutEndpointSupport support = new InOutEndpointSupport();
     
     @Override
-    protected AxisOperation createOperation() {
-        AxisOperation operation = new InOutAxisOperation(new QName("echo"));
+    protected InOutAxisOperation createOperation() {
+        InOutAxisOperation operation = new InOutAxisOperation(new QName("echo"));
         operation.setMessageReceiver(new AbstractInOutMessageReceiver() {
             @Override
             public void invokeBusinessLogic(MessageContext inMessage, MessageContext outMessage) throws AxisFault {

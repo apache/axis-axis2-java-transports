@@ -28,7 +28,7 @@ import java.util.concurrent.ExecutorService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class Acceptor implements Runnable {
+class Acceptor implements Runnable {
     private static final Log log = LogFactory.getLog(Acceptor.class);
     
     private final ServerSocket serverSocket;

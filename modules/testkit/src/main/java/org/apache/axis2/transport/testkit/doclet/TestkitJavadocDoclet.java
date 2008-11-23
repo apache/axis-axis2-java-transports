@@ -26,11 +26,16 @@ import java.util.List;
 
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.DocErrorReporter;
+import com.sun.javadoc.LanguageVersion;
 import com.sun.javadoc.RootDoc;
 import com.sun.tools.doclets.standard.Standard;
 
 public class TestkitJavadocDoclet {
     private static File resourceInfoFile;
+    
+    public static LanguageVersion languageVersion() {
+        return Standard.languageVersion();
+    }
     
     public static int optionLength(String option) {
         if (option.equals("-resource-info")) {
