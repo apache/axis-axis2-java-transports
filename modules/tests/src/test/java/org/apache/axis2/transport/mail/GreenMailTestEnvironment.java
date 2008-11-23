@@ -34,6 +34,7 @@ import org.apache.axis2.transport.testkit.tests.Setup;
 import org.apache.axis2.transport.testkit.tests.TearDown;
 import org.apache.axis2.transport.testkit.tests.Transient;
 import org.apache.axis2.transport.testkit.util.LogManager;
+import org.apache.axis2.transport.testkit.util.PortAllocator;
 import org.apache.axis2.transport.testkit.util.ServerUtil;
 import org.apache.axis2.transport.testkit.util.tcpmon.Tunnel;
 
@@ -46,17 +47,10 @@ import com.icegreen.greenmail.util.ServerSetup;
 
 @Name("greenmail")
 public class GreenMailTestEnvironment extends MailTestEnvironment {
-    private static final ServerSetup SMTP =
-            new ServerSetup(7025, "127.0.0.1", ServerSetup.PROTOCOL_SMTP);
-    
-    private static final ServerSetup POP3 =
-            new ServerSetup(7110, "127.0.0.1", ServerSetup.PROTOCOL_POP3);
-    
-    private static final ServerSetup IMAP =
-            new ServerSetup(7143, "127.0.0.1", ServerSetup.PROTOCOL_IMAP);
-    
     private final String protocol;
-    private final ServerSetup storeServerSetup;
+    private @Transient PortAllocator portAllocator;
+    private @Transient ServerSetup smtpServerSetup;
+    private @Transient ServerSetup storeServerSetup;
     private @Transient LogManager logManager;
     private @Transient GreenMail greenMail;
     private @Transient Tunnel smtpTunnel;
@@ -65,24 +59,20 @@ public class GreenMailTestEnvironment extends MailTestEnvironment {
 
     public GreenMailTestEnvironment(String protocol) {
         this.protocol = protocol;
-        if (protocol.equals("pop3")) {
-            storeServerSetup = POP3;
-        } else if (protocol.equals("imap")) {
-            storeServerSetup = IMAP;
-        } else {
-            throw new IllegalArgumentException();
-        }
     }
 
     @Setup @SuppressWarnings("unused")
-    private void setUp(LogManager logManager) throws Exception {
+    private void setUp(LogManager logManager, PortAllocator portAllocator) throws Exception {
         this.logManager = logManager;
-        greenMail = new GreenMail(new ServerSetup[] { SMTP, storeServerSetup });
+        this.portAllocator = portAllocator;
+        smtpServerSetup = new ServerSetup(portAllocator.allocatePort(), "127.0.0.1", ServerSetup.PROTOCOL_SMTP);
+        storeServerSetup = new ServerSetup(portAllocator.allocatePort(), "127.0.0.1", protocol);
+        greenMail = new GreenMail(new ServerSetup[] { smtpServerSetup, storeServerSetup });
         greenMail.start();
-        smtpTunnel = new Tunnel(new InetSocketAddress("127.0.0.1", 7025));
+        smtpTunnel = new Tunnel(new InetSocketAddress("127.0.0.1", smtpServerSetup.getPort()));
         smtpTunnel.start();
         unallocatedAccounts = new LinkedList<Account>();
-        ServerUtil.waitForServer(SMTP.getPort());
+        ServerUtil.waitForServer(smtpServerSetup.getPort());
         ServerUtil.waitForServer(storeServerSetup.getPort());
     }
 
@@ -90,6 +80,8 @@ public class GreenMailTestEnvironment extends MailTestEnvironment {
     private void tearDown() throws Exception {
         greenMail.stop();
         accountNumber = 1;
+        portAllocator.releasePort(smtpServerSetup.getPort());
+        portAllocator.releasePort(storeServerSetup.getPort());
     }
     
     @Override
