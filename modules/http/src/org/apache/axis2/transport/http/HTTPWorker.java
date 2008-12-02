@@ -111,17 +111,6 @@ public class HTTPWorker implements Worker {
                                 }
                             }
                         }
-                    } else {
-                        String serviceName = uri.replaceAll(contextPath, "");
-                        if (serviceName.indexOf("/") < 0) {
-                            String s = HTTPTransportReceiver
-                                    .printServiceHTML(serviceName, configurationContext);
-                            response.setStatus(HttpStatus.SC_OK);
-                            response.setContentType("text/html");
-                            OutputStream out = response.getOutputStream();
-                            out.write(EncodingUtils.getBytes(s, HTTP.ISO_8859_1));
-                            return;
-                        }
                     }
                 }
             }
