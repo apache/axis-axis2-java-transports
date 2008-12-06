@@ -69,6 +69,7 @@ import java.nio.charset.CoderResult;
  * <p>
  * Instances of {@link ReaderInputStream} are not thread safe.
  */
+// NOTE: Remove this class once Commons IO 2.0 is available (see IO-158)
 public class ReaderInputStream extends InputStream {
     private static final int DEFAULT_BUFFER_SIZE = 1024;
     

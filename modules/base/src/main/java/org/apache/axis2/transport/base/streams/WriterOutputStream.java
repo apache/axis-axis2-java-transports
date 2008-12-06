@@ -69,6 +69,7 @@ import java.nio.charset.CodingErrorAction;
  * <p>
  * Instances of {@link WriterOutputStream} are not thread safe.
  */
+//NOTE: Remove this class once Commons IO 2.0 is available (see IO-158)
 public class WriterOutputStream extends OutputStream {
     private static final int DEFAULT_BUFFER_SIZE = 1024;
     
