@@ -71,20 +71,24 @@ public class MinConcurrencyTest extends ManagedTestCase {
         this.messages = messages;
         this.preloadMessages = preloadMessages;
     }
+
+    private int concurrencyReached;
+    private final Object concurrencyReachedLock = new Object();
+    private final Object shutdownAwaitLock = new Object();
     
     @Override
     protected void runTest() throws Throwable {
         int endpointCount = channels.length;
         int expectedConcurrency = endpointCount * messages;
         
-        final CountDownLatch shutdownLatch = new CountDownLatch(1);
-        final CountDownLatch concurrencyReachedLatch = new CountDownLatch(expectedConcurrency);
-        
         final MessageReceiver messageReceiver = new MessageReceiver() {
             public void receive(MessageContext msgContext) throws AxisFault {
-                concurrencyReachedLatch.countDown();
+                synchronized (concurrencyReachedLock) {
+                    concurrencyReached++;
+                    concurrencyReachedLock.notifyAll();
+                }
                 try {
-                    shutdownLatch.await();
+                    shutdownAwaitLock.wait();
                 } catch (InterruptedException ex) {
                 }
             }
@@ -135,14 +139,25 @@ public class MinConcurrencyTest extends ManagedTestCase {
                     endpointResourceSets[i] = endpointResourceSet;
                 }
             }
-        
-            if (!concurrencyReachedLatch.await(5, TimeUnit.SECONDS)) {
-                fail("Concurrency reached is " + (expectedConcurrency -
-                        concurrencyReachedLatch.getCount()) + ", but expected " +
-                        expectedConcurrency);
+
+            long startTime = System.currentTimeMillis();
+            while (concurrencyReached < expectedConcurrency
+                && System.currentTimeMillis() < (startTime + 5000)) {
+                synchronized(concurrencyReachedLock) {
+                    concurrencyReachedLock.wait(5000);
+                }
             }
+            
+            synchronized(shutdownAwaitLock) {
+                shutdownAwaitLock.notifyAll();
+            }
+
+            if (concurrencyReached < expectedConcurrency) {
+                fail("Concurrency reached is " + concurrencyReached + ", but expected " +
+                    expectedConcurrency);
+            }
+
         } finally {
-            shutdownLatch.countDown();
             for (int i=0; i<endpointCount; i++) {
                 if (endpointResourceSets[i] != null) {
                     endpointResourceSets[i].tearDown();

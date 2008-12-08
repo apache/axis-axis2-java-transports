@@ -32,6 +32,7 @@ import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.description.WSDL2Constants;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.axiom.om.util.UUIDGenerator;
 
 import javax.management.MBeanServer;
@@ -56,6 +57,13 @@ public abstract class AbstractTransportSender extends AbstractHandler implements
     protected MetricsCollector metrics = new MetricsCollector();
     /** state of the listener */
     private int state = BaseConstants.STOPPED;
+
+    /**
+     * A constructor that makes subclasses pick up the correct logger
+     */
+    protected AbstractTransportSender() {
+        log = LogFactory.getLog(this.getClass());
+    }
 
     /**
      * Initialize the generic transport sender.

@@ -21,6 +21,10 @@ import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.transport.base.BaseUtils;
 import org.apache.axis2.transport.base.threads.WorkerPool;
+import org.apache.axis2.description.Parameter;
+import org.apache.axis2.description.ParameterIncludeImpl;
+import org.apache.axis2.AxisFault;
+import org.apache.axiom.om.OMElement;
 
 import javax.jms.*;
 import javax.naming.Context;
@@ -33,503 +37,358 @@ import java.util.Map;
 
 /**
  * Encapsulate a JMS Connection factory definition within an Axis2.xml
- * <p/>
- * More than one JMS connection factory could be defined within an Axis2 XML
- * specifying the JMSListener as the transportReceiver.
- * <p/>
- * These connection factories are created at the initialization of the
- * transportReceiver, and any service interested in using any of these could
- * specify the name of the factory and the destination through Parameters named
- * JMSConstants.CONFAC_PARAM and JMSConstants.DEST_PARAM as shown below.
- * <p/>
- * <parameter name="transport.jms.ConnectionFactory" locked="true">myQueueConnectionFactory</parameter>
- * <parameter name="transport.jms.Destination" locked="true">TestQueue</parameter>
- * <p/>
- * If a connection factory is defined by a parameter named
- * JMSConstants.DEFAULT_CONFAC_NAME in the Axis2 XML, services which does not
- * explicitly specify a connection factory will be defaulted to it - if it is
- * defined in the Axis2 configuration.
- * <p/>
- * e.g.
- * <transportReceiver name="jms" class="org.apache.axis2.transport.jms.JMSListener">
- * <parameter name="myTopicConnectionFactory" locked="false">
- * <parameter name="java.naming.factory.initial" locked="false">org.apache.activemq.jndi.ActiveMQInitialContextFactory</parameter>
- * <parameter name="java.naming.provider.url" locked="false">tcp://localhost:61616</parameter>
- * <parameter name="transport.jms.ConnectionFactoryJNDIName" locked="false">TopicConnectionFactory</parameter>
- * <parameter name="transport.jms.Destination" locked="false">myTopicOne, myTopicTwo</parameter>
- * </parameter>
- * <parameter name="myQueueConnectionFactory" locked="false">
- * <parameter name="java.naming.factory.initial" locked="false">org.apache.activemq.jndi.ActiveMQInitialContextFactory</parameter>
- * <parameter name="java.naming.provider.url" locked="false">tcp://localhost:61616</parameter>
- * <parameter name="transport.jms.ConnectionFactoryJNDIName" locked="false">QueueConnectionFactory</parameter>
- * <parameter name="transport.jms.Destination" locked="false">myQueueOne, myQueueTwo</parameter>
- * </parameter>
- * <parameter name="default" locked="false">
- * <parameter name="java.naming.factory.initial" locked="false">org.apache.activemq.jndi.ActiveMQInitialContextFactory</parameter>
- * <parameter name="java.naming.provider.url" locked="false">tcp://localhost:61616</parameter>
- * <parameter name="transport.jms.ConnectionFactoryJNDIName" locked="false">ConnectionFactory</parameter>
- * <parameter name="transport.jms.Destination" locked="false">myDestinationOne, myDestinationTwo</parameter>
- * </parameter>
- * </transportReceiver>
+ *
+ * JMS Connection Factory definitions, allows JNDI properties as well as other service
+ * level parameters to be defined, and re-used by each service that binds to it
+ *
+ * When used for sending messages out, the JMSConnectionFactory'ies are able to cache
+ * a Connection, Session or Producer
  */
-public class JMSConnectionFactory implements ExceptionListener {
+public class JMSConnectionFactory {
 
     private static final Log log = LogFactory.getLog(JMSConnectionFactory.class);
 
     /** The name used for the connection factory definition within Axis2 */
     private String name = null;
-    /** The JMS transport listener instance. */
-    private final JMSListener jmsListener;
-    /** The worker pool to use. */
-    private final WorkerPool workerPool;
-    /** The JNDI name of the actual connection factory */
-    private String connFactoryJNDIName = null;
-    /** Map of destination JNDI names to endpoints */
-    private Map<String,JMSEndpoint> endpointJNDINameMapping = null;
-    /** JMS Sessions currently active. One session for each Destination / Service */
-    private Map<String,Session> jmsSessions = null;
-    /** Properties of the connection factory to acquire the initial context */
-    private Hashtable<String,String> jndiProperties = null;
-    /** The JNDI Context used - created using the properties */
+    /** The list of parameters from the axis2.xml definition */
+    private Hashtable<String, String> parameters = new Hashtable<String, String>();
+
+    /** The cached InitialContext reference */
     private Context context = null;
-    /** The actual ConnectionFactory instance held within */
+    /** The JMS ConnectionFactory this definition refers to */
     private ConnectionFactory conFactory = null;
-    /** The JMS connection factory type */
-    private String connectionFactoryType = null;
-    /** The JMS Connection opened */
-    private Connection connection = null;
-    /** The axis2 configuration context */
-    private ConfigurationContext cfgCtx = null;
-    /** if connection dropped, reconnect timeout in milliseconds; default 30 seconds */
-    private long reconnectTimeout = 30000;
+    /** The shared JMS Connection for this JMS connection factory */
+    private Connection sharedConnection = null;
+    /** The shared JMS Session for this JMS connection factory */
+    private Session sharedSession = null;
+    /** The shared JMS MessageProducer for this JMS connection factory */
+    private MessageProducer sharedProducer = null;
+    /** The Shared Destination */
+    private Destination sharedDestination = null;
+    /** The shared JMS connection for this JMS connection factory */
+    private int cacheLevel = JMSConstants.CACHE_CONNECTION;
 
     /**
-     * Create a JMSConnectionFactory for the given [axis2] name the
-     * JNDI name of the actual ConnectionFactory
-     *
-     * @param name the connection factory name specified in the axis2.xml for the
-     * TransportListener or the TransportSender using this
-     * @param jmsListener the JMS transport listener, or null if the connection factory
-     *                    is not linked to a transport listener
-     * @param workerPool the worker pool to be used to process incoming messages; may be null
-     * @param cfgCtx the axis2 configuration context
+     * Digest a JMS CF definition from an axis2.xml 'Parameter' and construct
+     * @param parameter the axis2.xml 'Parameter' that defined the JMS CF
      */
-    public JMSConnectionFactory(String name, JMSListener jmsListener, WorkerPool workerPool,
-                                ConfigurationContext cfgCtx) {
-        this.name = name;
-        this.jmsListener = jmsListener;
-        this.workerPool = workerPool;
-        this.cfgCtx = cfgCtx;
-        endpointJNDINameMapping = new HashMap<String,JMSEndpoint>();
-        jndiProperties = new Hashtable<String,String>();
-        jmsSessions = new HashMap<String,Session>();
-    }
+    public JMSConnectionFactory(Parameter parameter) {
 
-
-    /**
-     * Add a listen destination on this connection factory on behalf of the given service
-     *
-     * @param endpoint the {@link JMSEndpoint} object that specifies the destination and
-     *                 the service
-     */
-    public void addDestination(JMSEndpoint endpoint) {
-        String destinationJNDIName = endpoint.getJndiDestinationName();
-        String destinationName = getPhysicalDestinationName(destinationJNDIName);
-
-        if (destinationName == null) {
-            log.warn("JMS Destination with JNDI name : " + destinationJNDIName + " does not exist");
-
-            try {
-                log.info("Creating a JMS Queue with the JNDI name : " + destinationJNDIName +
-                    " using the connection factory definition named : " + name);
-                JMSUtils.createDestination(conFactory, destinationJNDIName, endpoint.getDestinationType());
-
-                destinationName = getPhysicalDestinationName(destinationJNDIName);
-                
-            } catch (JMSException e) {
-                log.error("Unable to create Destination with JNDI name : " + destinationJNDIName, e);
-                BaseUtils.markServiceAsFaulty(
-                    endpoint.getServiceName(),
-                    "Error creating JMS destination : " + destinationJNDIName,
-                    cfgCtx.getAxisConfiguration());
-                return;
-            }
-        }
-
-        endpointJNDINameMapping.put(destinationJNDIName, endpoint);
-
-        log.info("Mapped JNDI name : " + destinationJNDIName + " and JMS Destination name : " +
-            destinationName + " against service : " + endpoint.getServiceName());
-    }
-
-    /**
-     * Abort listening on the JMS destination from this connection factory
-     *
-     * @param jndiDestinationName the JNDI name of the JMS destination to be removed
-     */
-    public void removeDestination(String jndiDestinationName) {
-        stoplisteningOnDestination(jndiDestinationName);
-        endpointJNDINameMapping.remove(jndiDestinationName);
-    }
-
-    /**
-     * Begin [or restart] listening for messages on the list of destinations associated
-     * with this connection factory. (Called during Axis2 initialization of
-     * the Transport receivers, or after a disconnection has been detected)
-     *
-     * When called from the JMS transport sender, this call simply acquires the actual
-     * JMS connection factory from the JNDI, creates a new connection and starts it.
-     *
-     * @throws JMSException on exceptions
-     * @throws NamingException on exceptions
-     */
-    public synchronized void connectAndListen() throws JMSException, NamingException {
-
-        // if this is a reconnection/re-initialization effort after the detection of a
-        // disconnection, close all sessions and the CF connection and re-initialize
-        if (connection != null) {
-            log.info("Re-initializing the JMS connection factory : " + name);
-
-            for (Session session : jmsSessions.values()) {
-                try {
-                    session.close();
-                } catch (JMSException ignore) {}
-            }
-            try {
-                connection.stop();
-            } catch (JMSException ignore) {}
-
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("Initializing the JMS connection factory : " + name);
-            }
-        }
-
-        // get the CF reference freshly [again] from JNDI
-        context = new InitialContext(jndiProperties);
-        conFactory = JMSUtils.lookup(context, ConnectionFactory.class, connFactoryJNDIName);
-        log.info("Connected to the JMS connection factory : " + connFactoryJNDIName);
+        this.name = parameter.getName();
+        ParameterIncludeImpl pi = new ParameterIncludeImpl();
 
         try {
-            connection = JMSUtils.createConnection(conFactory,
-                    jndiProperties.get(Context.SECURITY_PRINCIPAL),
-                    jndiProperties.get(Context.SECURITY_CREDENTIALS),
-                    getConnectionFactoryType());
-            
-            connection.setExceptionListener(this);
-
-        } catch (JMSException e) {
-            handleException("Error connecting to Connection Factory : " + connFactoryJNDIName, e);
+            pi.deserializeParameters((OMElement) parameter.getValue());
+        } catch (AxisFault axisFault) {
+            handleException("Error reading parameters for JMS connection factory" + name, axisFault);
         }
 
-        for (JMSEndpoint endpoint : endpointJNDINameMapping.values()) {
-            startListeningOnDestination(endpoint);
+        for (Object o : pi.getParameters()) {
+            Parameter p = (Parameter) o;
+            parameters.put(p.getName(), (String) p.getValue());
         }
 
-        connection.start(); // indicate readiness to start receiving messages
-        log.info("Connection factory : " + name + " initialized...");
-    }
-
-    /**
-     * Create a session for sending to the given destination and save it on the jmsSessions Map
-     * keyed by the destination JNDI name
-     * @param destinationJNDIname the destination JNDI name
-     * @return a JMS Session to send messages to the destination using this connection factory
-     */
-    public Session getSessionForDestination(String destinationJNDIname) {
-
-        Session session = jmsSessions.get(destinationJNDIname);
-
-        if (session == null) {
-            try {                
-                Destination dest = getPhysicalDestination(destinationJNDIname);
-
-                if (dest instanceof Topic) {
-                    session = ((TopicConnection) connection).
-                        createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-                } else {
-                    session = ((QueueConnection) connection).
-                        createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-                }
-
-                jmsSessions.put(destinationJNDIname, session);
-
-            } catch (JMSException e) {
-                handleException("Unable to create a session using connection factory : " + name, e);
-            }
-        }
-        return session;
-    }
-
-    /**
-     * Listen on the given destination from this connection factory. Used to
-     * start listening on a destination associated with a newly deployed service
-     *
-     * @param endpoint the JMS destination to listen on
-     */
-    public void startListeningOnDestination(JMSEndpoint endpoint) {
-        String destinationJNDIname = endpoint.getJndiDestinationName();
-        String destinationType = endpoint.getDestinationType();
-        Session session = jmsSessions.get(destinationJNDIname);
-        // if we already had a session open, close it first
-        if (session != null) {
-            try {
-                session.close();
-            } catch (JMSException ignore) {}
-        }
-
+        digestCacheLevel();
         try {
-            session = JMSUtils.createSession(connection, false, Session.AUTO_ACKNOWLEDGE, destinationType);
-            Destination destination = null;
-
-            try {
-                destination = JMSUtils.lookup(context, Destination.class, destinationJNDIname);
-
-            } catch (NameNotFoundException e) {
-                log.warn("Cannot find destination : " + destinationJNDIname + ". Creating a Queue");
-                destination = JMSUtils.createDestination(session, destinationJNDIname, destinationType);
+            context = new InitialContext(parameters);
+            conFactory = JMSUtils.lookup(context, ConnectionFactory.class,
+                parameters.get(JMSConstants.PARAM_CONFAC_JNDI_NAME));
+            if (parameters.get(JMSConstants.PARAM_DESTINATION) != null) {
+                sharedDestination = JMSUtils.lookup(context, Destination.class,
+                    parameters.get(JMSConstants.PARAM_DESTINATION));
             }
+            log.info("JMS ConnectionFactory : " + name + " initialized");
 
-            MessageConsumer consumer = JMSUtils.createConsumer(session, destination);
-            consumer.setMessageListener(new JMSMessageReceiver(jmsListener, this, workerPool,
-                    cfgCtx, endpoint));
-            jmsSessions.put(destinationJNDIname, session);
-
-        // catches NameNotFound and JMSExceptions and marks service as faulty    
-        } catch (Exception e) {
-            if (session != null) {
-                try {
-                    session.close();
-                } catch (JMSException ignore) {}
-            }
-
-            BaseUtils.markServiceAsFaulty(
-                endpoint.getServiceName(),
-                "Error looking up JMS destination : " + destinationJNDIname,
-                cfgCtx.getAxisConfiguration());
-        }
-    }
-
-    /**
-     * Stop listening on the given destination - for undeployment or stopping of services
-     * closes the underlying Session opened to subscribe to the destination
-     *
-     * @param destinationJNDIname the JNDI name of the JMS destination
-     */
-    private void stoplisteningOnDestination(String destinationJNDIname) {
-        Session session = jmsSessions.get(destinationJNDIname);
-        if (session != null) {
-            try {
-                session.close();
-            } catch (JMSException ignore) {}
-        }
-    }
-
-
-    /**
-     * Close all connections, sessions etc.. and stop this connection factory
-     */
-    public void stop() {
-        if (connection != null) {
-            for (Session session : jmsSessions.values()) {
-                try {
-                    session.close();
-                } catch (JMSException ignore) {}
-            }
-            try {
-                connection.close();
-            } catch (JMSException e) {
-                log.warn("Error shutting down connection factory : " + name, e);
-            }
-        }
-    }
-
-    /**
-     * Return the provider specific [physical] Destination name if any
-     * for the destination with the given JNDI name
-     *
-     * @param destinationJndi the JNDI name of the destination
-     * @return the provider specific Destination name or null if cannot be found
-     */
-    private String getPhysicalDestinationName(String destinationJndi) {
-        Destination destination = getPhysicalDestination(destinationJndi);
-
-        if (destination != null) {
-            try {
-                if (destination instanceof Queue) {
-                    return ((Queue) destination).getQueueName();
-                } else if (destination instanceof Topic) {
-                    return ((Topic) destination).getTopicName();
-                }
-            } catch (JMSException e) {
-                log.warn("Error reading Destination name for JNDI destination : " + destinationJndi, e);
-            }
-        }
-        return null;
-    }
-    
-    /**
-     * Return the provider specific [physical] Destination if any
-     * for the destination with the given JNDI name
-     *
-     * @param destinationJndi the JNDI name of the destination
-     * @return the provider specific Destination or null if cannot be found
-     */
-    private Destination getPhysicalDestination(String destinationJndi) {
-        Destination destination = null;
-
-        try {
-            destination = JMSUtils.lookup(context, Destination.class, destinationJndi);
         } catch (NamingException e) {
-
-            // if we are using ActiveMQ, check for dynamic Queues and Topics
-            String provider = jndiProperties.get(Context.INITIAL_CONTEXT_FACTORY);
-            if (provider.indexOf("activemq") != -1) {
-                try {
-                    destination = JMSUtils.lookup(context, Destination.class,
-                        JMSConstants.ACTIVEMQ_DYNAMIC_QUEUE + destinationJndi);
-                } catch (NamingException ne) {
-                    try {
-                        destination = JMSUtils.lookup(context, Destination.class,
-                            JMSConstants.ACTIVEMQ_DYNAMIC_TOPIC + destinationJndi);
-                    } catch (NamingException e1) {
-                        log.warn("Error looking up destination for JNDI name : " + destinationJndi);
-                    }
-                }
-            }
+            throw new AxisJMSException("Cannot acquire JNDI context, JMS Connection factory : " +
+                parameters.get(JMSConstants.PARAM_CONFAC_JNDI_NAME) + " or default destination : " +
+                parameters.get(JMSConstants.PARAM_DESTINATION) +
+                " for JMS CF : " + name + " using : " + parameters);
         }
-
-        return destination;
     }
 
     /**
-     * Return the EPR for the JMS Destination with the given JNDI name
-     * when using this connection factory
-     * @param jndiDestination the JNDI name of the JMS destination
-     * @return the EPR for a service using this destination
+     * Digest, the cache value iff specified
      */
-    public EndpointReference getEPRForDestination(String jndiDestination) {
+    private void digestCacheLevel() {
 
-        StringBuffer sb = new StringBuffer();
-        sb.append(JMSConstants.JMS_PREFIX).append(jndiDestination);
-        sb.append("?").
-            append(JMSConstants.CONFAC_JNDI_NAME_PARAM).
-            append("=").append(getConnFactoryJNDIName());
-        for (Map.Entry<String,String> entry : getJndiProperties().entrySet()) {
-            sb.append("&").append(entry.getKey()).append("=").append(entry.getValue());
+        String key = JMSConstants.PARAM_CACHE_LEVEL;
+        String val = parameters.get(key);
+
+        if ("none".equalsIgnoreCase(val)) {
+            this.cacheLevel = JMSConstants.CACHE_NONE;
+        } else if ("connection".equalsIgnoreCase(val)) {
+            this.cacheLevel = JMSConstants.CACHE_CONNECTION;
+        } else if ("session".equals(val)){
+            this.cacheLevel = JMSConstants.CACHE_SESSION;
+        } else if ("producer".equals(val)) {
+            this.cacheLevel = JMSConstants.CACHE_PRODUCER;
+        } else if (val != null) {
+            throw new AxisJMSException("Invalid cache level : " + val + " for JMS CF : " + name);
         }
-
-        return new EndpointReference(sb.toString());
     }
 
-    // -------------------- getters and setters and trivial methods --------------------
-
-    public void setConnFactoryJNDIName(String connFactoryJNDIName) {
-        this.connFactoryJNDIName = connFactoryJNDIName;
-    }
-
-    public Destination getDestination(String destinationJNDIName) {
-        try {
-            return JMSUtils.lookup(context, Destination.class, destinationJNDIName);
-        } catch (NamingException ignore) {}
-        return null;
-    }
-
-    public void addJNDIContextProperty(String key, String value) {
-        jndiProperties.put(key, value);
-    }
-
+    /**
+     * Return the name assigned to this JMS CF definition
+     * @return name of the JMS CF
+     */
     public String getName() {
         return name;
     }
 
-    public String getConnFactoryJNDIName() {
-        return connFactoryJNDIName;
+    /**
+     * The list of properties (including JNDI and non-JNDI)
+     * @return properties defined on the JMS CF
+     */
+    public Hashtable<String, String> getParameters() {
+        return parameters;
     }
 
-    public ConnectionFactory getConFactory() {
-        return conFactory;
-    }
-
-    public Hashtable<String,String> getJndiProperties() {
-        return jndiProperties;
-    }
-
+    /**
+     * Get cached InitialContext
+     * @return cache InitialContext
+     */
     public Context getContext() {
         return context;
     }
 
-    private void handleException(String msg, Exception e) throws AxisJMSException {
+    /**
+     * Cache level applicable for this JMS CF
+     * @return applicable cache level
+     */
+    public int getCacheLevel() {
+        return cacheLevel;
+    }
+
+    /**
+     * Get the shared Destination - if defined
+     * @return
+     */
+    public Destination getSharedDestination() {
+        return sharedDestination;
+    }
+
+    /**
+     * Lookup a Destination using this JMS CF definitions and JNDI name
+     * @param name JNDI name of the Destionation
+     * @return JMS Destination for the given JNDI name or null
+     */
+    public Destination getDestination(String name) {
+        try {
+            return JMSUtils.lookup(context, Destination.class, name);
+        } catch (NamingException e) {
+            handleException("Unknown JMS Destination : " + name + " using : " + parameters, e);
+        }
+        return null;
+    }
+
+    /**
+     * Get the reply Destination from the PARAM_REPLY_DESTINATION parameter
+     * @return reply destination defined in the JMS CF
+     */
+    public String getReplyToDestination() {
+        return parameters.get(JMSConstants.PARAM_REPLY_DESTINATION);
+    }
+
+    private void handleException(String msg, Exception e) {
         log.error(msg, e);
         throw new AxisJMSException(msg, e);
     }
 
-    public String getConnectionFactoryType() {
-      return connectionFactoryType;
-    }
-
-    public void setConnectionFactoryType(String connectionFactoryType) {
-      this.connectionFactoryType = connectionFactoryType;
-    }
-    
-    public long getReconnectTimeout() {
-      return reconnectTimeout;
-    }
-
-    public void setReconnectTimeout(long reconnectTimeout) {
-      this.reconnectTimeout = reconnectTimeout;
-    }
-
-    public void onException(JMSException e) {
-        log.error("JMS connection factory " + name + " encountered an error", e);
-        boolean wasError = true;
-
-        if (jmsListener != null) {
-            jmsListener.error(null, e);
-        }
-
-        // try to connect
-        // if error occurs wait and try again
-        while (wasError == true) {
-
-            try {
-                connectAndListen();
-                wasError = false;
-
-            } catch (Exception e1) {
-                log.warn("JMS reconnection attempt failed for connection factory : " + name, e);
-            }
-
-            if (wasError == true) {
-                try {
-                    log.info("Attempting reconnection for connection factory " + name +
-                        " in " + getReconnectTimeout()/1000 +  " seconds");
-                    Thread.sleep(getReconnectTimeout());
-                } catch (InterruptedException ignore) {}
-            }
-        } // wasError
-
+    /**
+     * Should the JMS 1.1 API be used? - defaults to yes
+     * @return true, if JMS 1.1 api should  be used
+     */
+    public boolean isJmsSpec11() {
+        return parameters.get(JMSConstants.PARAM_JMS_SPEC_VER) == null ||
+            "1.1".equals(parameters.get(JMSConstants.PARAM_JMS_SPEC_VER));
     }
 
     /**
-     * Temporarily pause receiving new messages
+     * Return the type of the JMS CF Destination
+     * @return TRUE if a Queue, FALSE for a Topic and NULL for a JMS 1.1 Generic Destination
      */
-    public void pause() {
-        try {
-            connection.stop();
-        } catch (JMSException e) {
-            handleException("Error pausing JMS connection for factory : " + name, e);
+    public Boolean isQueue() {
+        if (parameters.get(JMSConstants.PARAM_CONFAC_TYPE) == null &&
+            parameters.get(JMSConstants.PARAM_DEST_TYPE) == null) {
+            return null;
+        }
+
+        if (parameters.get(JMSConstants.PARAM_CONFAC_TYPE) != null) {
+            if ("queue".equalsIgnoreCase(parameters.get(JMSConstants.PARAM_CONFAC_TYPE))) {
+                return true;
+            } else if ("topic".equalsIgnoreCase(parameters.get(JMSConstants.PARAM_CONFAC_TYPE))) {
+                return false;
+            } else {
+                throw new AxisJMSException("Invalid " + JMSConstants.PARAM_CONFAC_TYPE + " : " +
+                    parameters.get(JMSConstants.PARAM_CONFAC_TYPE) + " for JMS CF : " + name);
+            }
+        } else {
+            if ("queue".equalsIgnoreCase(parameters.get(JMSConstants.PARAM_DEST_TYPE))) {
+                return true;
+            } else if ("topic".equalsIgnoreCase(parameters.get(JMSConstants.PARAM_DEST_TYPE))) {
+                return false;
+            } else {
+                throw new AxisJMSException("Invalid " + JMSConstants.PARAM_DEST_TYPE + " : " +
+                    parameters.get(JMSConstants.PARAM_DEST_TYPE) + " for JMS CF : " + name);
+            }
         }
     }
 
     /**
-     * Resume from temporarily pause
+     * Is a session transaction requested from users of this JMS CF?
+     * @return session transaction required by the clients of this?
      */
-    public void resume() {
+    private boolean isSessionTransacted() {
+        return parameters.get(JMSConstants.PARAM_SESSION_TRANSACTED) == null ||
+            Boolean.valueOf(parameters.get(JMSConstants.PARAM_SESSION_TRANSACTED));
+    }
+
+    /**
+     * Create a new Connection
+     * @return a new Connection
+     */
+    private Connection createConnection() {
+
+        Connection connection = null;
         try {
-            connection.start();
+            connection = JMSUtils.createConnection(
+                conFactory,
+                parameters.get(JMSConstants.PARAM_JMS_USERNAME),
+                parameters.get(JMSConstants.PARAM_JMS_PASSWORD),
+                isJmsSpec11(), isQueue());
+
+            if (log.isDebugEnabled()) {
+                log.debug("New JMS Connection from JMS CF : " + name + " created");
+            }
+
         } catch (JMSException e) {
-            handleException("Error resuming JMS connection for factory : " + name, e);
+            handleException("Error acquiring a Connection from the JMS CF : " + name +
+                " using properties : " + parameters, e);
         }
+        return connection;
+    }
+
+    /**
+     * Create a new Session
+     * @param connection Connection to use
+     * @return A new Session
+     */
+    private Session createSession(Connection connection) {
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Creating a new JMS Session from JMS CF : " + name);
+            }
+            return JMSUtils.createSession(
+                connection, isSessionTransacted(), Session.AUTO_ACKNOWLEDGE, isJmsSpec11(), isQueue());
+
+        } catch (JMSException e) {
+            handleException("Error creating JMS session from JMS CF : " + name, e);
+        }
+        return null;
+    }
+
+    /**
+     * Create a new MessageProducer
+     * @param session Session to be used
+     * @param destination Destination to be used
+     * @return a new MessageProducer
+     */
+    private MessageProducer createProducer(Session session, Destination destination) {
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Creating a new JMS MessageProducer from JMS CF : " + name);
+            }
+
+            return JMSUtils.createProducer(
+                session, destination, isQueue(), isJmsSpec11());
+
+        } catch (JMSException e) {
+            handleException("Error creating JMS producer from JMS CF : " + name,e);
+        }
+        return null;
+    }
+
+    /**
+     * Get a new Connection or shared Connection from this JMS CF
+     * @return new or shared Connection from this JMS CF
+     */
+    public Connection getConnection() {
+        if (cacheLevel > JMSConstants.CACHE_NONE) {
+            return getSharedConnection();
+        } else {
+            return createConnection();
+        }
+    }
+
+    /**
+     * Get a new Session or shared Session from this JMS CF
+     * @param connection the Connection to be used
+     * @return new or shared Session from this JMS CF
+     */
+    public Session getSession(Connection connection) {
+        if (cacheLevel > JMSConstants.CACHE_CONNECTION) {
+            return getSharedSession();
+        } else {
+            return createSession((connection == null ? getConnection() : connection));
+        }
+    }
+
+    /**
+     * Get a new MessageProducer or shared MessageProducer from this JMS CF
+     * @param connection the Connection to be used
+     * @param session the Session to be used
+     * @param destination the Destination to bind MessageProducer to
+     * @return new or shared MessageProducer from this JMS CF
+     */
+    public MessageProducer getMessageProducer(
+        Connection connection, Session session, Destination destination) {
+        if (cacheLevel > JMSConstants.CACHE_SESSION) {
+            return getSharedProducer();
+        } else {
+            return createProducer((session == null ? getSession(connection) : session), destination);
+        }
+    }
+
+    /**
+     * Get a new Connection or shared Connection from this JMS CF
+     * @return new or shared Connection from this JMS CF
+     */
+    private Connection getSharedConnection() {
+        if  (sharedConnection == null) {
+            sharedConnection = createConnection();
+            if (log.isDebugEnabled()) {
+                log.debug("Created shared JMS Connection for JMS CF : " + name);
+            }
+        }
+        return sharedConnection;
+    }
+
+    /**
+     * Get a shared Session from this JMS CF
+     * @return shared Session from this JMS CF
+     */
+    private Session getSharedSession() {
+        if (sharedSession == null) {
+            sharedSession = createSession(getSharedConnection());
+            if (log.isDebugEnabled()) {
+                log.debug("Created shared JMS Session for JMS CF : " + name);
+            }
+        }
+        return sharedSession;
+    }
+
+    /**
+     * Get a shared MessageProducer from this JMS CF
+     * @return shared MessageProducer from this JMS CF
+     */
+    private MessageProducer getSharedProducer() {
+        if (sharedProducer == null) {
+            sharedProducer = createProducer(getSharedSession(), sharedDestination);
+            if (log.isDebugEnabled()) {
+                log.debug("Created shared JMS MessageConsumer for JMS CF : " + name);
+            }
+        }
+        return sharedProducer;
     }
 }

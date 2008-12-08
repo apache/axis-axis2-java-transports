@@ -96,4 +96,31 @@ public class BaseConstants {
     // this is an property required by axis2
     // FIXME: where is this required in Axis2?
     public final static String MAIL_CONTENT_TYPE = "mail.contenttype";
+
+    /** Service transaction level - non-transactional */
+    public static final int TRANSACTION_NONE  = 0;
+    /** Service transaction level - use non-JTA (i.e. local) transactions */
+    public static final int TRANSACTION_LOCAL = 1;
+    /** Service transaction level - use JTA transactions */
+    public static final int TRANSACTION_JTA   = 2;
+    /** Service transaction level - non-transactional */
+    public static final String STR_TRANSACTION_NONE  = "none";
+    /** Service transaction level - use non-JTA (i.e. local) transactions */
+    public static final String STR_TRANSACTION_LOCAL = "local";
+    /** Service transaction level - use JTA transactions */
+    public static final String STR_TRANSACTION_JTA   = "jta";
+
+    /** The Parameter name indicating the transactionality of a service */
+    public static final String PARAM_TRANSACTIONALITY = "transport.Transactionality";
+    /** Parameter name indicating the JNDI name to get a UserTransaction from JNDI */
+    public static final String PARAM_USER_TXN_JNDI_NAME = "transport.UserTxnJNDIName";
+    /** Parameter that indicates if a UserTransaction reference could be cached - default yes */
+    public static final String PARAM_CACHE_USER_TXN = "transport.CacheUserTxn";
+
+    /** The UserTransaction associated with this message */
+    public static final String USER_TRANSACTION = "UserTransaction";
+    /** A message level property indicating a request to rollback the transaction associated with the message */
+    public static final String SET_ROLLBACK_ONLY = "SET_ROLLBACK_ONLY";
+    /** A message level property indicating a commit is required after the next immidiate send over a transport */
+    public static final String JTA_COMMIT_AFTER_SEND = "JTA_COMMIT_AFTER_SEND";    
 }

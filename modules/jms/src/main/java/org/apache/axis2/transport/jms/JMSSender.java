@@ -20,6 +20,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMText;
 import org.apache.axiom.om.OMNode;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.Constants;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.TransportOutDescription;
@@ -29,11 +30,9 @@ import org.apache.axis2.transport.OutTransportInfo;
 import org.apache.axis2.transport.base.*;
 import org.apache.axis2.transport.base.streams.WriterOutputStream;
 import org.apache.axis2.transport.http.HTTPConstants;
-import org.apache.commons.logging.LogFactory;
 
 import javax.jms.*;
 import javax.activation.DataHandler;
-import javax.naming.Context;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
@@ -45,34 +44,23 @@ import java.util.*;
  */
 public class JMSSender extends AbstractTransportSender implements ManagementSupport {
 
-    public static final String TRANSPORT_NAME = "jms";
-    
-    private JMSConnectionFactoryManager connFacManager;
+    public static final String TRANSPORT_NAME = Constants.TRANSPORT_JMS;
 
-    public JMSSender() {
-        log = LogFactory.getLog(JMSSender.class);
-    }
+    /** The JMS connection factory manager to be used when sending messages out */
+    private JMSConnectionFactoryManager connFacManager;
 
     /**
      * Initialize the transport sender by reading pre-defined connection factories for
-     * outgoing messages. These will create sessions (one per each destination dealth with)
-     * to be used when messages are being sent.
+     * outgoing messages.
+     *
      * @param cfgCtx the configuration context
      * @param transportOut the transport sender definition from axis2.xml
      * @throws AxisFault on error
      */
     public void init(ConfigurationContext cfgCtx, TransportOutDescription transportOut) throws AxisFault {
         super.init(cfgCtx, transportOut);
-        connFacManager = new JMSConnectionFactoryManager(cfgCtx);
-        // read the connection factory definitions and create them
-        connFacManager.loadConnectionFactoryDefinitions(transportOut);
-        connFacManager.start();
-    }
-
-    @Override
-    public void stop() {
-        connFacManager.stop();
-        super.stop();
+        connFacManager = new JMSConnectionFactoryManager(transportOut);
+        log.info("JMS Transport Sender initialized...");
     }
 
     /**
@@ -84,9 +72,9 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
      */
     private JMSConnectionFactory getJMSConnectionFactory(JMSOutTransportInfo trpInfo) {
         Map<String,String> props = trpInfo.getProperties();
-        if(trpInfo.getProperties() != null) {
-            String jmsConnectionFactoryName = props.get(JMSConstants.CONFAC_PARAM);
-            if(jmsConnectionFactoryName != null) {
+        if (trpInfo.getProperties() != null) {
+            String jmsConnectionFactoryName = props.get(JMSConstants.PARAM_JMS_CONFAC);
+            if (jmsConnectionFactoryName != null) {
                 return connFacManager.getJMSConnectionFactory(jmsConnectionFactoryName);
             } else {
                 return connFacManager.getJMSConnectionFactory(props);
@@ -103,58 +91,85 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
         OutTransportInfo outTransportInfo) throws AxisFault {
 
         JMSConnectionFactory jmsConnectionFactory = null;
-        Connection connection = null;   // holds a one time connection if used
-        JMSOutTransportInfo jmsOut;
-        Session session = null;
-        Destination replyDestination = null;
+        JMSOutTransportInfo jmsOut = null;
+        JMSMessageSender messageSender = null;
 
-        try {
-            if (targetAddress != null) {
+        if (targetAddress != null) {
 
-                jmsOut = new JMSOutTransportInfo(targetAddress);
-                // do we have a definition for a connection factory to use for this address?
-                jmsConnectionFactory = getJMSConnectionFactory(jmsOut);
-
-                if (jmsConnectionFactory != null) {
-                    // create new or get existing session to send to the destination from the CF
-                    session = jmsConnectionFactory.getSessionForDestination(
-                        JMSUtils.getDestination(targetAddress));
-
-                } else {
-                    // digest the targetAddress and locate CF from the EPR
-                    jmsOut.loadConnectionFactoryFromProperies();
-                    try {
-                        // create a one time connection and session to be used
-                        Hashtable<String,String> jndiProps = jmsOut.getProperties();
-                        connection = JMSUtils.createConnection(jmsOut.getConnectionFactory(),
-                                jndiProps.get(Context.SECURITY_PRINCIPAL),
-                                jndiProps.get(Context.SECURITY_CREDENTIALS),
-                                jmsOut.getDestinationType());
-
-                        session = JMSUtils.createSession(connection, false,
-                                Session.AUTO_ACKNOWLEDGE, jmsOut.getDestinationType());
-
-                    } catch (JMSException e) {
-                        handleException("Error creating a connection/session for : " + targetAddress, e);
-                    }
-                }
-                replyDestination = jmsOut.getReplyDestination();
-
-            } else if (outTransportInfo != null && outTransportInfo instanceof JMSOutTransportInfo) {
-
-                jmsOut = (JMSOutTransportInfo) outTransportInfo;
-                jmsConnectionFactory = jmsOut.getJmsConnectionFactory();
-
-                session = jmsConnectionFactory.getSessionForDestination(
-                    jmsOut.getDestination().toString());
-            } else {
-                handleException("Unable to get JMSOutTransportInfo");
-                return; // We never get here. Just make the compiler happy.
-            }
+            jmsOut = new JMSOutTransportInfo(targetAddress);
+            // do we have a definition for a connection factory to use for this address?
+            jmsConnectionFactory = getJMSConnectionFactory(jmsOut);
             
-            Destination destination = jmsOut.getDestination();
+            if (jmsConnectionFactory != null) {
+                messageSender = new JMSMessageSender(jmsConnectionFactory, targetAddress);
+
+            } else {
+                try {
+                    messageSender = JMSUtils.createJMSSender(jmsOut);
+                } catch (JMSException e) {
+                    handleException("Unable to create a JMSMessageSender for : " + outTransportInfo, e);
+                }
+            }
+
+        } else if (outTransportInfo != null && outTransportInfo instanceof JMSOutTransportInfo) {
+
+            jmsOut = (JMSOutTransportInfo) outTransportInfo;
+            try {
+                messageSender = JMSUtils.createJMSSender(jmsOut);
+            } catch (JMSException e) {
+                handleException("Unable to create a JMSMessageSender for : " + outTransportInfo, e);
+            }
+        }
+
+        // The message property to be used to send the content type is determined by
+        // the out transport info, i.e. either from the EPR if we are sending a request,
+        // or, if we are sending a response, from the configuration of the service that
+        // received the request). The property name can be overridden by a message
+        // context property.
+        String contentTypeProperty =
+            (String) msgCtx.getProperty(JMSConstants.CONTENT_TYPE_PROPERTY_PARAM);
+        if (contentTypeProperty == null) {
+            contentTypeProperty = jmsOut.getContentTypeProperty();
+        }
+
+        // need to synchronize as Sessions are not thread safe
+        synchronized (messageSender.getSession()) {
+            try {
+                sendOverJMS(msgCtx, messageSender, contentTypeProperty, jmsConnectionFactory, jmsOut);
+            } finally {
+                messageSender.close();
+            }
+        }
+    }
+
+    /**
+     * Perform actual sending of the JMS message
+     */
+    private void sendOverJMS(MessageContext msgCtx, JMSMessageSender messageSender,
+        String contentTypeProperty, JMSConnectionFactory jmsConnectionFactory,
+        JMSOutTransportInfo jmsOut) throws AxisFault {
+        
+        // convert the axis message context into a JMS Message that we can send over JMS
+        Message message = null;
+        String correlationId = null;
+        try {
+            message = createJMSMessage(msgCtx, messageSender.getSession(), contentTypeProperty);
+        } catch (JMSException e) {
+            handleException("Error creating a JMS message from the message context", e);
+        }
+
+        // should we wait for a synchronous response on this same thread?
+        boolean waitForResponse = waitForSynchronousResponse(msgCtx);
+        Destination replyDestination = jmsOut.getReplyDestination();
+
+        // if this is a synchronous out-in, prepare to listen on the response destination
+        if (waitForResponse) {
 
             String replyDestName = (String) msgCtx.getProperty(JMSConstants.JMS_REPLY_TO);
+            if (replyDestName == null && jmsConnectionFactory != null) {
+                replyDestName = jmsConnectionFactory.getReplyToDestination();
+            }
+
             if (replyDestName != null) {
                 if (jmsConnectionFactory != null) {
                     replyDestination = jmsConnectionFactory.getDestination(replyDestName);
@@ -162,107 +177,45 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
                     replyDestination = jmsOut.getReplyDestination(replyDestName);
                 }
             }
+            replyDestination = JMSUtils.setReplyDestination(
+                replyDestination, messageSender.getSession(), message);
+        }
 
-            if(session == null) {
-               handleException("Could not create JMS session");
-            }
+        try {
+            messageSender.send(message, msgCtx);
+            metrics.incrementMessagesSent();
 
-            // now we are going to use the JMS session, but if this was a session from a
-            // defined JMS connection factory, we need to synchronize as sessions are not
-            // thread safe
-            synchronized(session) {
-                // The message property to be used to send the content type is determined by
-                // the out transport info, i.e. either from the EPR if we are sending a request,
-                // or, if we are sending a response, from the configuration of the service that
-                // received the request). The property name can be overridden by a message
-                // context property.
-                String contentTypeProperty =
-                        (String)msgCtx.getProperty(JMSConstants.CONTENT_TYPE_PROPERTY_PARAM);
-                if (contentTypeProperty == null) {
-                    contentTypeProperty = jmsOut.getContentTypeProperty();
-                }
+        } catch (AxisJMSException e) {
+            metrics.incrementFaultsSending();
+            handleException("Error sending JMS message", e);
+        }
 
-                // convert the axis message context into a JMS Message that we can send over JMS
-                Message message = null;
-                String correlationId = null;
-                try {
-                    message = createJMSMessage(msgCtx, session, contentTypeProperty);
-                } catch (JMSException e) {
-                    handleException("Error creating a JMS message from the axis message context", e);
-                }
+        try {
+            metrics.incrementBytesSent(JMSUtils.getMessageSize(message));
+        } catch (JMSException e) {
+            log.warn("Error reading JMS message size to update transport metrics", e);
+        }
 
-                String destinationType = jmsOut.getDestinationType();
+        // if we are expecting a synchronous response back for the message sent out
+        if (waitForResponse) {
+            // TODO ********************************************************************************
+            // TODO **** replace with asynchronous polling via a poller task to process this *******
+            // information would be given. Then it should poll (until timeout) the
+            // requested destination for the response message and inject it from a
+            // asynchronous worker thread
+            try {
+                messageSender.getConnection().start();  // multiple calls are safely ignored
+            } catch (JMSException ignore) {}
 
-                // if the destination does not exist, see if we can create it
-                destination = JMSUtils.createDestinationIfRequired(
-                    destination, destinationType, targetAddress, session);
+            try {
+                correlationId = message.getJMSMessageID();
+            } catch(JMSException ignore) {}
 
-                if(jmsOut.getReplyDestinationName() != null) {
-                    replyDestination = JMSUtils.createReplyDestinationIfRequired(
-                        replyDestination, jmsOut.getReplyDestinationName(),
-                        jmsOut.getReplyDestinationType(), targetAddress, session);
-                }
-
-                // should we wait for a synchronous response on this same thread?
-                boolean waitForResponse = waitForSynchronousResponse(msgCtx);
-
-                // if this is a synchronous out-in, prepare to listen on the response destination
-                if (waitForResponse) {
-                    replyDestination = JMSUtils.setReplyDestination(
-                        replyDestination, session, message);
-                }
-
-                // send the outgoing message over JMS to the destination selected
-                try {
-                    JMSUtils.sendMessageToJMSDestination(session, destination, destinationType, message);
-
-                    // set the actual MessageID to the message context for use by any others
-                    try {
-                        String msgId = message.getJMSMessageID();
-                        if (msgId != null) {
-                            msgCtx.setProperty(JMSConstants.JMS_MESSAGE_ID, msgId);
-                        }
-                    } catch (JMSException ignore) {}
-
-                    metrics.incrementMessagesSent();
-                    try {
-                        metrics.incrementBytesSent(JMSUtils.getMessageSize(message));
-                    } catch (JMSException e) {
-                        log.warn("Error reading JMS message size to update transport metrics", e);
-                    }
-                } catch (BaseTransportException e) {
-                    metrics.incrementFaultsSending();
-                    throw e;
-                }
-
-                // if we are expecting a synchronous response back for the message sent out
-                if (waitForResponse) {
-                    if (connection != null) {
-                        try {
-                            connection.start();
-                        } catch (JMSException ignore) {}
-                    } else {
-                        // If connection is null, we are using a cached session and the underlying
-                        // connection is already started. Thus, there is nothing to do here.
-                    }
-                    try {
-                        correlationId = message.getJMSMessageID();
-                    } catch(JMSException ignore) {}
-                    
-                    // We assume here that the response uses the same message property to
-                    // specify the content type of the message.
-                    waitForResponseAndProcess(session, replyDestination,
-                            jmsOut.getReplyDestinationType(), msgCtx, correlationId,
-                            contentTypeProperty);
-                }
-            }
-
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (JMSException ignore) {}
-            }
+            // We assume here that the response uses the same message property to
+            // specify the content type of the message.
+            waitForResponseAndProcess(messageSender.getSession(), replyDestination,
+                msgCtx, correlationId, contentTypeProperty);
+            // TODO ********************************************************************************
         }
     }
 
@@ -278,17 +231,13 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
      * @throws AxisFault on error
      */
     private void waitForResponseAndProcess(Session session, Destination replyDestination,
-            String replyDestinationType, MessageContext msgCtx, String correlationId,
+            MessageContext msgCtx, String correlationId,
             String contentTypeProperty) throws AxisFault {
 
         try {
             MessageConsumer consumer;
-            if (correlationId != null) {
-                consumer = JMSUtils.createConsumer(session, replyDestination,
-                        "JMSCorrelationID = '" + correlationId + "'");
-            } else {
-                consumer = JMSUtils.createConsumer(session, replyDestination);
-            }
+            consumer = JMSUtils.createConsumer(session, replyDestination,
+                "JMSCorrelationID = '" + correlationId + "'");
 
             // how long are we willing to wait for the sync response
             long timeout = JMSConstants.DEFAULT_JMS_TIMEOUT;
@@ -332,8 +281,9 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
 
         } catch (JMSException e) {
             metrics.incrementFaultsReceiving();
-            handleException("Error creating consumer or receiving reply to : " +
-                replyDestination, e);
+            handleException("Error creating a consumer, or receiving a synchronous reply " +
+                "for outgoing MessageContext ID : " + msgCtx.getMessageID() +
+                " and reply Destination : " + replyDestination, e);
         }
     }
 

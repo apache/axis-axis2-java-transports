@@ -171,6 +171,14 @@ public abstract class AbstractTransportListener implements TransportListener {
         }
         return result;
     }
+
+    public EndpointReference[] getEPRsForService(String serviceName, String ip) throws AxisFault {
+        return getEPRsForService(serviceName);
+    }
+
+    protected EndpointReference[] getEPRsForService(String serviceName) {
+        return null;
+    }
     
     private boolean ignoreService(AxisService service) {
         return service.getName().startsWith("__"); // these are "private" services

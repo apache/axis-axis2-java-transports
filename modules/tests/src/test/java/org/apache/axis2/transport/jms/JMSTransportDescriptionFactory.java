@@ -47,6 +47,7 @@ public class JMSTransportDescriptionFactory implements TransportDescriptionFacto
     
     private final boolean singleCF;
     private final boolean cfOnSender;
+    private final int concurrentConsumers;
     private @Transient Context context;
     
     /**
@@ -58,9 +59,10 @@ public class JMSTransportDescriptionFactory implements TransportDescriptionFacto
      *                   should also be configured on the sender. This switch allows
      *                   us to build regression tests for SYNAPSE-448. 
      */
-    public JMSTransportDescriptionFactory(boolean singleCF, boolean cfOnSender) {
+    public JMSTransportDescriptionFactory(boolean singleCF, boolean cfOnSender, int concurrentConsumers) {
         this.singleCF = singleCF;
         this.cfOnSender = cfOnSender;
+        this.concurrentConsumers = concurrentConsumers;
     }
 
     @Setup @SuppressWarnings("unused")
@@ -108,18 +110,20 @@ public class JMSTransportDescriptionFactory implements TransportDescriptionFacto
         OMElement element = createParameterElement(JMSConstants.DEFAULT_CONFAC_NAME, null);
         element.addChild(createParameterElement(Context.INITIAL_CONTEXT_FACTORY,
                 MockContextFactory.class.getName()));
-        element.addChild(createParameterElement(JMSConstants.CONFAC_JNDI_NAME_PARAM,
+        element.addChild(createParameterElement(JMSConstants.PARAM_CONFAC_JNDI_NAME,
                 connFactName));
         if (type != null) {
-            element.addChild(createParameterElement(JMSConstants.CONFAC_TYPE, type));
+            element.addChild(createParameterElement(JMSConstants.PARAM_CONFAC_TYPE, type));
         }
+        element.addChild(createParameterElement(JMSConstants.PARAM_CONCURRENT_CONSUMERS,
+            Integer.toString(concurrentConsumers)));
         trpDesc.addParameter(new Parameter(name, element));
     }
     
     private void setupTransport(ParameterInclude trpDesc) throws AxisFault {
         if (singleCF) {
             // TODO: setting the type to "queue" is nonsense, but required by the transport (see SYNAPSE-439)
-            setupConnectionFactoryConfig(trpDesc, "default", CONNECTION_FACTORY, "queue");
+            setupConnectionFactoryConfig(trpDesc, "default", CONNECTION_FACTORY, null);
         } else {
             setupConnectionFactoryConfig(trpDesc, "queue", QUEUE_CONNECTION_FACTORY, "queue");
             setupConnectionFactoryConfig(trpDesc, "topic", TOPIC_CONNECTION_FACTORY, "topic");

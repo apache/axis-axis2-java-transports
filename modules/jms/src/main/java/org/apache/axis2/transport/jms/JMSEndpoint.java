@@ -16,7 +16,14 @@
 package org.apache.axis2.transport.jms;
 
 import org.apache.axis2.description.AxisService;
+import org.apache.axis2.description.Parameter;
 import org.apache.axis2.transport.jms.ctype.ContentTypeRuleSet;
+import org.apache.axis2.addressing.EndpointReference;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * Class that links an Axis2 service to a JMS destination. Additionally, it contains
@@ -24,10 +31,11 @@ import org.apache.axis2.transport.jms.ctype.ContentTypeRuleSet;
  * into Axis2.
  */
 public class JMSEndpoint {
+    private JMSConnectionFactory cf;
     private AxisService service;
     private String jndiDestinationName;
-    private String destinationType;
-    private String endpointReference;
+    private int destinationType = JMSConstants.GENERIC;
+    private Set<EndpointReference> endpointReferences = new HashSet<EndpointReference>();
     private ContentTypeRuleSet contentTypeRuleSet;
 
     public AxisService getService() {
@@ -50,20 +58,39 @@ public class JMSEndpoint {
         this.jndiDestinationName = destinationJNDIName;
     }
 
-    public String getDestinationType() {
-        return destinationType;
-    }
-
     public void setDestinationType(String destinationType) {
-        this.destinationType = destinationType;
+        if (JMSConstants.DESTINATION_TYPE_TOPIC.equalsIgnoreCase(destinationType)) {
+            this.destinationType = JMSConstants.TOPIC;
+        } else if (JMSConstants.DESTINATION_TYPE_QUEUE.equalsIgnoreCase(destinationType)) {
+            this.destinationType = JMSConstants.QUEUE;
+        } else {
+            this.destinationType = JMSConstants.GENERIC;
+        }
     }
 
-    public String getEndpointReference() {
-        return endpointReference;
+    public EndpointReference[] getEndpointReferences() {
+        return endpointReferences.toArray(new EndpointReference[endpointReferences.size()]);
     }
 
-    public void setEndpointReference(String endpointReference) {
-        this.endpointReference = endpointReference;
+    public void computeEPRs() {
+        List<EndpointReference> eprs = new ArrayList<EndpointReference>();
+        for (Object o : getService().getParameters()) {
+            Parameter p = (Parameter) o;
+            if (JMSConstants.PARAM_PUBLISH_EPR.equals(p.getName()) && p.getValue() instanceof String) {
+                if ("legacy".equalsIgnoreCase((String) p.getValue())) {
+                    // if "legacy" specified, compute and replace it
+                    endpointReferences.add(
+                        new EndpointReference(JMSUtils.getEPR(cf, destinationType, this)));
+                } else {
+                    endpointReferences.add(new EndpointReference((String) p.getValue()));
+                }
+            }
+        }
+
+        if (eprs.isEmpty()) {
+            // if nothing specified, compute and return legacy EPR
+            endpointReferences.add(new EndpointReference(JMSUtils.getEPR(cf, destinationType, this)));
+        }
     }
 
     public ContentTypeRuleSet getContentTypeRuleSet() {
@@ -72,5 +99,13 @@ public class JMSEndpoint {
 
     public void setContentTypeRuleSet(ContentTypeRuleSet contentTypeRuleSet) {
         this.contentTypeRuleSet = contentTypeRuleSet;
+    }
+
+    public JMSConnectionFactory getCf() {
+        return cf;
+    }
+
+    public void setCf(JMSConnectionFactory cf) {
+        this.cf = cf;
     }
 }

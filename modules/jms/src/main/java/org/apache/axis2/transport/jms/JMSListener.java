@@ -24,7 +24,6 @@ import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.transport.base.AbstractTransportListener;
 import org.apache.axis2.transport.base.BaseConstants;
-import org.apache.axis2.transport.base.BaseUtils;
 import org.apache.axis2.transport.base.ManagementSupport;
 import org.apache.axis2.transport.base.event.TransportErrorListener;
 import org.apache.axis2.transport.base.event.TransportErrorSource;
@@ -41,88 +40,57 @@ import javax.jms.BytesMessage;
 import javax.jms.TextMessage;
 
 /**
- * The JMS Transport listener implementation. A JMS Listner will hold one or
- * more JMS connection factories, which would be created at initialization
- * time. This implementation does not support the creation of connection
- * factories at runtime. This JMS Listener registers with Axis to be notified
- * of service deployment/undeployment/start and stop, and enables or disables
- * listening for messages on the destinations as appropriate.
- * <p/>
- * A Service could state the JMS connection factory name and the destination
- * name for use as Parameters in its services.xml as shown in the example
- * below. If the connection name was not specified, it will use the connection
- * factory named "default" (JMSConstants.DEFAULT_CONFAC_NAME) - if such a
- * factory is defined in the Axis2.xml. If the destination name is not specified
- * it will default to a JMS queue by the name of the service. If the destination
- * should be a Topic, it should be created on the JMS implementation, and
- * specified in the services.xml of the service.
- * <p/>
- * <parameter name="transport.jms.ConnectionFactory" locked="true">
- * myTopicConnectionFactory</parameter>
- * <parameter name="transport.jms.Destination" locked="true">
- * dynamicTopics/something.TestTopic</parameter>
+ * The revamped JMS Transport listener implementation. Creates {@link ServiceTaskManager} instances
+ * for each service requesting exposure over JMS, and stops these if they are undeployed / stopped.
+ * <p>
+ * A service indicates a JMS Connection factory definition by name, which would be defined in the
+ * JMSListner on the axis2.xml, and this provides a way to reuse common configuration between
+ * services, as well as to optimize resources utilized
+ * <p>
+ * If the connection factory name was not specified, it will default to the one named "default"
+ * {@see JMSConstants.DEFAULT_CONFAC_NAME}
+ * <p>
+ * If a destination JNDI name is not specified, a service will expect to use a Queue with the same
+ * JNDI name as of the service. Additional Parameters allows one to bind to a Topic or specify
+ * many more detailed control options. See package documentation for more details
+ * <p>
+ * All Destinations / JMS Administered objects used MUST be pre-created or already available 
  */
 public class JMSListener extends AbstractTransportListener implements ManagementSupport,
-        TransportErrorSource {
+    TransportErrorSource {
 
     public static final String TRANSPORT_NAME = Constants.TRANSPORT_JMS;
 
+    /** The JMSConnectionFactoryManager which centralizes the management of defined factories */
     private JMSConnectionFactoryManager connFacManager;
     /** A Map of service name to the JMS endpoints */
     private Map<String,JMSEndpoint> serviceNameToEndpointMap = new HashMap<String,JMSEndpoint>();
-
+    /** A Map of service name to its ServiceTaskManager instances */
+    private Map<String, ServiceTaskManager> serviceNameToSTMMap =
+        new HashMap<String, ServiceTaskManager>();
     private final TransportErrorSourceSupport tess = new TransportErrorSourceSupport(this);
     
     /**
-     * This is the TransportListener initialization method invoked by Axis2
+     * TransportListener initialization
      *
-     * @param cfgCtx   the Axis configuration context
+     * @param cfgCtx the Axis configuration context
      * @param trpInDesc the TransportIn description
      */
     public void init(ConfigurationContext cfgCtx,
-                     TransportInDescription trpInDesc) throws AxisFault {
+        TransportInDescription trpInDesc) throws AxisFault {
+
         super.init(cfgCtx, trpInDesc);
-
-        connFacManager = new JMSConnectionFactoryManager(cfgCtx, this, workerPool);
-        // read the connection factory definitions and create them
-        connFacManager.loadConnectionFactoryDefinitions(trpInDesc);
-
-        // if no connection factories are defined, we cannot listen for any messages
-        if (connFacManager.getNames().length == 0) {
-            log.warn("No JMS connection factories are defined. Cannot listen for JMS");
-            return;
-        }
-
+        connFacManager = new JMSConnectionFactoryManager(trpInDesc);
         log.info("JMS Transport Receiver/Listener initialized...");
     }
 
     /**
-     * Start this JMS Listener (Transport Listener)
-     *
-     * @throws AxisFault
-     */
-    public void start() throws AxisFault {
-        connFacManager.start();
-        super.start();
-    }
-
-    /**
-     * Stop the JMS Listener, and shutdown all of the connection factories
-     */
-    public void stop() throws AxisFault {
-        super.stop();
-        connFacManager.stop();
-    }
-
-    /**
-     * Returns EPRs for the given service and IP over the JMS transport
+     * Returns EPRs for the given service over the JMS transport
      *
      * @param serviceName service name
-     * @param ip          ignored
-     * @return the EPR for the service
-     * @throws AxisFault not used
+     * @return the JMS EPRs for the service
      */
-    public EndpointReference[] getEPRsForService(String serviceName, String ip) throws AxisFault {
+    public EndpointReference[] getEPRsForService(String serviceName) {
         //Strip out the operation name
         if (serviceName.indexOf('/') != -1) {
             serviceName = serviceName.substring(0, serviceName.indexOf('/'));
@@ -133,28 +101,29 @@ public class JMSListener extends AbstractTransportListener implements Management
         }
         JMSEndpoint endpoint = serviceNameToEndpointMap.get(serviceName);
         if (endpoint != null) {
-            return new EndpointReference[] { new EndpointReference(endpoint.getEndpointReference()) };
+            return endpoint.getEndpointReferences();
         } else {
             return null;
         }
     }
 
     /**
-     * Prepare to listen for JMS messages on behalf of the given service
+     * Listen for JMS messages on behalf of the given service
      *
-     * @param service the service for which to listen for messages
+     * @param service the Axis service for which to listen for messages
      */
     protected void startListeningForService(AxisService service) throws AxisFault {
         JMSConnectionFactory cf = getConnectionFactory(service);
         if (cf == null) {
             throw new AxisFault("The service doesn't specify a JMS connection factory or refers " +
-            		"to an invalid factory.");
+                "to an invalid factory.");
         }
 
         JMSEndpoint endpoint = new JMSEndpoint();
         endpoint.setService(service);
-        
-        Parameter destParam = service.getParameter(JMSConstants.DEST_PARAM);
+        endpoint.setCf(cf);
+
+        Parameter destParam = service.getParameter(JMSConstants.PARAM_DESTINATION);
         if (destParam != null) {
             endpoint.setJndiDestinationName((String)destParam.getValue());
         } else {
@@ -162,10 +131,10 @@ public class JMSListener extends AbstractTransportListener implements Management
             endpoint.setJndiDestinationName(service.getName());
         }
         
-        Parameter destTypeParam = service.getParameter(JMSConstants.DEST_PARAM_TYPE);
+        Parameter destTypeParam = service.getParameter(JMSConstants.PARAM_DEST_TYPE);
         if (destTypeParam != null) {
             String paramValue = (String) destTypeParam.getValue();
-            if(JMSConstants.DESTINATION_TYPE_QUEUE.equals(paramValue) ||
+            if (JMSConstants.DESTINATION_TYPE_QUEUE.equals(paramValue) ||
                     JMSConstants.DESTINATION_TYPE_TOPIC.equals(paramValue) )  {
                 endpoint.setDestinationType(paramValue);
             } else {
@@ -186,15 +155,30 @@ public class JMSListener extends AbstractTransportListener implements Management
         } else {
             endpoint.setContentTypeRuleSet(ContentTypeRuleFactory.parse(contentTypeParam));
         }
-        
-        // compute service EPR and keep for later use
-        endpoint.setEndpointReference(JMSUtils.getEPR(cf, endpoint));
+
+        endpoint.computeEPRs(); // compute service EPR and keep for later use        
         serviceNameToEndpointMap.put(service.getName(), endpoint);
         
-        log.info("Starting to listen on destination : " + endpoint.getJndiDestinationName() + " of type "
-                + endpoint.getDestinationType() + " for service " + service.getName());
-        cf.addDestination(endpoint);
-        cf.startListeningOnDestination(endpoint);
+        ServiceTaskManager stm = JMSUtils.createTaskManagerForService(cf, service, workerPool);
+        stm.setJmsMessageReceiver(new JMSMessageReceiver(this, cf, endpoint));
+        stm.start();
+        serviceNameToSTMMap.put(service.getName(), stm);
+
+        for (int i=0; i<3; i++) {
+            if (stm.getActiveTaskCount() > 0) {
+                log.info("Started to listen on destination : " + stm.getDestinationJNDIName() +
+                    " of type " + JMSUtils.getDestinationTypeAsString(stm.getDestinationType()) +
+                    " for service " + stm.getServiceName());
+                return;
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ignore) {}
+        }
+
+        log.warn("Polling tasks on destination : " + stm.getDestinationJNDIName() +
+            " of type " + JMSUtils.getDestinationTypeAsString(stm.getDestinationType()) +
+            " for service " + stm.getServiceName() + " have not yet started after 3 seconds ..");
     }
 
     /**
@@ -204,12 +188,22 @@ public class JMSListener extends AbstractTransportListener implements Management
      */
     protected void stopListeningForService(AxisService service) {
 
-        JMSConnectionFactory cf = getConnectionFactory(service);
-        if (cf != null) {
-            // remove from the serviceNameToEprMap
-            JMSEndpoint endpoint = serviceNameToEndpointMap.remove(service.getName());
+        ServiceTaskManager stm = serviceNameToSTMMap.get(service.getName());
+        if (stm != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Stopping listening on destination : " + stm.getDestinationJNDIName() +
+                    " for service : " + stm.getServiceName());
+            }
 
-            cf.removeDestination(endpoint.getJndiDestinationName());
+            stm.stop();
+
+            serviceNameToSTMMap.remove(service.getName());
+            serviceNameToEndpointMap.remove(service.getName());
+            log.info("Stopped listening for JMS messages to service : " + service.getName());
+
+        } else {
+            log.error("Unable to stop service : " + service.getName() +
+                " - unable to find its ServiceTaskManager");
         }
     }
     /**
@@ -220,12 +214,12 @@ public class JMSListener extends AbstractTransportListener implements Management
      * @param service the AxisService
      * @return the JMSConnectionFactory to be used, or null if reference is invalid
      */
-    private JMSConnectionFactory getConnectionFactory(AxisService service) {
-        Parameter conFacParam = service.getParameter(JMSConstants.CONFAC_PARAM);
+    public JMSConnectionFactory getConnectionFactory(AxisService service) {
 
+        Parameter conFacParam = service.getParameter(JMSConstants.PARAM_JMS_CONFAC);
         // validate connection factory name (specified or default)
         if (conFacParam != null) {
-            return connFacManager.getJMSConnectionFactory((String)conFacParam.getValue());
+            return connFacManager.getJMSConnectionFactory((String) conFacParam.getValue());
         } else {
             return connFacManager.getJMSConnectionFactory(JMSConstants.DEFAULT_CONFAC_NAME);
         }
@@ -240,11 +234,13 @@ public class JMSListener extends AbstractTransportListener implements Management
     public void pause() throws AxisFault {
         if (state != BaseConstants.STARTED) return;
         try {
-            connFacManager.pause();
+            for (ServiceTaskManager stm : serviceNameToSTMMap.values()) {
+                stm.pause();
+            }
             state = BaseConstants.PAUSED;
             log.info("Listener paused");
         } catch (AxisJMSException e) {
-            log.error("At least one connection factory could not be paused", e);
+            log.error("At least one service could not be paused", e);
         }
     }
 
@@ -255,11 +251,13 @@ public class JMSListener extends AbstractTransportListener implements Management
     public void resume() throws AxisFault {
         if (state != BaseConstants.PAUSED) return;
         try {
-            connFacManager.resume();
+            for (ServiceTaskManager stm : serviceNameToSTMMap.values()) {
+                stm.resume();
+            }
             state = BaseConstants.STARTED;
             log.info("Listener resumed");
         } catch (AxisJMSException e) {
-            log.error("At least one connection factory could not be resumed", e);
+            log.error("At least one service could not be resumed", e);
         }
     }
 

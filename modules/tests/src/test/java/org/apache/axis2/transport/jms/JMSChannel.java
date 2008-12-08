@@ -137,8 +137,8 @@ public abstract class JMSChannel implements AxisServiceConfigurator {
     }
 
     public void setupService(AxisService service, boolean isClientSide) throws Exception {
-        service.addParameter(JMSConstants.CONFAC_PARAM, connectionFactoryName);
-        service.addParameter(JMSConstants.DEST_PARAM_TYPE, destinationType);
-        service.addParameter(JMSConstants.DEST_PARAM, jndiName);
+        service.addParameter(JMSConstants.PARAM_JMS_CONFAC, connectionFactoryName);
+        service.addParameter(JMSConstants.PARAM_DEST_TYPE, destinationType);
+        service.addParameter(JMSConstants.PARAM_DESTINATION, jndiName);
     }
 }

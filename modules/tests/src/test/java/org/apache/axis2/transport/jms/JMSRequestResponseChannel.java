@@ -63,8 +63,8 @@ public class JMSRequestResponseChannel extends JMSChannel implements RequestResp
     @Override
     public void setupService(AxisService service, boolean isClientSide) throws Exception {
         super.setupService(service, isClientSide);
-        service.addParameter(JMSConstants.REPLY_PARAM_TYPE, replyDestinationType);
-        service.addParameter(JMSConstants.REPLY_PARAM, replyJndiName);
+        service.addParameter(JMSConstants.PARAM_REPLY_DEST_TYPE, replyDestinationType);
+        service.addParameter(JMSConstants.PARAM_REPLY_DESTINATION, replyJndiName);
     }
 
     public void setupRequestMessageContext(MessageContext msgContext) {
@@ -74,7 +74,7 @@ public class JMSRequestResponseChannel extends JMSChannel implements RequestResp
     @Override
     public EndpointReference getEndpointReference() throws Exception {
         String address = super.getEndpointReference().getAddress();
-        return new EndpointReference(address + "&" + JMSConstants.REPLY_PARAM_TYPE + "=" + replyDestinationType + "&" + JMSConstants.REPLY_PARAM + "=" + replyJndiName);
+        return new EndpointReference(address + "&" + JMSConstants.PARAM_REPLY_DEST_TYPE + "=" + replyDestinationType + "&" + JMSConstants.PARAM_REPLY_DESTINATION + "=" + replyJndiName);
     }
 
     @Key("replyDestType")

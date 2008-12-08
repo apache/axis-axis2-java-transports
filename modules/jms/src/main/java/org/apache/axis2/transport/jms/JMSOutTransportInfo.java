@@ -41,8 +41,8 @@ public class JMSOutTransportInfo implements OutTransportInfo {
     /** The naming context */
     private Context context;
     /**
-     * this is a reference to the underlying JMS connection factory when sending messages
-     * through connection factories not defined to the transport sender
+     * this is a reference to the underlying JMS ConnectionFactory when sending messages
+     * through connection factories not defined at the TransportSender level
      */
     private ConnectionFactory connectionFactory = null;
     /**
@@ -53,14 +53,18 @@ public class JMSOutTransportInfo implements OutTransportInfo {
     private JMSConnectionFactory jmsConnectionFactory = null;
     /** the Destination queue or topic for the outgoing message */
     private Destination destination = null;
-    /** the Destination queue or topic for the outgoing message i.e. JMSConstants.DESTINATION_TYPE_QUEUE, DESTINATION_TYPE_TOPIC */
-    private String destinationType = JMSConstants.DESTINATION_TYPE_QUEUE;
+    /** the Destination queue or topic for the outgoing message
+     * i.e. JMSConstants.DESTINATION_TYPE_QUEUE, DESTINATION_TYPE_TOPIC or DESTINATION_TYPE_GENERIC
+     */
+    private String destinationType = JMSConstants.DESTINATION_TYPE_GENERIC;
     /** the Reply Destination queue or topic for the outgoing message */
     private Destination replyDestination = null;
     /** the Reply Destination name */
     private String replyDestinationName = null;
-    /** the Reply Destination queue or topic for the outgoing message i.e. JMSConstants.DESTINATION_TYPE_QUEUE, DESTINATION_TYPE_TOPIC */
-    private String replyDestinationType = JMSConstants.DESTINATION_TYPE_QUEUE;
+    /** the Reply Destination queue or topic for the outgoing message
+     * i.e. JMSConstants.DESTINATION_TYPE_QUEUE, DESTINATION_TYPE_TOPIC or DESTINATION_TYPE_GENERIC
+     */
+    private String replyDestinationType = JMSConstants.DESTINATION_TYPE_GENERIC;
     /** the EPR properties when the out-transport info is generated from a target EPR */
     private Hashtable<String,String> properties = null;
     /** the target EPR string where applicable */
@@ -68,13 +72,12 @@ public class JMSOutTransportInfo implements OutTransportInfo {
     /** the message property name that stores the content type of the outgoing message */
     private String contentTypeProperty;
     
-    private String contentType = null;
-
     /**
      * Creates an instance using the given JMS connection factory and destination
      *
      * @param jmsConnectionFactory the JMS connection factory
      * @param dest the destination
+     * @param contentTypeProperty
      */
     JMSOutTransportInfo(JMSConnectionFactory jmsConnectionFactory, Destination dest,
             String contentTypeProperty) {
@@ -91,26 +94,31 @@ public class JMSOutTransportInfo implements OutTransportInfo {
      * @param targetEPR the target EPR
      */
     JMSOutTransportInfo(String targetEPR) {
+
         this.targetEPR = targetEPR;
         if (!targetEPR.startsWith(JMSConstants.JMS_PREFIX)) {
             handleException("Invalid prefix for a JMS EPR : " + targetEPR);
+
         } else {
             properties = BaseUtils.getEPRProperties(targetEPR);
-            String destinationType = properties.get(JMSConstants.DEST_PARAM_TYPE);
-            if(destinationType != null) {
+            String destinationType = properties.get(JMSConstants.PARAM_DEST_TYPE);
+            if (destinationType != null) {
                 setDestinationType(destinationType);
             }
-            String replyDestinationType = properties.get(JMSConstants.REPLY_PARAM_TYPE);
-            if(replyDestinationType != null) {
+
+            String replyDestinationType = properties.get(JMSConstants.PARAM_REPLY_DEST_TYPE);
+            if (replyDestinationType != null) {
                 setReplyDestinationType(replyDestinationType);
             }
-            replyDestinationName = properties.get(JMSConstants.REPLY_PARAM);
+
+            replyDestinationName = properties.get(JMSConstants.PARAM_REPLY_DESTINATION);
             contentTypeProperty = properties.get(JMSConstants.CONTENT_TYPE_PROPERTY_PARAM);
             try {
                 context = new InitialContext(properties);
             } catch (NamingException e) {
                 handleException("Could not get an initial context using " + properties, e);
             }
+
             destination = getDestination(context, targetEPR);
             replyDestination = getReplyDestination(context, targetEPR);
         }
@@ -136,7 +144,7 @@ public class JMSOutTransportInfo implements OutTransportInfo {
     private ConnectionFactory getConnectionFactory(Context context, Hashtable<String,String> props) {
         try {
 
-            String conFacJndiName = props.get(JMSConstants.CONFAC_JNDI_NAME_PARAM);
+            String conFacJndiName = props.get(JMSConstants.PARAM_CONFAC_JNDI_NAME);
             if (conFacJndiName != null) {
                 return JMSUtils.lookup(context, ConnectionFactory.class, conFacJndiName);
             } else {
@@ -160,8 +168,12 @@ public class JMSOutTransportInfo implements OutTransportInfo {
         try {
             return JMSUtils.lookup(context, Destination.class, destinationName);
         } catch (NameNotFoundException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Cannot locate destination : " + destinationName + " using " + url);
+            try {
+                return JMSUtils.lookup(context, Destination.class,
+                    (JMSConstants.DESTINATION_TYPE_TOPIC.equals(destinationType) ?
+                        "dynamicTopics/" : "dynamicQueues/") + destinationName);
+            } catch (NamingException x) {
+                handleException("Cannot locate destination : " + destinationName + " using " + url);
             }
         } catch (NamingException e) {
             handleException("Cannot locate destination : " + destinationName + " using " + url, e);
@@ -177,10 +189,11 @@ public class JMSOutTransportInfo implements OutTransportInfo {
      * @return the JMS destination, or null if it does not exist
      */
     private Destination getReplyDestination(Context context, String url) {
-        String replyDestinationName = properties.get(JMSConstants.REPLY_PARAM);
+        String replyDestinationName = properties.get(JMSConstants.PARAM_REPLY_DESTINATION);
         if(replyDestinationName == null) {
             return null;
         }
+
         try {
             return JMSUtils.lookup(context, Destination.class, replyDestinationName);
         } catch (NameNotFoundException e) {
@@ -190,13 +203,14 @@ public class JMSOutTransportInfo implements OutTransportInfo {
         } catch (NamingException e) {
             handleException("Cannot locate destination : " + replyDestinationName + " using " + url, e);
         }
+
         return null;
     }
 
     /**
      * Look up for the given destination
-     * @param replyDest
-     * @return
+     * @param replyDest the JNDI name to lookup Destination required
+     * @return Destination for the JNDI name passed
      */
     public Destination getReplyDestination(String replyDest) {
         try {
@@ -236,7 +250,7 @@ public class JMSOutTransportInfo implements OutTransportInfo {
     }
 
     public void setContentType(String contentType) {
-        this.contentType = contentType;
+        // this is a useless Axis2 method imposed by the OutTransportInfo interface :(
     }
 
     public Hashtable<String,String> getProperties() {

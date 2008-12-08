@@ -51,14 +51,19 @@ public class JMSTransportTest extends TestCase {
         
         // SYNAPSE-436:
         suite.addExclude("(&(test=EchoXML)(replyDestType=topic)(endpoint=axis))");
-        
+
+        // Example to run a few use cases.. please leave these commented out - asankha
+        //suite.addExclude("(|(test=AsyncXML)(test=MinConcurrency)(destType=topic)(broker=qpid)(destType=topic)(replyDestType=topic)(client=jms)(endpoint=mock)(cfOnSender=true))");
+        //suite.addExclude("(|(test=EchoXML)(destType=queue)(broker=qpid)(cfOnSender=true)(singleCF=false)(destType=queue)(client=jms)(endpoint=mock))");
+        //suite.addExclude("(|(test=EchoXML)(test=AsyncXML)(test=AsyncSwA)(test=AsyncTextPlain)(test=AsyncBinary)(test=AsyncSOAPLarge)(broker=qpid))");
+
         TransportTestSuiteBuilder builder = new TransportTestSuiteBuilder(suite);
 
         JMSTestEnvironment[] environments = new JMSTestEnvironment[] { new QpidTestEnvironment(), new ActiveMQTestEnvironment() };
         for (boolean singleCF : new boolean[] { false, true }) {
             for (boolean cfOnSender : new boolean[] { false, true }) {
                 for (JMSTestEnvironment env : environments) {
-                    builder.addEnvironment(env, new JMSTransportDescriptionFactory(singleCF, cfOnSender));
+                    builder.addEnvironment(env, new JMSTransportDescriptionFactory(singleCF, cfOnSender, 1));
                 }
             }
         }
@@ -87,12 +92,12 @@ public class JMSTransportTest extends TestCase {
         
         builder.addEchoEndpoint(new MockEchoEndpoint());
         builder.addEchoEndpoint(new AxisEchoEndpoint());
-        
+
         for (JMSTestEnvironment env : new JMSTestEnvironment[] { new QpidTestEnvironment(), new ActiveMQTestEnvironment() }) {
             suite.addTest(new MinConcurrencyTest(new AsyncChannel[] {
                     new JMSAsyncChannel("endpoint1", JMSConstants.DESTINATION_TYPE_QUEUE, ContentTypeMode.TRANSPORT),
                     new JMSAsyncChannel("endpoint2", JMSConstants.DESTINATION_TYPE_QUEUE, ContentTypeMode.TRANSPORT) },
-                    2, false, env, new JMSTransportDescriptionFactory(false, false)));
+                    2, false, env, new JMSTransportDescriptionFactory(false, false, 2)));
         }
         
         
