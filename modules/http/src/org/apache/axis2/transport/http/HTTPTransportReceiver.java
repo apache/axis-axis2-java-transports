@@ -150,6 +150,8 @@ public class HTTPTransportReceiver {
         return temp;
     }
 
+    // NOTE: This method is no longer used by the standard Axis2 HTTP transport (see WSCOMMONS-405).
+    //       However it is still used by Synapse's NIO HTTP transport.
     public static String printServiceHTML(String serviceName,
                                           ConfigurationContext configurationContext) {
         String temp = "";
