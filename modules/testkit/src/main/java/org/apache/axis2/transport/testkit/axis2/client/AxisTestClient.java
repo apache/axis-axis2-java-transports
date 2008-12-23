@@ -112,7 +112,9 @@ public class AxisTestClient implements TestClient, MessageExchangeValidator {
         if (sender instanceof ManagementSupport) {
             ManagementSupport sender = (ManagementSupport)this.sender;
             Assert.assertEquals(messagesSent+1, sender.getMessagesSent());
-            Assert.assertTrue("No increase in bytes sent", sender.getBytesSent() > bytesSent);
+            long newBytesSent = sender.getBytesSent();
+            Assert.assertTrue("No increase in bytes sent (before sending: " + bytesSent +
+                    "; after sending: " + newBytesSent + ")", newBytesSent > bytesSent);
         }
     }
 }
