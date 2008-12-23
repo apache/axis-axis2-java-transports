@@ -183,7 +183,7 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
 
         try {
             messageSender.send(message, msgCtx);
-            metrics.incrementMessagesSent();
+            metrics.incrementMessagesSent(msgCtx);
 
         } catch (AxisJMSException e) {
             metrics.incrementFaultsSending();
@@ -191,7 +191,7 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
         }
 
         try {
-            metrics.incrementBytesSent(JMSUtils.getMessageSize(message));
+            metrics.incrementBytesSent(msgCtx, JMSUtils.getMessageSize(message));
         } catch (JMSException e) {
             log.warn("Error reading JMS message size to update transport metrics", e);
         }

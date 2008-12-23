@@ -31,8 +31,10 @@ import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.TransportSender;
+import org.apache.axis2.transport.base.BaseConstants;
 import org.apache.axis2.transport.base.ManagementSupport;
 import org.apache.axis2.transport.testkit.MessageExchangeValidator;
+import org.apache.axis2.transport.testkit.axis2.util.MessageLevelMetricsCollectorImpl;
 import org.apache.axis2.transport.testkit.channel.Channel;
 import org.apache.axis2.transport.testkit.client.ClientOptions;
 import org.apache.axis2.transport.testkit.client.TestClient;
@@ -51,6 +53,7 @@ public class AxisTestClient implements TestClient, MessageExchangeValidator {
     protected @Transient Options axisOptions;
     private long messagesSent;
     private long bytesSent;
+    private MessageLevelMetricsCollectorImpl metrics;
     
     @Setup @SuppressWarnings("unused")
     private void setUp(AxisTestClientContext context, Channel channel, AxisTestClientConfigurator[] configurators) throws Exception {
@@ -82,6 +85,9 @@ public class AxisTestClient implements TestClient, MessageExchangeValidator {
             ManagementSupport sender = (ManagementSupport)this.sender;
             messagesSent = sender.getMessagesSent();
             bytesSent = sender.getBytesSent();
+            metrics = new MessageLevelMetricsCollectorImpl();
+        } else {
+            metrics = null;
         }
     }
 
@@ -103,6 +109,9 @@ public class AxisTestClient implements TestClient, MessageExchangeValidator {
         }
         mc.setProperty(Constants.Configuration.CHARACTER_SET_ENCODING, options.getCharset());
         mc.setServiceContext(serviceClient.getServiceContext());
+        if (metrics != null) {
+            mc.setProperty(BaseConstants.METRICS_COLLECTOR, metrics);
+        }
         mepClient.addMessageContext(mc);
         mepClient.execute(block);
         return resultMessageLabel == null ? null : mepClient.getMessageContext(resultMessageLabel);
@@ -111,10 +120,14 @@ public class AxisTestClient implements TestClient, MessageExchangeValidator {
     public void afterReceive() throws Exception {
         if (sender instanceof ManagementSupport) {
             ManagementSupport sender = (ManagementSupport)this.sender;
+            Assert.assertEquals(1, metrics.getMessagesSent());
             Assert.assertEquals(messagesSent+1, sender.getMessagesSent());
+            long thisBytesSent = metrics.getBytesSent();
+            Assert.assertTrue("No increase in bytes sent in message level metrics", thisBytesSent != 0);
             long newBytesSent = sender.getBytesSent();
-            Assert.assertTrue("No increase in bytes sent (before sending: " + bytesSent +
+            Assert.assertTrue("No increase in bytes sent in transport level metrics (before sending: " + bytesSent +
                     "; after sending: " + newBytesSent + ")", newBytesSent > bytesSent);
+            Assert.assertEquals("Mismatch between message and transport level metrics", thisBytesSent, newBytesSent - bytesSent);
         }
     }
 }

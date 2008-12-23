@@ -447,10 +447,10 @@ public class MailTransportSender extends AbstractTransportSender
             Transport.send(message);
 
             // update metrics
-            metrics.incrementMessagesSent();
+            metrics.incrementMessagesSent(msgContext);
             long bytesSent = message.getBytesSent();
             if (bytesSent != -1) {
-                metrics.incrementBytesSent(bytesSent);
+                metrics.incrementBytesSent(msgContext, bytesSent);
             }
 
         } catch (MessagingException e) {
