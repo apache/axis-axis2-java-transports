@@ -32,16 +32,20 @@ import org.apache.commons.logging.LogFactory;
 class Relay implements Runnable {
     private static final Log log = LogFactory.getLog(Relay.class);
     
-    private final String tag;
     private final Socket inSocket;
     private final InputStream in;
     private final OutputStream out;
+    private final String connectionSpec;
     
-    public Relay(String tag, Socket inSocket, Socket outSocket) throws IOException {
-        this.tag = tag;
+    public Relay(Socket inSocket, Socket outSocket, boolean isResponse) throws IOException {
         this.inSocket = inSocket;
         this.in = inSocket.getInputStream();
         this.out = outSocket.getOutputStream();
+        if (isResponse) {
+            connectionSpec = outSocket.getRemoteSocketAddress() + " <- " + inSocket.getRemoteSocketAddress();
+        } else {
+            connectionSpec = inSocket.getRemoteSocketAddress() + " -> " + outSocket.getRemoteSocketAddress();
+        }
     }
     
     public void run() {
@@ -49,7 +53,7 @@ class Relay implements Runnable {
         try {
             int n;
             while ((n = in.read(buf)) > 0) {
-                StringBuilder dump = new StringBuilder(tag);
+                StringBuilder dump = new StringBuilder(connectionSpec);
                 dump.append('\n');
                 Utils.hexDump(dump, buf, n);
                 log.debug(dump);
@@ -64,5 +68,6 @@ class Relay implements Runnable {
             IOUtils.closeQuietly(in);
             IOUtils.closeQuietly(out);
         }
+        log.debug(connectionSpec + ": closed");
     }
 }
