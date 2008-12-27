@@ -24,6 +24,8 @@ import org.apache.axis2.transport.base.MessageLevelMetricsCollector;
 /**
  * Message level metrics collector implementation used during the tests to check that
  * message level metrics collection is implemented.
+ * <p>
+ * On any update, all threads waiting for an instance of this class are notified.
  */
 public class MessageLevelMetricsCollectorImpl implements MessageLevelMetricsCollector {
     private long messagesSent;
@@ -34,6 +36,7 @@ public class MessageLevelMetricsCollectorImpl implements MessageLevelMetricsColl
 
     public synchronized void incrementBytesSent(long size) {
         bytesSent += size;
+        notifyAll();
     }
 
     public void incrementFaultsReceiving(int errorCode) {
@@ -47,6 +50,7 @@ public class MessageLevelMetricsCollectorImpl implements MessageLevelMetricsColl
 
     public synchronized void incrementMessagesSent() {
         messagesSent++;
+        notifyAll();
     }
 
     public void incrementTimeoutsReceiving() {
