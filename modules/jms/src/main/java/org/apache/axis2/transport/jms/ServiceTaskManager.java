@@ -775,7 +775,7 @@ public class ServiceTaskManager {
             try {
                 conFactory = JMSUtils.lookup(
                     getInitialContext(), ConnectionFactory.class, getConnFactoryJNDIName());
-                log.info("Connected to the JMS connection factory : " + getConnFactoryJNDIName());
+                log.debug("Connected to the JMS connection factory : " + getConnFactoryJNDIName());
             } catch (NamingException e) {
                 handleException("Error looking up connection factory : " + getConnFactoryJNDIName() +
                     " using JNDI properties : " + jmsProperties, e);
@@ -791,7 +791,7 @@ public class ServiceTaskManager {
 
                 connection.setExceptionListener(this);
                 connection.start();
-                log.info("JMS Connection for service : " + serviceName + " created and started");
+                log.debug("JMS Connection for service : " + serviceName + " created and started");
 
             } catch (JMSException e) {
                 handleException("Error acquiring a JMS connection to : " + getConnFactoryJNDIName() +

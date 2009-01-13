@@ -29,13 +29,18 @@ public class BaseConstants {
     public final static int PAUSED  = 2;
 
     /**
-     * The JMS message property specifying the SOAP Action
+     * A message property specifying the SOAP Action
      */
     public static final String SOAPACTION = "SOAPAction";
     /**
-     * The JMS message property specifying the content type
+     * A message property specifying the content type
      */
     public static final String CONTENT_TYPE = "Content-Type";
+    /** 
+     * A message context property indicating "TRUE", if a transport or the message builder
+     * has information that the current message is a fault (e.g. SOAP faults, non-HTTP 2xx, etc)
+     */
+    public static final String FAULT_MESSAGE = "FAULT_MESSAGE";
     /**
      * content type identifier for multipart / MTOM messages
      */
