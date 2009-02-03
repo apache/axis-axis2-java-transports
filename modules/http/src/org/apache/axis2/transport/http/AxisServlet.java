@@ -47,6 +47,7 @@ import org.apache.axis2.engine.ListenerManager;
 import org.apache.axis2.transport.RequestResponseTransport;
 import org.apache.axis2.transport.TransportListener;
 import org.apache.axis2.transport.TransportUtils;
+import org.apache.axis2.transport.base.QueryStringParser;
 import org.apache.axis2.transport.http.server.HttpUtils;
 import org.apache.axis2.transport.http.util.RESTUtil;
 import org.apache.axis2.util.JavaUtils;
@@ -68,7 +69,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.SocketException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -79,6 +83,10 @@ public class AxisServlet extends HttpServlet implements TransportListener {
     private static final Log log = LogFactory.getLog(AxisServlet.class);
     public static final String CONFIGURATION_CONTEXT = "CONFIGURATION_CONTEXT";
     public static final String SESSION_ID = "SessionId";
+    
+    private static final Set<String> metadataQueryParamNames = new HashSet<String>(
+            Arrays.asList("wsdl2", "wsdl", "xsd", "policy"));
+    
     protected transient ConfigurationContext configContext;
     protected transient AxisConfiguration axisConfiguration;
 
@@ -235,9 +243,7 @@ public class AxisServlet extends HttpServlet implements TransportListener {
         // 1. wsdl, wsdl2 and xsd requests
         // 2. list services requests
         // 3. REST requests.
-        if ((query != null) && (query.indexOf("wsdl2") >= 0 ||
-                query.indexOf("wsdl") >= 0 || query.indexOf("xsd") >= 0 ||
-                query.indexOf("policy") >= 0)) {
+        if ((query != null) && new QueryStringParser(query).search(metadataQueryParamNames)) {
             // handling meta data exchange stuff
             agent.initTransportListener(request);
             agent.processListService(request, response);
