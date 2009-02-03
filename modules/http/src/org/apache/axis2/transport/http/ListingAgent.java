@@ -379,7 +379,7 @@ public class ListingAgent extends AbstractAgent {
                             OutputStream out = res.getOutputStream();
                             res.setContentType("text/html");
                             String outStr = "<b>No effective policy for "
-                                            + serviceName + " servcie</b>";
+                                            + serviceName + " service</b>";
                             out.write(outStr.getBytes());
                         }
                     }
