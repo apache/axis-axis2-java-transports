@@ -262,4 +262,12 @@ public class JMSConstants {
      * A MessageContext property or client Option indicating the JMS time to live for message sent
      */
     public static final String JMS_TIME_TO_LIVE = "JMS_TIME_TO_LIVE";
+
+    /** The prefix that denotes JMSX properties */
+    public static final String JMSX_PREFIX = "JMSX";
+    /** The JMSXGroupID property */
+    public static final String JMSX_GROUP_ID = "JMSXGroupID";
+    /** The JMSXGroupSeq property */
+    public static final String JMSX_GROUP_SEQ = "JMSXGroupSeq";
+
 }

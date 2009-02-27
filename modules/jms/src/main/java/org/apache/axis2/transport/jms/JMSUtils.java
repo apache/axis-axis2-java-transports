@@ -284,6 +284,11 @@ public class JMSUtils extends BaseUtils {
 
             String name = (String) headerName;
 
+            if (name.startsWith(JMSConstants.JMSX_PREFIX) &&
+                !(name.equals(JMSConstants.JMSX_GROUP_ID) || name.equals(JMSConstants.JMSX_GROUP_SEQ))) {
+                continue;
+            }
+
             if (JMSConstants.JMS_COORELATION_ID.equals(name)) {
                 message.setJMSCorrelationID(
                         (String) headerMap.get(JMSConstants.JMS_COORELATION_ID));
