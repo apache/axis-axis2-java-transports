@@ -25,6 +25,7 @@ import org.apache.axis2.builder.SOAPBuilder;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
+import org.apache.axis2.format.DataSourceMessageBuilder;
 import org.apache.axis2.format.TextMessageBuilder;
 import org.apache.axis2.format.TextMessageBuilderAdapter;
 import org.apache.commons.logging.Log;
@@ -164,55 +165,51 @@ public class JMSUtils extends BaseUtils {
     public static void setSOAPEnvelope(Message message, MessageContext msgContext, String contentType)
         throws AxisFault, JMSException {
 
-        if (message instanceof BytesMessage) {
-            if (contentType == null) {
-                log.debug("No content type specified; assuming application/octet-stream.");
+        if (contentType == null) {
+            if (message instanceof TextMessage) {
+                contentType = "text/plain";
+            } else {
                 contentType = "application/octet-stream";
-            } else {
-                // Extract the charset encoding from the content type and
-                // set the CHARACTER_SET_ENCODING property as e.g. SOAPBuilder relies on this.
-                String charSetEnc = null;
-                try {
-                    if (contentType != null) {
-                        charSetEnc = new ContentType(contentType).getParameter("charset");
-                    }
-                } catch (ParseException ex) {
-                    // ignore
-                }
-                msgContext.setProperty(Constants.Configuration.CHARACTER_SET_ENCODING, charSetEnc);
             }
-            
-            SOAPEnvelope envelope;
+            if (log.isDebugEnabled()) {
+                log.debug("No content type specified; assuming " + contentType);
+            }
+        }
+        
+        int index = contentType.indexOf(';');
+        String type = index > 0 ? contentType.substring(0, index) : contentType;
+        Builder builder = BuilderUtil.getBuilderFromSelector(type, msgContext);
+        if (builder == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("No message builder found for type '" + type + "'. Falling back to SOAP.");
+            }
+            builder = new SOAPBuilder();
+        }
+        
+        OMElement documentElement;
+        if (message instanceof BytesMessage) {
+            // Extract the charset encoding from the content type and
+            // set the CHARACTER_SET_ENCODING property as e.g. SOAPBuilder relies on this.
+            String charSetEnc = null;
             try {
-                envelope = TransportUtils.createSOAPMessage(msgContext,
-                        new BytesMessageInputStream((BytesMessage)message), contentType);
-            } catch (XMLStreamException ex) {
-                handleException("Error parsing XML", ex);
-                return; // Make compiler happy
+                if (contentType != null) {
+                    charSetEnc = new ContentType(contentType).getParameter("charset");
+                }
+            } catch (ParseException ex) {
+                // ignore
             }
-            msgContext.setEnvelope(envelope);
-
-        } else if (message instanceof TextMessage) {
-            String type;
-            if (contentType == null) {
-                log.debug("No content type specified; assuming text/plain.");
-                type = contentType = "text/plain";
+            msgContext.setProperty(Constants.Configuration.CHARACTER_SET_ENCODING, charSetEnc);
+            
+            if (builder instanceof DataSourceMessageBuilder) {
+                documentElement = ((DataSourceMessageBuilder)builder).processDocument(
+                        new BytesMessageDataSource((BytesMessage)message), contentType,
+                        msgContext);
             } else {
-                int index = contentType.indexOf(';');
-                if (index > 0) {
-                    type = contentType.substring(0, index);
-                } else {
-                    type = contentType;
-                }
+                documentElement = builder.processDocument(
+                        new BytesMessageInputStream((BytesMessage)message), contentType,
+                        msgContext);
             }
-            Builder builder = BuilderUtil.getBuilderFromSelector(type, msgContext);
-            if (builder == null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("No message builder found for type '" + type + "'. Falling back to SOAP.");
-                }
-                builder = new SOAPBuilder();
-            }
-
+        } else if (message instanceof TextMessage) {
             TextMessageBuilder textMessageBuilder;
             if (builder instanceof TextMessageBuilder) {
                 textMessageBuilder = (TextMessageBuilder)builder;
@@ -220,10 +217,12 @@ public class JMSUtils extends BaseUtils {
                 textMessageBuilder = new TextMessageBuilderAdapter(builder);
             }
             String content = ((TextMessage)message).getText();
-            OMElement documentElement
-                    = textMessageBuilder.processDocument(content, contentType, msgContext);
-            msgContext.setEnvelope(TransportUtils.createSOAPEnvelope(documentElement));
+            documentElement = textMessageBuilder.processDocument(content, contentType, msgContext);
+        } else {
+            handleException("Unsupported JMS message type " + message.getClass().getName());
+            return; // Make compiler happy
         }
+        msgContext.setEnvelope(TransportUtils.createSOAPEnvelope(documentElement));
     }
 
     /**

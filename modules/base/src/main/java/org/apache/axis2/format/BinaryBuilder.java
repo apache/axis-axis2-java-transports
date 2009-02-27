@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import javax.activation.DataHandler;
+import javax.activation.DataSource;
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.attachments.ByteArrayDataSource;
@@ -29,7 +30,6 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.builder.Builder;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.Parameter;
 import org.apache.commons.io.IOUtils;
@@ -44,8 +44,8 @@ import org.apache.axis2.transport.base.BaseUtils;
  * be configured as a service parameter (see {@link BaseConstants#WRAPPER_PARAM}).
  * It defaults to {@link BaseConstants#DEFAULT_BINARY_WRAPPER}.
  */
-public class BinaryBuilder implements Builder {
-    public OMElement processDocument(InputStream inputStream,
+public class BinaryBuilder implements DataSourceMessageBuilder {
+    public OMElement processDocument(DataSource dataSource,
                                      String contentType,
                                      MessageContext msgContext) throws AxisFault {
         QName wrapperQName = BaseConstants.DEFAULT_BINARY_WRAPPER;
@@ -57,15 +57,22 @@ public class BinaryBuilder implements Builder {
         }
         OMFactory factory = OMAbstractFactory.getOMFactory();
         OMElement wrapper = factory.createOMElement(wrapperQName, null);
+        DataHandler dataHandler = new DataHandler(dataSource);
+        wrapper.addChild(factory.createOMText(dataHandler, true));
+        msgContext.setDoingMTOM(true);
+        return wrapper;
+    }
+
+    public OMElement processDocument(InputStream inputStream,
+                                     String contentType,
+                                     MessageContext msgContext) throws AxisFault {
+        // TODO: this could be further optimized by deferring the read operation
         byte[] msgBytes;
         try {
             msgBytes = IOUtils.toByteArray(inputStream);
         } catch (IOException ex) {
             throw new AxisFault("Unable to read message payload", ex);
         }
-        DataHandler dataHandler = new DataHandler(new ByteArrayDataSource(msgBytes));
-        wrapper.addChild(factory.createOMText(dataHandler, true));
-        msgContext.setDoingMTOM(true);
-        return wrapper;
+        return processDocument(new ByteArrayDataSource(msgBytes), contentType, msgContext);
     }
 }

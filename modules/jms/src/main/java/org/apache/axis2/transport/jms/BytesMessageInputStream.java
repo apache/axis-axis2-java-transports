@@ -23,6 +23,10 @@ import javax.jms.MessageEOFException;
 
 /**
  * Input stream that reads data from a JMS {@link BytesMessage}.
+ * Note that since the current position in the message is managed by
+ * the underlying {@link BytesMessage} object, it is not possible to
+ * use several instances of this class operating on a single
+ * {@link BytesMessage} at the same time.
  */
 public class BytesMessageInputStream extends InputStream {
     private final BytesMessage message;
