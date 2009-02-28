@@ -241,7 +241,22 @@
             <dependency>
                 <groupId>org.apache.axis2</groupId>
                 <artifactId>axis2-kernel</artifactId>
-                <version>SNAPSHOT</version>
+                <version>${axis2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-api</artifactId>
+                <version>${axiom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-impl</artifactId>
+                <version>${axiom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-dom</artifactId>
+                <version>${axiom.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.geronimo.specs</groupId>
@@ -318,7 +333,6 @@
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-kernel</artifactId>
-
         </dependency>
     </dependencies>
 
@@ -378,7 +392,7 @@
         </site>
     </distributionManagement>
     <properties>
-        <transport.version>SNAPSHOT</transport.version>
+        <axiom.version>1.2.8</axiom.version>
         <axis2.version>SNAPSHOT</axis2.version>
         <failIfNoTests>false</failIfNoTests>
     </properties>

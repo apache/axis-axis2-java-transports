@@ -80,17 +80,14 @@
         <dependency>
             <groupId>org.apache.ws.commons.axiom</groupId>
             <artifactId>axiom-api</artifactId>
-            <version>${axiom.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.ws.commons.axiom</groupId>
             <artifactId>axiom-impl</artifactId>
-            <version>${axiom.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.ws.commons.axiom</groupId>
             <artifactId>axiom-dom</artifactId>
-            <version>${axiom.version}</version>
         </dependency>
         <!-- Axis2 -->
         <dependency>
@@ -116,7 +113,6 @@
         <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
-            <version>${commons.logging.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>javax.servlet</groupId>
@@ -143,11 +139,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <properties>
-        <axiom.version>SNAPSHOT</axiom.version>
-        <axis2.version>SNAPSHOT</axis2.version>
-        <commons.logging.version>1.1</commons.logging.version>
-    </properties>
-
 </project>

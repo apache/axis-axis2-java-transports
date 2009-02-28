@@ -97,7 +97,7 @@
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-transport-base</artifactId>
-            <version>${axis2-transport-base.version}</version>
+            <version>${version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -105,8 +105,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <properties>
-        <axis2-transport-base.version>SNAPSHOT</axis2-transport-base.version>
-    </properties>
 </project>
