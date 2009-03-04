@@ -37,6 +37,20 @@
         <sourceDirectory>src</sourceDirectory>
         <testSourceDirectory>test</testSourceDirectory>
         <plugins>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-surefire-plugin</artifactId>
+              <version>2.3</version>
+              <configuration>
+                  <systemProperties>
+                      <property>
+                          <name>log4j.configuration</name>
+                          <value>file:log4j.properties</value>
+                      </property>
+                  </systemProperties>
+              </configuration>
+          </plugin>
+
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
@@ -99,6 +113,14 @@
             <artifactId>axis2-transport-base</artifactId>
             <version>${version}</version>
         </dependency>
+
+      <dependency>
+          <groupId>org.apache.axis2</groupId>
+          <artifactId>axis2-transport-testkit</artifactId>
+          <version>${pom.version}</version>
+          <scope>test</scope>
+      </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

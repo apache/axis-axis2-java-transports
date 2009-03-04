@@ -144,6 +144,19 @@
                             <tagBase>https://svn.apache.org/repos/asf/webservices/commons/tags/transport</tagBase>
                         </configuration>
                     </plugin>
+
+                  <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <executions>
+                      <execution>
+                        <goals>
+                          <goal>sign</goal>
+                        </goals>
+                      </execution>
+                    </executions>
+                  </plugin>
+
                 </plugins>
             </build>
         </profile>
@@ -209,7 +222,6 @@
                     <attach>true</attach>
                 </configuration>
             </plugin>
-            
         </plugins>
     </build>
     <pluginRepositories>
