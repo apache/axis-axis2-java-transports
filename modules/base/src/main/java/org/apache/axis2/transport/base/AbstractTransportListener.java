@@ -197,6 +197,7 @@ public abstract class AbstractTransportListener implements TransportListener {
                     exposedTransports.add(transportName);
                 }
             }
+            service.setEnableAllTransports(false);
             service.setExposedTransports(exposedTransports);
         } else {
             service.removeExposedTransport(getTransportName());
