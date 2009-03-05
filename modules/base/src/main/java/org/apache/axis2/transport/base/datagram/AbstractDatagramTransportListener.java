@@ -104,6 +104,12 @@ public abstract class AbstractDatagramTransportListener<E extends DatagramEndpoi
     }
 
     public EndpointReference[] getEPRsForService(String serviceName, String ip) throws AxisFault {
+
+        // strip out the endpoint name if present
+        if (serviceName.indexOf('.') != -1) {
+            serviceName = serviceName.substring(0, serviceName.indexOf('.'));
+        }
+
         E endpoint = endpoints.get(serviceName);
         if (endpoint == null) {
             return null;
