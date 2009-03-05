@@ -45,7 +45,6 @@
         <module>modules/mail</module>
         <module>modules/jms</module>
         <module>modules/testkit</module>
-        <module>modules/tests</module>
     </modules>
 
     <profiles>
