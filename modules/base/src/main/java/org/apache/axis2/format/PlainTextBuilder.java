@@ -21,12 +21,15 @@ package org.apache.axis2.format;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.nio.charset.Charset;
 
+import javax.activation.DataSource;
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.impl.llom.OMSourcedElementImpl;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.builder.BuilderUtil;
 import org.apache.axis2.context.MessageContext;
@@ -49,8 +52,8 @@ import org.apache.axis2.transport.base.BaseUtils;
  * is specified on the content type, the default charset encoding specified by
  * {@link MessageContext#DEFAULT_CHAR_SET_ENCODING} is used.
  */
-public class PlainTextBuilder implements TextMessageBuilder {
-    private OMElement buildMessage(String textPayload, MessageContext msgContext) {
+public class PlainTextBuilder implements TextMessageBuilder, DataSourceMessageBuilder {
+    private static QName getWrapperQName(MessageContext msgContext) {
         QName wrapperQName = BaseConstants.DEFAULT_TEXT_WRAPPER;
         if (msgContext.getAxisService() != null) {
             Parameter wrapperParam
@@ -58,10 +61,13 @@ public class PlainTextBuilder implements TextMessageBuilder {
             if (wrapperParam != null) {
                 wrapperQName = BaseUtils.getQNameFromString(wrapperParam.getValue());
             }
-        }        
-
+        }
+        return wrapperQName;
+    }
+    
+    private OMElement buildMessage(String textPayload, MessageContext msgContext) {
         OMFactory factory = OMAbstractFactory.getOMFactory();
-        OMElement wrapper = factory.createOMElement(wrapperQName, null);
+        OMElement wrapper = factory.createOMElement(getWrapperQName(msgContext), null);
         wrapper.addChild(factory.createOMText(textPayload));
         return wrapper;
     }
@@ -92,5 +98,16 @@ public class PlainTextBuilder implements TextMessageBuilder {
                                      String contentType,
                                      MessageContext msgContext) throws AxisFault {
         return buildMessage(content, msgContext);
+    }
+
+    public OMElement processDocument(DataSource dataSource,
+                                     String contentType,
+                                     MessageContext msgContext) throws AxisFault {
+        
+        OMFactory factory = OMAbstractFactory.getOMFactory();
+        Charset cs = Charset.forName(BuilderUtil.getCharSetEncoding(contentType));
+        QName wrapperQName = getWrapperQName(msgContext);
+        return new OMSourcedElementImpl(wrapperQName, factory,
+                new WrappedTextNodeOMDataSource(wrapperQName, dataSource, cs));
     }
 }

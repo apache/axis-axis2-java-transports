@@ -37,19 +37,39 @@ import org.apache.axis2.context.MessageContext;
  * provide the message payload as a data source, then the method defined by this
  * interface should be preferred over the method defined by {@link Builder}.
  * <p>
- * When a message builder is invoked through the basic {@link Builder} interface,
- * it is the responsibility of the transport to close the input stream once the
- * message has been processed, and the builder is not required to consume the input
- * stream immediately. On the other hand, when the builder is invoked through this extension
- * interface, the transport is only responsible for ensuring that the {@link DataSource}
- * remains valid for the whole lifecycle of the message. It is the responsibility of the
- * builder to acquire the input stream and to make sure that it is closed when no longer
- * needed. This important difference is the reason why there is no
- * DataSourceMessageBuilderAdapter class.
- * <p>
  * Implementing this interface helps optimizing message processing with transports
  * that use messaging providers that store messages in memory or on the file system.
  * Examples are JMS and VFS.
+ * <p>
+ * The builder will typically expose the data source directly or indirectly through
+ * the returned {@link OMElement}, e.g. by adding to the tree an {@link org.apache.axiom.om.OMText}
+ * or {@link org.apache.axiom.om.OMDataSource} node referencing the data source.
+ * This means that the builder will not be able to guarantee that all streams requested
+ * from the data source are properly closed. Note that code accessing the returned
+ * {@link OMElement} can't be expected to take care of this since in many cases the fact
+ * that a data source is being used is completely transparent to that code.
+ * It is therefore the responsibility of the transport to make sure that all resources linked to
+ * the data source itself as well as any open stream requested from that data source are properly
+ * released after the message has been processed. Depending on the type of transport, there are
+ * three possible cases:
+ * <ol>
+ *   <li>All resources allocated to the data source or streams requested from it are
+ *       memory based. In that case the garbage collector will take care of freeing
+ *       these resources and the transport should simply pass the data source object
+ *       to the builder.</li>
+ *   <li>There are operation system resources linked to the data source and open
+ *       streams will become invalid when these resources are freed, i.e.
+ *       it is not required that all streams be closed explicitly.
+ *       In this case the transport only needs to take care to properly dispose of
+ *       the data source after the message has been processed by the Axis2 engine.</li>
+ *   <li>Requesting a stream from the data source allocates operation system resources
+ *       (e.g. a network connection) that remain linked to the stream, i.e. all streams requested
+ *       from the data source must be closed properly. In that case the transport should use
+ *       {@link ManagedDataSourceFactory#create(DataSource)} to wrap the original data source
+ *       before passing it to the builder. After the message has been processed it should
+ *       then call {@link ManagedDataSource#destroy()} on the wrapper to close all remaining
+ *       open streams.</li>
+ * </ol>
  */
 public interface DataSourceMessageBuilder extends Builder {
     public OMElement processDocument(DataSource dataSource, String contentType,
