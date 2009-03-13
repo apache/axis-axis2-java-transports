@@ -16,49 +16,54 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
+
 package org.apache.axis2.format;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Random;
 
 import javax.activation.DataSource;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axis2.transport.base.streams.ReaderInputStream;
+public class RandomDataSource implements DataSource {
+    private final long seed;
+    private final int rangeStart;
+    private final int rangeEnd;
+    private final int length;
 
-/**
- * Data source that represents the text of a given {@link OMElement}.
- * <p>
- * The expression
- * <pre>new TextFromElementDataSource(element, charset, contentType)</pre>
- * produces a DataSource implementation that is equivalent to
- * <pre>new ByteArrayDataSource(element.getText().getBytes(charset), contentType)</pre>
- * but that is more efficient.
- */
-public class TextFromElementDataSource implements DataSource {
-    private final OMElement element;
-    private final String charset;
-    private final String contentType;
-    
-    public TextFromElementDataSource(OMElement element, String charset, String contentType) {
-        this.element = element;
-        this.charset = charset;
-        this.contentType = contentType;
-    }
-    
-    public String getContentType() {
-        return contentType;
+    public RandomDataSource(long seed, int rangeStart, int rangeEnd, int length) {
+        this.seed = seed;
+        this.rangeStart = rangeStart;
+        this.rangeEnd = rangeEnd;
+        this.length = length;
     }
 
     public String getName() {
         return null;
     }
-
-    public InputStream getInputStream() throws IOException {
-        return new ReaderInputStream(ElementHelper.getTextAsStream(element, true), charset);
+    
+    public String getContentType() {
+        return null;
     }
-
+    
+    public InputStream getInputStream() throws IOException {
+        final Random random = new Random(seed);
+        return new InputStream() {
+            private int position;
+            
+            @Override
+            public int read() throws IOException {
+                if (position == length) {
+                    return -1;
+                } else {
+                    position++;
+                    return random.nextInt(rangeEnd-rangeStart) + rangeStart;
+                }
+            }
+        };
+    }
+    
     public OutputStream getOutputStream() throws IOException {
         throw new UnsupportedOperationException();
     }

@@ -35,7 +35,6 @@ import java.net.URL;
 
 import javax.activation.DataSource;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 
 public class PlainTextFormatter implements MessageFormatterEx {
 
@@ -50,13 +49,7 @@ public class PlainTextFormatter implements MessageFormatterEx {
         if (BaseConstants.DEFAULT_TEXT_WRAPPER.equals(textElt.getQName())) {
 	        try {
 		        Writer out = new OutputStreamWriter(outputStream, format.getCharSetEncoding());
-                XMLStreamReader reader = preserve ? textElt.getXMLStreamReader() : textElt.getXMLStreamReaderWithoutCaching();
-                while (reader.hasNext()) {
-                	int eventType = reader.next();
-                    if (eventType == XMLStreamReader.CHARACTERS || eventType == XMLStreamReader.CDATA) {
-                        out.write(reader.getText());
-                    }
-                }
+		        ElementHelper.writeTextTo(textElt, out, preserve);
                 out.flush();
 	        } catch (IOException e) {
 	            throw new AxisFault("Error writing text message to stream", e);
