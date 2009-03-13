@@ -39,23 +39,23 @@ import javax.xml.stream.XMLStreamException;
 public class PlainTextFormatter implements MessageFormatterEx {
 
     public byte[] getBytes(MessageContext messageContext, OMOutputFormat format) throws AxisFault {
-    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    	writeTo(messageContext, format, baos, true);
-    	return baos.toByteArray();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        writeTo(messageContext, format, baos, true);
+        return baos.toByteArray();
     }
 
     public void writeTo(MessageContext messageContext, OMOutputFormat format, OutputStream outputStream, boolean preserve) throws AxisFault {
         OMElement textElt = messageContext.getEnvelope().getBody().getFirstElement();
         if (BaseConstants.DEFAULT_TEXT_WRAPPER.equals(textElt.getQName())) {
-	        try {
-		        Writer out = new OutputStreamWriter(outputStream, format.getCharSetEncoding());
-		        ElementHelper.writeTextTo(textElt, out, preserve);
+            try {
+                Writer out = new OutputStreamWriter(outputStream, format.getCharSetEncoding());
+                ElementHelper.writeTextTo(textElt, out, preserve);
                 out.flush();
-	        } catch (IOException e) {
-	            throw new AxisFault("Error writing text message to stream", e);
-	        } catch (XMLStreamException e) {
-				throw new AxisFault("Error extracting the text payload from the message", e);
-			}
+            } catch (IOException e) {
+                throw new AxisFault("Error writing text message to stream", e);
+            } catch (XMLStreamException e) {
+                throw new AxisFault("Error extracting the text payload from the message", e);
+            }
         }
     }
 
