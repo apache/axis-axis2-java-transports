@@ -172,6 +172,21 @@
         </dependency>        
     </dependencies>
     
+    <repositories>
+        <!-- this is for qpid -->
+        <repository>
+            <id>apache-incubating</id>
+            <name>Apache Maven 2 Incubating Repository</name>
+            <url>http://people.apache.org/repo/m2-incubating-repository/</url>
+            <releases>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <updatePolicy>interval:60</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
+    
     <properties>
         <jms-1.1-spec.version>1.1</jms-1.1-spec.version>
         <jta-spec.version>1.0</jta-spec.version>
