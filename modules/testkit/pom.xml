@@ -173,6 +173,7 @@
                                 </docletArtifact>
                             </docletArtifacts>
                             <doclet>org.apache.axis2.transport.testkit.doclet.ResourceInfoDoclet</doclet>
+                            <useStandardDocletOptions>false</useStandardDocletOptions>
                             <show>private</show>
                             <additionalparam>-out ${project.build.directory}/resource-info.dat</additionalparam>
                         </configuration>
