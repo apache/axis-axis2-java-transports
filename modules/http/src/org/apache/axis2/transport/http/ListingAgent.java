@@ -20,7 +20,6 @@
 
 package org.apache.axis2.transport.http;
 
-import org.apache.axiom.attachments.utils.IOUtils;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.context.ConfigurationContext;
@@ -187,9 +186,12 @@ public class ListingAgent extends AbstractAgent {
                 if (stream != null) {
                     OutputStream out = res.getOutputStream();
                     res.setContentType("text/xml");
-                    copy(stream, out);
-                    out.flush();
-                    out.close();
+                    try {
+                        copy(stream, out);
+                    } finally {
+                        try { stream.close(); } catch (IOException e) {}
+                        try { out.close(); } catch (IOException e) {}
+                    }
                     return;
                 }
             }
@@ -203,10 +205,10 @@ public class ListingAgent extends AbstractAgent {
      * @param ostream the <code>OutputStream</code>
      */
     public static void copy(InputStream stream, OutputStream ostream) throws IOException {
-        int nextValue = stream.read();
-        while (-1 != nextValue) {
-            ostream.write(nextValue);
-            nextValue = stream.read();
+        byte[] buffer = new byte[4096];
+        int count;
+        while ((count = stream.read(buffer)) > 0) {
+            ostream.write(buffer, 0, count);
         }
     }
 
@@ -248,26 +250,29 @@ public class ListingAgent extends AbstractAgent {
         if ((services != null) && !services.isEmpty()) {
             Object serviceObj = services.get(serviceName);
             if (serviceObj != null) {
+                AxisService axisService = (AxisService) serviceObj;
                 boolean isHttp = "http".equals(req.getScheme());
                 if (wsdl2 >= 0) {
                     res.setContentType("text/xml");
                     String ip = extractHostAndPort(url, isHttp);
                     String wsdlName = req.getParameter("wsdl2");
                     if (wsdlName != null && wsdlName.length()>0) {
-                        InputStream in = ((AxisService) serviceObj).getClassLoader()
+                        InputStream in = axisService.getClassLoader()
                                 .getResourceAsStream(DeploymentConstants.META_INF + "/" + wsdlName);
                         if (in != null) {
                             OutputStream out = res.getOutputStream();
-                            out.write(IOUtils.getStreamAsByteArray(in));
-                            out.flush();
-                            out.close();
+                            try {
+                                copy(in, out);
+                            } finally {
+                                try { in.close(); } catch (IOException e) {}
+                                try { out.close(); } catch (IOException e) {}
+                            }
                         } else {
                             res.sendError(HttpServletResponse.SC_NOT_FOUND);
                         }
                     } else {
                         OutputStream out = res.getOutputStream();
-                        ((AxisService) serviceObj)
-                                .printWSDL2(out, ip);
+                        axisService.printWSDL2(out, ip);
                         out.flush();
                         out.close();
                     }
@@ -279,19 +284,18 @@ public class ListingAgent extends AbstractAgent {
                     String wsdlName = req.getParameter("wsdl");
 
                     if (wsdlName != null && wsdlName.length()>0) {
-                        AxisService axisServce = (AxisService) serviceObj;
-                        axisServce.printUserWSDL(out, wsdlName);
+                        axisService.printUserWSDL(out, wsdlName);
                         out.flush();
                         out.close();
                     } else {
-                        ((AxisService) serviceObj).printWSDL(out, ip);
+                        axisService.printWSDL(out, ip);
                         out.flush();
                         out.close();
                     }
                     return;
                 } else if (xsd >= 0) {
                     res.setContentType("text/xml");
-                    int ret = ((AxisService) serviceObj).printXSD(res.getOutputStream(), req.getParameter("xsd"));
+                    int ret = axisService.printXSD(res.getOutputStream(), req.getParameter("xsd"));
                     if (ret == 0) {
                         //multiple schemas are present and the user specified
                         //no name - in this case we cannot possibly pump a schema
@@ -313,7 +317,7 @@ public class ListingAgent extends AbstractAgent {
                     if (idParam != null) {
                         // Id is set
 
-                        Policy targetPolicy = findPolicy(idParam, (AxisService) serviceObj);
+                        Policy targetPolicy = findPolicy(idParam, axisService);
 
                         if (targetPolicy != null) {
                             XMLStreamWriter writer;
@@ -349,7 +353,7 @@ public class ListingAgent extends AbstractAgent {
 
                     } else {
 
-                        PolicyInclude policyInclude = ((AxisService) serviceObj).getPolicyInclude();
+                        PolicyInclude policyInclude = axisService.getPolicyInclude();
                         Policy effecPolicy = policyInclude.getEffectivePolicy();
 
                         if (effecPolicy != null) {
