@@ -29,6 +29,7 @@ import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.PolicyInclude;
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.util.ExternalPolicySerializer;
+import org.apache.axis2.util.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Policy;
@@ -186,12 +187,7 @@ public class ListingAgent extends AbstractAgent {
                 if (stream != null) {
                     OutputStream out = res.getOutputStream();
                     res.setContentType("text/xml");
-                    try {
-                        copy(stream, out);
-                    } finally {
-                        try { stream.close(); } catch (IOException e) {}
-                        try { out.close(); } catch (IOException e) {}
-                    }
+                    IOUtils.copy(stream, out, true);
                     return;
                 }
             }
@@ -205,11 +201,7 @@ public class ListingAgent extends AbstractAgent {
      * @param ostream the <code>OutputStream</code>
      */
     public static void copy(InputStream stream, OutputStream ostream) throws IOException {
-        byte[] buffer = new byte[4096];
-        int count;
-        while ((count = stream.read(buffer)) > 0) {
-            ostream.write(buffer, 0, count);
-        }
+        IOUtils.copy(stream, ostream, false);
     }
 
     public String extractServiceName(String urlString) {
@@ -256,25 +248,12 @@ public class ListingAgent extends AbstractAgent {
                     res.setContentType("text/xml");
                     String ip = extractHostAndPort(url, isHttp);
                     String wsdlName = req.getParameter("wsdl2");
-                    if (wsdlName != null && wsdlName.length()>0) {
-                        InputStream in = axisService.getClassLoader()
-                                .getResourceAsStream(DeploymentConstants.META_INF + "/" + wsdlName);
-                        if (in != null) {
-                            OutputStream out = res.getOutputStream();
-                            try {
-                                copy(in, out);
-                            } finally {
-                                try { in.close(); } catch (IOException e) {}
-                                try { out.close(); } catch (IOException e) {}
-                            }
-                        } else {
-                            res.sendError(HttpServletResponse.SC_NOT_FOUND);
-                        }
-                    } else {
-                        OutputStream out = res.getOutputStream();
-                        axisService.printWSDL2(out, ip);
-                        out.flush();
-                        out.close();
+                    
+                    int ret = axisService.printWSDL2(res.getOutputStream(), ip, wsdlName);
+                    if (ret == 0) {
+                        res.sendRedirect("");
+                    } else if (ret == -1) {
+                        res.sendError(HttpServletResponse.SC_NOT_FOUND);
                     }
                     return;
                 } else if (wsdl >= 0) {
