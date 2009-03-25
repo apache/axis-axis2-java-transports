@@ -306,33 +306,32 @@ public abstract class AbstractTransportListener implements TransportListener {
 
         // send the message context through the axis engine
         try {
-                try {
-                    // check if an callback has register for this message
-                    Map callBackMap = (Map) msgCtx.getConfigurationContext().getProperty(BaseConstants.CALLBACK_TABLE);
-                    // FIXME: transport headers are protocol specific; the correlation ID should be passed as argument to this method
-                    Object replyToMessageID = trpHeaders.get(BaseConstants.HEADER_IN_REPLY_TO);
-                    // if there is a call back register with this replyto ID then this has
-                    // to handle as a synchronized message
-                    if ((replyToMessageID != null) && (callBackMap.get(replyToMessageID) != null)) {
-                        SynchronousCallback synchronousCallback = (SynchronousCallback) callBackMap.get(replyToMessageID);
-                        synchronousCallback.setInMessageContext(msgCtx);
-                        callBackMap.remove(replyToMessageID);
-                    } else {
-                        AxisEngine.receive(msgCtx);
-                    }
+            // check if an Axis2 callback has been registered for this message
+            Map callBackMap = (Map) msgCtx.getConfigurationContext().
+                getProperty(BaseConstants.CALLBACK_TABLE);
+            // FIXME: transport headers are protocol specific; the correlation ID should be
+            // passed as argument to this method
+            Object replyToMessageID = trpHeaders.get(BaseConstants.HEADER_IN_REPLY_TO);
+            // if there is a callback registerd with this replyto ID then this has to
+            // be handled as a synchronous incoming message, via the
+            if (replyToMessageID != null && callBackMap != null &&
+                callBackMap.get(replyToMessageID) != null) {
 
-                } catch (AxisFault e) {
-                    e.printStackTrace();
-                    if (log.isDebugEnabled()) {
-                        log.debug("Error receiving message", e);
-                    }
-                    if (msgCtx.isServerSide()) {
-                        AxisEngine.sendFault(MessageContextBuilder.createFaultMessageContext(msgCtx, e));
-                    }
-                }
-        } catch (AxisFault axisFault) {
-            logException("Error processing received message", axisFault);
-            throw axisFault;
+                SynchronousCallback synchronousCallback =
+                    (SynchronousCallback) callBackMap.get(replyToMessageID);
+                synchronousCallback.setInMessageContext(msgCtx);
+                callBackMap.remove(replyToMessageID);
+            } else {
+                AxisEngine.receive(msgCtx);
+            }
+
+        } catch (AxisFault e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error receiving message", e);
+            }
+            if (msgCtx.isServerSide()) {
+                AxisEngine.sendFault(MessageContextBuilder.createFaultMessageContext(msgCtx, e));
+            }
         }
     }
 

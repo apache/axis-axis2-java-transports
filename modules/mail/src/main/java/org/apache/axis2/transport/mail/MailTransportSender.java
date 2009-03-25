@@ -205,13 +205,15 @@ public class MailTransportSender extends AbstractTransportSender
             TransportInDescription mailTo =
                     configContext.getAxisConfiguration().getTransportIn(MailConstants.TRANSPORT_NAME);
             if (mailTo == null) {
-                handleException("Could not found the transport receiver for " + MailConstants.TRANSPORT_NAME);
+                handleException("Could not find the transport receiver for " +
+                    MailConstants.TRANSPORT_NAME);
             }
             configContext.getListenerManager().addListener(mailTo, false);
         }
 
         SynchronousCallback synchronousCallback = new SynchronousCallback(msgContext);
-        Map callBackMap = (Map) msgContext.getConfigurationContext().getProperty(BaseConstants.CALLBACK_TABLE);
+        Map callBackMap = (Map) msgContext.getConfigurationContext().
+            getProperty(BaseConstants.CALLBACK_TABLE);
         callBackMap.put(mailMessageID, synchronousCallback);
         synchronized (synchronousCallback) {
             try {
