@@ -91,6 +91,10 @@ public class BaseConstants {
      */
     public static final String TRANSPORT_POLL_INTERVAL = "transport.PollInterval";
     /**
+     * Could polling take place in parallel, i.e. starting at fixed intervals?
+     */
+    public static final String TRANSPORT_POLL_IN_PARALLEL = "transport.ConcurrentPollingAllowed";
+    /**
      * The default poll interval in milliseconds.
      */
     public static final int DEFAULT_POLL_INTERVAL = 5 * 60 * 1000; // 5 mins by default

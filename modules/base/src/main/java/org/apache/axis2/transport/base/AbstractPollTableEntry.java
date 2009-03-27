@@ -41,6 +41,8 @@ public abstract class AbstractPollTableEntry {
     private long pollInterval;
     /** state of the last poll */
     private int lastPollState;
+    /** can polling occur in parallel? */
+    private boolean concurrentPollingAllowed = false;
     /** The timer task that will trigger the next poll */
     TimerTask timerTask;
     /** Flag indicating whether polling has been canceled. */
@@ -86,5 +88,13 @@ public abstract class AbstractPollTableEntry {
 
     public void setLastPollState(int lastPollState) {
         this.lastPollState = lastPollState;
+    }
+
+    public boolean isConcurrentPollingAllowed() {
+        return concurrentPollingAllowed;
+    }
+
+    public void setConcurrentPollingAllowed(boolean concurrentPollingAllowed) {
+        this.concurrentPollingAllowed = concurrentPollingAllowed;
     }
 }

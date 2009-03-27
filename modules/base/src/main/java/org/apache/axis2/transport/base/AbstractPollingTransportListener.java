@@ -42,7 +42,7 @@ public abstract class AbstractPollingTransportListener<T extends AbstractPollTab
     @Override
     public void init(ConfigurationContext cfgCtx,
             TransportInDescription transportIn) throws AxisFault {
-        
+
         timer = new Timer("PollTimer");
         super.init(cfgCtx, transportIn);
         T entry = createPollTableEntry(transportIn);
@@ -96,9 +96,12 @@ public abstract class AbstractPollingTransportListener<T extends AbstractPollTab
                         } else {
                             poll(entry);
                         }
-                        synchronized (entry) {
-                            if (!entry.canceled) {
-                                schedulePoll(entry, pollInterval);
+
+                        if (!entry.isConcurrentPollingAllowed()) {
+                            synchronized (entry) {
+                                if (!entry.canceled) {
+                                    schedulePoll(entry, pollInterval);
+                                }
                             }
                         }
                     }
@@ -106,7 +109,11 @@ public abstract class AbstractPollingTransportListener<T extends AbstractPollTab
             }
         };
         entry.timerTask = timerTask;
-        timer.schedule(timerTask, pollInterval);
+        if (entry.isConcurrentPollingAllowed()) {
+            timer.scheduleAtFixedRate(timerTask, pollInterval, pollInterval);
+        } else {
+            timer.schedule(timerTask, pollInterval);
+        }
     }
 
     private void cancelPoll(T entry) {

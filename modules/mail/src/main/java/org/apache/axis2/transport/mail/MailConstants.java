@@ -39,6 +39,8 @@ public class MailConstants {
     public static final String TRANSPORT_MAIL_MOVE_AFTER_PROCESS = "transport.mail.MoveAfterProcess";
     public static final String TRANSPORT_MAIL_MOVE_AFTER_FAILURE = "transport.mail.MoveAfterFailure";
 
+    public static final String TRANSPORT_MAIL_PROCESS_IN_PARALLEL = "transport.mail.ProcessInParallel";
+
     public static final String MAX_RETRY_COUNT   = "transport.mail.MaxRetryCount";
     public static final String RECONNECT_TIMEOUT = "transport.mail.ReconnectTimeout";
 

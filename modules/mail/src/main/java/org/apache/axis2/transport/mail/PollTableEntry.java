@@ -22,6 +22,7 @@ package org.apache.axis2.transport.mail;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.Collections;
 
 import javax.mail.Session;
 import javax.mail.internet.AddressException;
@@ -76,6 +77,10 @@ public class PollTableEntry extends AbstractPollTableEntry {
     private String moveAfterProcess;
     /** folder to move the email after failure */
     private String moveAfterFailure;
+    /** Should mail be processed in parallel? e.g. with IMAP */
+    private boolean processingMailInParallel = false;
+    /** UIDs of messages currently being processed */
+    private List<String> uidList = Collections.synchronizedList(new ArrayList<String>());
 
     private int maxRetryCount;
     private long reconnectTimeout;
@@ -251,5 +256,25 @@ public class PollTableEntry extends AbstractPollTableEntry {
         } else {
             return true;
         }
+    }
+
+    public boolean isProcessingMailInParallel() {
+        return processingMailInParallel;
+    }
+
+    public void setProcessingMailInParallel(boolean processingMailInParallel) {
+        this.processingMailInParallel = processingMailInParallel;
+    }
+
+    public synchronized void processingUID(String uid) {
+        this.uidList.add(uid);
+    }
+
+    public synchronized boolean isProcessingUID(String uid) {
+        return this.uidList.contains(uid);
+    }
+
+    public synchronized void removeUID(String uid) {
+        this.uidList.remove(uid);
     }
 }
