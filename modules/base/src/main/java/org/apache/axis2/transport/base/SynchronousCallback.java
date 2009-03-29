@@ -40,6 +40,10 @@ public class SynchronousCallback {
         // if some other thread has access and complete then return without doing any thing.
         // thread should have activate by the first message.
         if (!isComplete) {
+            // this code is invoked only if the code use with axis2 at the client side
+            // when axis2 client receive messages it waits in the sending thread until the response comes.
+            // so this thread only notify the waiting thread and hence we need to build the message here.
+            inMessageContext.getEnvelope().build();
             OperationContext operationContext = outMessageContext.getOperationContext();
             MessageContext msgCtx =
                     operationContext.getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE);
