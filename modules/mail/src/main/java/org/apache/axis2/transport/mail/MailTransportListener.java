@@ -31,6 +31,7 @@ import org.apache.axis2.description.ParameterInclude;
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.TransportUtils;
+import org.apache.axis2.transport.RequestResponseTransport;
 import org.apache.axis2.transport.base.AbstractPollingTransportListener;
 import org.apache.axis2.transport.base.BaseConstants;
 import org.apache.axis2.transport.base.BaseUtils;
@@ -454,6 +455,8 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
 
         // save out transport information
         msgContext.setProperty(Constants.OUT_TRANSPORT_INFO, outInfo);
+        // this property only useful for supporting smtp with Sandesha2.
+        msgContext.setProperty(RequestResponseTransport.TRANSPORT_CONTROL, new MailRequestResponseTransport());
 
         // set message context From
         if (outInfo.getFromAddress() != null) {

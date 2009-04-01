@@ -367,11 +367,13 @@ public class MailTransportSender extends AbstractTransportSender
             message.setSubject(BaseConstants.SOAPACTION + ": " + msgContext.getSoapAction());
         }
 
+        //TODO: use a combined message id for smtp so that it generates a unique id while
+        // being able to support asynchronous communication.
         // if a custom message id is set, use it
-        if (msgContext.getMessageID() != null) {
-            message.setHeader(MailConstants.MAIL_HEADER_MESSAGE_ID, msgContext.getMessageID());
-            message.setHeader(MailConstants.MAIL_HEADER_X_MESSAGE_ID, msgContext.getMessageID());
-        }
+//        if (msgContext.getMessageID() != null) {
+//            message.setHeader(MailConstants.MAIL_HEADER_MESSAGE_ID, msgContext.getMessageID());
+//            message.setHeader(MailConstants.MAIL_HEADER_X_MESSAGE_ID, msgContext.getMessageID());
+//        }
 
         // if this is a reply, set reference to original message
         if (outInfo.getRequestMessageID() != null) {
