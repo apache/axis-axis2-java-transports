@@ -47,7 +47,8 @@ public abstract class AbstractPollingTransportListener<T extends AbstractPollTab
         super.init(cfgCtx, transportIn);
         T entry = createPollTableEntry(transportIn);
         if (entry != null) {
-            schedulePoll(entry, getPollInterval(transportIn));
+            entry.setPollInterval(getPollInterval(transportIn));
+            schedulePoll(entry);
             pollTable.add(entry);
         }
     }
@@ -82,7 +83,8 @@ public abstract class AbstractPollingTransportListener<T extends AbstractPollTab
      * @param entry the poll table entry with the configuration for the service
      * @param pollInterval the interval between successive polls in milliseconds
      */
-    void schedulePoll(final T entry, final long pollInterval) {
+    void schedulePoll(final T entry) {
+        final long pollInterval = entry.getPollInterval();
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
@@ -95,14 +97,6 @@ public abstract class AbstractPollingTransportListener<T extends AbstractPollTab
                             }
                         } else {
                             poll(entry);
-                        }
-
-                        if (!entry.isConcurrentPollingAllowed()) {
-                            synchronized (entry) {
-                                if (!entry.canceled) {
-                                    schedulePoll(entry, pollInterval);
-                                }
-                            }
                         }
                     }
                 });
@@ -123,8 +117,18 @@ public abstract class AbstractPollingTransportListener<T extends AbstractPollTab
         }
         pollTable.remove(entry);
     }
-    
+
     protected abstract void poll(T entry);
+
+    protected void onPollCompletion(T entry) {
+        if (!entry.isConcurrentPollingAllowed()) {
+            synchronized (entry) {
+                if (!entry.canceled) {
+                    schedulePoll(entry);
+                }
+            }
+        }
+    }
 
     /**
      * method to log a failure to the log file and to update the last poll status and time
@@ -142,6 +146,7 @@ public abstract class AbstractPollingTransportListener<T extends AbstractPollTab
         entry.setLastPollState(AbstractPollTableEntry.FAILED);
         entry.setLastPollTime(now);
         entry.setNextPollTime(now + entry.getPollInterval());
+        onPollCompletion(entry);
     }
 
     private long getPollInterval(ParameterInclude params) {
@@ -173,7 +178,8 @@ public abstract class AbstractPollingTransportListener<T extends AbstractPollTab
             throw new AxisFault("The service has no configuration for the transport");
         }
         entry.setService(service);
-        schedulePoll(entry, getPollInterval(service));
+        entry.setPollInterval(getPollInterval(service));
+        schedulePoll(entry);
         pollTable.add(entry);
     }
     
