@@ -40,7 +40,6 @@
         <module>modules/http</module>
         <module>modules/tcp</module>
         <module>modules/udp</module>
-        <module>modules/local</module>
         <module>modules/xmpp</module>
         <module>modules/mail</module>
         <module>modules/jms</module>
@@ -66,13 +65,11 @@
                                     <tasks>
                                         <mkdir dir="target/lib"/>
                                         <jar destfile="target/lib/axis2-transports-${pom.version}.jar">
-                                            <fileset dir="modules/http/target/classes"/>
                                             <fileset dir="modules/jms/target/classes"/>
-                                            <fileset dir="modules/local/target/classes"/>
                                             <fileset dir="modules/tcp/target/classes"/>
                                             <fileset dir="modules/xmpp/target/classes"/>
                                             <fileset dir="modules/base/target/classes"/>
-							  <fileset dir="modules/mail/target/classes"/>
+                                            <fileset dir="modules/mail/target/classes"/>
                                         </jar>
                                     </tasks>
                                 </configuration>
@@ -103,13 +100,11 @@
                                     <tasks>
                                         <mkdir dir="target/lib"/>
                                         <jar destfile="target/lib/axis2-transports-${pom.version}.jar">
-                                           <fileset dir="modules/http/target/classes"/>
                                             <fileset dir="modules/jms/target/classes"/>
-                                            <fileset dir="modules/local/target/classes"/>
                                             <fileset dir="modules/tcp/target/classes"/>
                                             <fileset dir="modules/xmpp/target/classes"/>
- 							  <fileset dir="modules/base/target/classes"/>
-							  <fileset dir="modules/mail/target/classes"/>
+                                            <fileset dir="modules/base/target/classes"/>
+                                            <fileset dir="modules/mail/target/classes"/>
                                         </jar>
                                     </tasks>
                                 </configuration>
@@ -149,7 +144,6 @@
                                                           datafile="target/cobertura.ser"
                                                           destdir="${project.build.directory}/cobertura">
                                             <fileset dir="modules/base/src/main/java"/>
-                                            <fileset dir="modules/http/src"/>
                                             <fileset dir="modules/jms/src/main/java"/>
                                             <fileset dir="modules/mail/src/main/java"/>
                                         </cobertura-report>
