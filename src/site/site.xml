@@ -32,10 +32,8 @@
         <menu name="Transport">
             <item name="About" href="index.html"/>
             <item name="Documentation">
-                <item name="HTTP" href="http-transport.html"/>
                 <item name="JMS" href="jms.html"/>
                 <item name="Mail" href="mail.html"/>
-                <item name="Local" href="local.html"/>
                 <item name="TCP" href="tcp-transport.html"/>
                 <item name="XMPP" href="xmpp.html"/>
             </item>
