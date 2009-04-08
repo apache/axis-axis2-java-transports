@@ -63,6 +63,23 @@ JMS Transport
 
     As explained below, for the JMS sender configuration it is not mandatory (but recommended) to specify
     connection factories.
+    
+    The parameters that may appear in a connection factory configuration are defined as follows:
+    
+      [java.naming.factory.initial]
+      TODO
+      
+      [java.naming.provider.url]
+      TODO
+      
+      [transport.jms.ConnectionFactoryJNDIName]
+      TODO
+      
+      [transport.jms.JMSSpecVersion]
+      TODO
+      
+      [transport.jms.CacheLevel]
+      TODO
 
 * {JMS connections and message dispatching}
 
@@ -180,10 +197,15 @@ JMS Transport
 
 * {Endpoint references}
 
+  Endpoint references for the JMS transport must have the following form:
+  
 +--------------------------------------------+
-jms-epr = "jms:/" jms-dest [ "?" param  *( [ "&amp;" param ] ) ]
+jms-epr = "jms:/" jms-dest [ "?" param  *( [ "&" param ] ) ]
 param = param-name "=" param-value
 +--------------------------------------------+
+
+  <<<jms-dest>>> is the JNDI name of the destination to send the message to. The parameters are
+  defined as follows:
 
   [transport.jms.ConnectionFactoryJNDIName]
   TODO
@@ -212,6 +234,14 @@ param = param-name "=" param-value
   [java.naming.security.credentials]
   TODO
 
+  []
+  
+  The JMS sender will check if the transport configuration contains a connection factory compatible
+  with the settings specified in the endpoint URL. If a matching configuration is found, the
+  sender will reuse the cached JMS objects related to that configuration. Otherwise it will
+  execute the JNDI lookup and open a new connection. In that case the connection will be closed
+  immediately after sending the message.
+  
 * {Content type detection}
 
   [Incoming requests]
