@@ -23,7 +23,9 @@ JMS Transport
 
 * {Transport configuration}
 
-  Sample axis2.xml:
+  Connection factories are configured using parameters in the transport description in
+  <<<axis2.xml>>>. The syntax is the same for the transport listener and sender. For example,
+  the following configuration sets up the JMS listener with three connection factories:
 
 +----------------------------+  
     <transportReceiver name="jms" class="org.apache.axis2.transport.jms.JMSListener">
@@ -51,6 +53,49 @@ JMS Transport
     implementation would create a JMS Queue with the service name. The JMS destination should ideally be created
     and administered through the JMS provider utilities.
     
+    For the JMS sender, only the outer element is different:
+    
++----------------------------+  
+    <transportSender name="jms" class="org.apache.axis2.transport.jms.JMSSender">
+        ...
+    </transportSender>
++----------------------------+  
+
+    As explained below, for the JMS sender configuration it is not mandatory (but recommended) to specify
+    connection factories.
+
+* {JMS connections and message dispatching}
+
+  Every deployed service for which the JMS transport is enabled will be associated with a
+  destination (queue or topic) according to the following rules:
+
+    * If the service has a <<<transport.jms.Destination>>> parameter, its value is interpreted
+      as the JNDI name of the destination.
+    
+    * Otherwise the service name is used as the JNDI name of the destination.
+  
+  At the same time, the connection factory is determined by looking at the service parameter
+  <<<transport.jms.ConnectionFactory>>>. If this parameter is not set, the default value
+  <<<default>>> is assumed. The value of this parameter is interpreted as a logical identifier
+  for the connection factory configuration defined in the transport configuration (see above).
+
+  It follows that JMS destinations are statically bound to services. Therefore the transport
+  always predispatches incoming messages to the service the destination is bound to.
+
+  The message is dispatched to an operation according to the following rules:
+
+    * The transport looks for a service parameter <<<Operation>>>. If this parameter is not present,
+      the default value <<<urn:mediate>>> is assumed.
+    
+    * If the service has an operation with the corresponding name, the transport predispatches
+      the message to that operation.
+    
+    * If no such operation exists, the message will be dispatched by the Axis2 engine using the
+      configured dispatchers.
+  
+  In addition, if the JMS message has a property named <<<SOAPAction>>>, the value of this property
+  is interpreted as the SOAP action.
+
 * {Service configuration}
 
   [transport.jms.ConnectionFactory (Optional)]
