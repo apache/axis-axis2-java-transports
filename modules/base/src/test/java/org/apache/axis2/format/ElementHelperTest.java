@@ -75,7 +75,7 @@ public class ElementHelperTest extends TestCase {
         QName qname = new QName("a");
         Charset cs = Charset.forName("ascii");
         OMSourcedElement element = new OMSourcedElementImpl(qname, factory,
-                new WrappedTextNodeOMDataSource(qname, ds, cs));
+                new WrappedTextNodeOMDataSourceFromDataSource(qname, ds, cs));
         Reader in = ElementHelper.getTextAsStream(element, true);
         assertFalse(in instanceof StringReader);
         compareStreams(new InputStreamReader(ds.getInputStream(), cs), in);
@@ -117,7 +117,7 @@ public class ElementHelperTest extends TestCase {
         DataSource ds = new RandomDataSource(665544, 32, 128, 20000000);
         QName qname = new QName("a");
         OMSourcedElement element = new OMSourcedElementImpl(qname, factory,
-                new WrappedTextNodeOMDataSource(qname, ds, Charset.forName("ascii")));
+                new WrappedTextNodeOMDataSourceFromDataSource(qname, ds, Charset.forName("ascii")));
         Reader in = new InputStreamReader(ds.getInputStream(), "ascii");
         Writer out = new CharacterStreamComparator(in);
         ElementHelper.writeTextTo(element, out, true); // cache doesn't matter here

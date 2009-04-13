@@ -20,6 +20,8 @@
 package org.apache.axis2.transport.testkit.message;
 
 import org.apache.axiom.attachments.Attachments;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMSourcedElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.Constants;
 import org.apache.axis2.context.MessageContext;
@@ -40,6 +42,14 @@ public class AxisMessage {
     public AxisMessage(MessageContext msgContext) throws Exception {
         envelope = msgContext.getEnvelope();
         envelope.build();
+        
+        // TODO: quick & dirty hack to force expansion of OMSourceElement payloads
+        OMElement content = envelope.getBody().getFirstElement();
+        if (content instanceof OMSourcedElement) {
+            ((OMSourcedElement)content).getFirstOMChild();
+            ((OMSourcedElement)content).build();
+        }
+        
         if (msgContext.isDoingSwA()) {
             // Make sure that all attachments are read
             attachments = msgContext.getAttachmentMap();

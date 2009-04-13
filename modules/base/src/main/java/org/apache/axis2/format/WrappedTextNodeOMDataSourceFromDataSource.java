@@ -44,12 +44,12 @@ import org.apache.axiom.om.util.StAXUtils;
  * {@link org.apache.axiom.om.OMDataSource} implementation that represents a text node wrapped
  * inside an element. The text data is provided by a {@link DataSource} object.
  */
-public class WrappedTextNodeOMDataSource extends OMDataSourceExtBase {
+public class WrappedTextNodeOMDataSourceFromDataSource extends OMDataSourceExtBase {
     private final QName wrapperElementName;
     private final DataSource binaryData;
     private final Charset charset;
 
-    public WrappedTextNodeOMDataSource(QName wrapperElementName, DataSource binaryData,
+    public WrappedTextNodeOMDataSourceFromDataSource(QName wrapperElementName, DataSource binaryData,
             Charset charset) {
         this.wrapperElementName = wrapperElementName;
         this.binaryData = binaryData;
@@ -109,6 +109,6 @@ public class WrappedTextNodeOMDataSource extends OMDataSourceExtBase {
     }
 
     public OMDataSourceExt copy() {
-        return new WrappedTextNodeOMDataSource(wrapperElementName, binaryData, charset);
+        return new WrappedTextNodeOMDataSourceFromDataSource(wrapperElementName, binaryData, charset);
     }
 }

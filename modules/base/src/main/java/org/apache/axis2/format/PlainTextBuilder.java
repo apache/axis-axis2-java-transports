@@ -18,9 +18,10 @@
  */
 package org.apache.axis2.format;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
 import javax.activation.DataSource;
@@ -34,7 +35,6 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.builder.BuilderUtil;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.Parameter;
-import org.apache.commons.io.IOUtils;
 import org.apache.axis2.transport.base.BaseConstants;
 import org.apache.axis2.transport.base.BaseUtils;
 
@@ -65,39 +65,40 @@ public class PlainTextBuilder implements TextMessageBuilder, DataSourceMessageBu
         return wrapperQName;
     }
     
-    private OMElement buildMessage(String textPayload, MessageContext msgContext) {
-        OMFactory factory = OMAbstractFactory.getOMFactory();
-        OMElement wrapper = factory.createOMElement(getWrapperQName(msgContext), null);
-        wrapper.addChild(factory.createOMText(textPayload));
-        return wrapper;
-    }
-    
     public OMElement processDocument(InputStream inputStream,
                                      String contentType,
                                      MessageContext msgContext) throws AxisFault {
 
+        OMFactory factory = OMAbstractFactory.getOMFactory();
         String charSetEnc = BuilderUtil.getCharSetEncoding(contentType);
+        QName wrapperQName = getWrapperQName(msgContext);
+        Reader reader;
         try {
-            return buildMessage(IOUtils.toString(inputStream, charSetEnc), msgContext);
-        } catch (IOException ex) {
-            throw new AxisFault("Unable to read message payload", ex);
+            reader = new InputStreamReader(inputStream, charSetEnc);
+        } catch (UnsupportedEncodingException ex) {
+            throw new AxisFault("Unsupported encoding: " + charSetEnc, ex);
         }
+        return new OMSourcedElementImpl(wrapperQName, factory,
+                new WrappedTextNodeOMDataSourceFromReader(wrapperQName, reader));
     }
 
     public OMElement processDocument(Reader reader,
                                      String contentType,
                                      MessageContext msgContext) throws AxisFault {
-        try {
-            return buildMessage(IOUtils.toString(reader), msgContext);
-        } catch (IOException ex) {
-            throw new AxisFault("Unable to read message payload", ex);
-        }
+        
+        OMFactory factory = OMAbstractFactory.getOMFactory();
+        QName wrapperQName = getWrapperQName(msgContext);
+        return new OMSourcedElementImpl(wrapperQName, factory,
+                new WrappedTextNodeOMDataSourceFromReader(wrapperQName, reader));
     }
 
     public OMElement processDocument(String content,
                                      String contentType,
                                      MessageContext msgContext) throws AxisFault {
-        return buildMessage(content, msgContext);
+        OMFactory factory = OMAbstractFactory.getOMFactory();
+        OMElement wrapper = factory.createOMElement(getWrapperQName(msgContext), null);
+        factory.createOMText(wrapper, content);
+        return wrapper;
     }
 
     public OMElement processDocument(DataSource dataSource,
@@ -108,6 +109,6 @@ public class PlainTextBuilder implements TextMessageBuilder, DataSourceMessageBu
         Charset cs = Charset.forName(BuilderUtil.getCharSetEncoding(contentType));
         QName wrapperQName = getWrapperQName(msgContext);
         return new OMSourcedElementImpl(wrapperQName, factory,
-                new WrappedTextNodeOMDataSource(wrapperQName, dataSource, cs));
+                new WrappedTextNodeOMDataSourceFromDataSource(wrapperQName, dataSource, cs));
     }
 }
