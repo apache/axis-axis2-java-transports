@@ -207,6 +207,10 @@ param = param-name "=" param-value
   <<<jms-dest>>> is the JNDI name of the destination to send the message to. The parameters are
   defined as follows:
 
+    [<<<transport.jms.ConnectionFactory>>> (Optional)]
+    The JMS connection factory definition (from <<<axis2.xml>>>) to be used to send messages to
+    the endpoint.
+    
     [<<<transport.jms.ConnectionFactoryJNDIName>>>]
     TODO
   
@@ -234,8 +238,12 @@ param = param-name "=" param-value
     [java.naming.security.credentials]
     TODO
   
-  The JMS sender will check if the transport configuration contains a connection factory compatible
-  with the settings specified in the endpoint URL. If a matching configuration is found, the
+  If no connection factory definition is explicitly specified using the
+  <<<transport.jms.ConnectionFactory>>> parameter, the JMS sender will check if the transport
+  configuration contains a connection factory compatible with the other settings specified in the
+  endpoint URL (<<<transport.jms.ConnectionFactoryJNDIName>>>, <<<java.naming.factory.initial>>>,
+  <<<java.naming.provider.url>>>, <<<java.naming.security.principal>>> and
+  <<<java.naming.security.credentials>>>). If a matching configuration is found, the
   sender will reuse the cached JMS objects related to that configuration. Otherwise it will
   execute the JNDI lookup and open a new connection. In that case the connection will be closed
   immediately after sending the message.
