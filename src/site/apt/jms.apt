@@ -81,7 +81,9 @@ JMS Transport
     [<<<transport.jms.CacheLevel>>>]
     TODO
 
-* {JMS connections and message dispatching}
+* {Transport listener}
+
+** {JMS connections and message dispatching}
 
   Every deployed service for which the JMS transport is enabled will be associated with a
   destination (queue or topic) according to the following rules:
@@ -113,7 +115,7 @@ JMS Transport
   In addition, if the JMS message has a property named <<<SOAPAction>>>, the value of this property
   is interpreted as the SOAP action.
 
-* {Service configuration}
+** {Service configuration}
 
   [<<<transport.jms.ConnectionFactory>>> (Optional)]
   The JMS connection factory definition (from <<<axis2.xml>>>) to be used to
@@ -195,7 +197,17 @@ JMS Transport
 </service>
 +--------------------------------------------+
 
-* {Endpoint references}
+** {Message context properties for incoming messages}
+
+  For incoming messages, the transport listener will make the following properties available in
+  the message context:
+  
+    [<<<TRANSPORT_HEADERS>>>]
+    This property will contain a map with the JMS message properties.
+
+* {Transport sender}
+
+** {Endpoint references}
 
   Endpoint references for the JMS transport must have the following form:
   
@@ -247,6 +259,17 @@ param = param-name "=" param-value
   sender will reuse the cached JMS objects related to that configuration. Otherwise it will
   execute the JNDI lookup and open a new connection. In that case the connection will be closed
   immediately after sending the message.
+  
+** {Message context properties for outcoming messages}
+
+  For outgoing messages, the transport sender will recognize the following message context
+  properties:
+  
+    [<<<TRANSPORT_HEADERS>>>]
+    The transport expects a map as value for this property. The entries of this map will be
+    set as properties on the outgoing JMS message.
+
+  Note that all the properties are optional.
   
 * {Content type detection}
 
