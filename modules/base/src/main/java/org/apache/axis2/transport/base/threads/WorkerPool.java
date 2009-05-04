@@ -20,7 +20,16 @@
 package org.apache.axis2.transport.base.threads;
 
 public interface WorkerPool {
+    /**
+     * Asynchronously execute the given task using one of the threads of the worker pool.
+     * The task is expected to terminate gracefully, i.e. {@link Runnable#run()} should not
+     * throw an exception. Any uncaught exceptions should be logged by the worker pool
+     * implementation.
+     * 
+     * @param task the task to execute
+     */
     public void execute(Runnable task);
+    
     public int getActiveCount();
     public int getQueueSize();
     

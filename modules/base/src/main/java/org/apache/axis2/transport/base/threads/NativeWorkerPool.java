@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class NativeWorkerPool implements WorkerPool {
 
-    private static final Log log = LogFactory.getLog(NativeWorkerPool.class);
+    static final Log log = LogFactory.getLog(NativeWorkerPool.class);
 
     private final ThreadPoolExecutor executor;
     private final LinkedBlockingQueue<Runnable> blockingQueue;
@@ -56,8 +56,8 @@ public class NativeWorkerPool implements WorkerPool {
             public void run() {
                 try {
                     task.run();
-                } catch (Exception ignore) {
-                    // this is to re-use this thread, even if it threw a RuntimeException
+                } catch (Throwable t) {
+                    log.error("Uncaught exception", t);
                 }
             }
         });
