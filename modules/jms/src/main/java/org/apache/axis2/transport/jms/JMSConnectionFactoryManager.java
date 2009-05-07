@@ -60,9 +60,8 @@ public class JMSConnectionFactoryManager {
     private void loadConnectionFactoryDefinitions(ParameterInclude trpDesc) {
 
         for (Parameter p : trpDesc.getParameters()) {
-            JMSConnectionFactory jmsConFactory = null;
             try {
-                jmsConFactory = new JMSConnectionFactory(p);
+                JMSConnectionFactory jmsConFactory = new JMSConnectionFactory(p);
                 connectionFactories.put(jmsConFactory.getName(), jmsConFactory);
             } catch (AxisJMSException e) {
                 log.error("Error setting up connection factory : " + p.getName(), e);
