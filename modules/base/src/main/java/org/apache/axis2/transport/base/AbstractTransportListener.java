@@ -26,16 +26,15 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.util.MessageContextBuilder;
 import org.apache.axis2.transport.base.threads.WorkerPool;
 import org.apache.axis2.transport.base.threads.WorkerPoolFactory;
+import org.apache.axis2.transport.base.tracker.AxisServiceFilter;
+import org.apache.axis2.transport.base.tracker.AxisServiceTracker;
+import org.apache.axis2.transport.base.tracker.AxisServiceTrackerListener;
 import org.apache.axis2.transport.TransportListener;
 import org.apache.axis2.engine.AxisEngine;
-import org.apache.axis2.engine.AxisObserver;
-import org.apache.axis2.engine.AxisConfiguration;
-import org.apache.axis2.engine.AxisEvent;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.axiom.om.util.UUIDGenerator;
-import org.apache.axiom.om.OMElement;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -58,8 +57,10 @@ public abstract class AbstractTransportListener implements TransportListener {
     protected int state = BaseConstants.STOPPED;
     /** is this transport non-blocking? */
     protected boolean isNonBlocking = false;
-    /** the axis observer that gets notified of service life cycle events*/
-    private final AxisObserver axisObserver = new GenericAxisObserver();
+    /**
+     * Service tracker used to invoke {@link #internalStartListeningForService(AxisService)}
+     * and {@link #internalStopListeningForService(AxisService)}. */
+    private AxisServiceTracker serviceTracker;
 
     /** the thread pool to execute actual poll invocations */
     protected WorkerPool workerPool = null;
@@ -101,7 +102,23 @@ public abstract class AbstractTransportListener implements TransportListener {
         }
 
         // register to receive updates on services for lifetime management
-        cfgCtx.getAxisConfiguration().addObservers(axisObserver);
+        serviceTracker = new AxisServiceTracker(
+                cfgCtx.getAxisConfiguration(),
+                new AxisServiceFilter() {
+                    public boolean matches(AxisService service) {
+                        return !service.getName().startsWith("__") // these are "private" services
+                                && BaseUtils.isUsingTransport(service, getTransportName());
+                    }
+                },
+                new AxisServiceTrackerListener() {
+                    public void serviceAdded(AxisService service) {
+                        internalStartListeningForService(service);
+                    }
+
+                    public void serviceRemoved(AxisService service) {
+                        internalStopListeningForService(service);
+                    }
+                });
 
         // register with JMX
         mbeanSupport = new TransportMBeanSupport(this, getTransportName());
@@ -132,11 +149,8 @@ public abstract class AbstractTransportListener implements TransportListener {
         if (state == BaseConstants.STARTED) {
             state = BaseConstants.STOPPED;
             // cancel receipt of service lifecycle events
-            cfgCtx.getAxisConfiguration().getObserversList().remove(axisObserver);
             log.info(getTransportName().toUpperCase() + " Listener Shutdown");
-            for (AxisService service : getListeningServices()) {
-                internalStopListeningForService(service);
-            }
+            serviceTracker.stop();
         }
     }
 
@@ -147,41 +161,16 @@ public abstract class AbstractTransportListener implements TransportListener {
             // cfgCtx.getAxisConfiguration().addObservers(axisObserver);
             log.info(getTransportName().toUpperCase() + " Listener started");
             // iterate through deployed services and start
-            for (AxisService service : getListeningServices()) {
-                internalStartListeningForService(service);
-            }
+            serviceTracker.start();
         }
     }
     
-    /**
-     * Get the list of services that are listening on this transport, i.e. that are
-     * configured to use this transport.
-     * 
-     * @return the list of listening services
-     */
-    private List<AxisService> getListeningServices() {
-        List<AxisService> result = new LinkedList<AxisService>();
-        Iterator services = cfgCtx.getAxisConfiguration().getServices().values().iterator();
-        while (services.hasNext()) {
-            AxisService service = (AxisService) services.next();
-            if (!ignoreService(service)
-                    && BaseUtils.isUsingTransport(service, getTransportName())) {
-                result.add(service);
-            }
-        }
-        return result;
-    }
-
     public EndpointReference[] getEPRsForService(String serviceName, String ip) throws AxisFault {
         return getEPRsForService(serviceName);
     }
 
     protected EndpointReference[] getEPRsForService(String serviceName) {
         return null;
-    }
-    
-    private boolean ignoreService(AxisService service) {
-        return service.getName().startsWith("__"); // these are "private" services
     }
     
     public void disableTransportForService(AxisService service) {
@@ -204,7 +193,7 @@ public abstract class AbstractTransportListener implements TransportListener {
         }
     }
 
-    private void internalStartListeningForService(AxisService service) {
+    void internalStartListeningForService(AxisService service) {
         String serviceName = service.getName();
         try {
             startListeningForService(service);
@@ -237,7 +226,7 @@ public abstract class AbstractTransportListener implements TransportListener {
                       getEndpointMBeanName(serviceName));
     }
 
-    private void internalStopListeningForService(AxisService service) {
+    void internalStopListeningForService(AxisService service) {
         unregisterMBean(getEndpointMBeanName(service.getName()));
         stopListeningForService(service);
     }
@@ -350,47 +339,6 @@ public abstract class AbstractTransportListener implements TransportListener {
 
     public MetricsCollector getMetricsCollector() {
         return metrics;
-    }
-
-    /**
-     * An AxisObserver which will start listening for newly deployed or started services,
-     * and stop listening when services are undeployed or stopped.
-     */
-    class GenericAxisObserver implements AxisObserver {
-
-        // The initilization code will go here
-        public void init(AxisConfiguration axisConfig) {
-        }
-
-        public void serviceUpdate(AxisEvent event, AxisService service) {
-
-            if (!ignoreService(service)
-                    && BaseUtils.isUsingTransport(service, getTransportName())) {
-                switch (event.getEventType()) {
-                    case AxisEvent.SERVICE_DEPLOY :
-                        internalStartListeningForService(service);
-                        break;
-                    case AxisEvent.SERVICE_REMOVE :
-                        internalStopListeningForService(service);
-                        break;
-                    case AxisEvent.SERVICE_START  :
-                        internalStartListeningForService(service);
-                        break;
-                    case AxisEvent.SERVICE_STOP   :
-                        internalStopListeningForService(service);
-                        break;
-                }
-            }
-        }
-
-        public void moduleUpdate(AxisEvent event, AxisModule module) {}
-        public void addParameter(Parameter param) throws AxisFault {}
-        public void removeParameter(Parameter param) throws AxisFault {}
-        public void deserializeParameters(OMElement parameterElement) throws AxisFault {}
-        public Parameter getParameter(String name) { return null; }
-        public ArrayList getParameters() { return null; }
-        public boolean isParameterLocked(String parameterName) { return false; }
-        public void serviceGroupUpdate(AxisEvent event, AxisServiceGroup serviceGroup) {}
     }
 
     // -- jmx/management methods--
