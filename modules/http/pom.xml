@@ -91,7 +91,7 @@
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-transport-http</artifactId>
-            <version>${pom.version}</version>
+            <version>${axis2.version}</version>
             <scope>test</scope>
         </dependency>
 
