@@ -139,8 +139,8 @@ public class AxisTestClient implements TestClient, MessageExchangeValidator {
                         break;
                     } catch (AssertionFailedError ex) {
                         // SYNAPSE-491: Maybe the transport sender didn't finish updating the
-                        // metrics yet. We give it up to one seconds to do so.
-                        long remaining = start + 1000 - System.currentTimeMillis();
+                        // metrics yet. We give it a couple of seconds to do so.
+                        long remaining = start + 5000 - System.currentTimeMillis();
                         if (remaining < 0) {
                             throw ex;
                         } else {
