@@ -32,18 +32,18 @@ import org.apache.axis2.transport.testkit.util.tcpmon.Tunnel;
 
 public class HttpChannel implements AsyncChannel, RequestResponseChannel {
     private @Transient String serviceName;
-    private @Transient Tunnel tunnel;
+//    private @Transient Tunnel tunnel;
     
     @Setup @SuppressWarnings("unused")
     private void setUp() throws Exception {
         serviceName = "TestService-" + UUID.randomUUID();
-        tunnel = new Tunnel(new InetSocketAddress("127.0.0.1", 8280));
-        tunnel.start();
+//        tunnel = new Tunnel(new InetSocketAddress("127.0.0.1", 8280));
+//        tunnel.start();
     }
     
     @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
-        tunnel.stop();
+//        tunnel.stop();
     }
 
     public String getServiceName() {
@@ -51,6 +51,6 @@ public class HttpChannel implements AsyncChannel, RequestResponseChannel {
     }
 
     public EndpointReference getEndpointReference() throws Exception {
-        return new EndpointReference("http://localhost:" + tunnel.getPort() + CONTEXT_PATH + "/" + serviceName);
+        return new EndpointReference("http://localhost:" + /* tunnel.getPort() */ 8280 + CONTEXT_PATH + "/" + serviceName);
     }
 }
