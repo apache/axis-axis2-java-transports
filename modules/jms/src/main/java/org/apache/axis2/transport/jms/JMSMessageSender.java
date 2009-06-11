@@ -81,21 +81,15 @@ public class JMSMessageSender {
      */
     public JMSMessageSender(JMSConnectionFactory jmsConnectionFactory, String targetAddress) {
 
-        if (jmsConnectionFactory != null) {
-            this.cacheLevel  = jmsConnectionFactory.getCacheLevel();
-            this.jmsSpec11   = jmsConnectionFactory.isJmsSpec11();
-            this.connection  = jmsConnectionFactory.getConnection();
-            this.session     = jmsConnectionFactory.getSession(connection);
-            this.destination =
-                jmsConnectionFactory.getSharedDestination() == null ?
-                    jmsConnectionFactory.getDestination(JMSUtils.getDestination(targetAddress)) :
-                    jmsConnectionFactory.getSharedDestination();
-            this.producer = jmsConnectionFactory.getMessageProducer(connection, session, destination);
-
-        } else {
-            JMSOutTransportInfo jmsOut = new JMSOutTransportInfo(targetAddress);
-            jmsOut.loadConnectionFactoryFromProperies();
-        }
+        this.cacheLevel  = jmsConnectionFactory.getCacheLevel();
+        this.jmsSpec11   = jmsConnectionFactory.isJmsSpec11();
+        this.connection  = jmsConnectionFactory.getConnection();
+        this.session     = jmsConnectionFactory.getSession(connection);
+        this.destination =
+            jmsConnectionFactory.getSharedDestination() == null ?
+                jmsConnectionFactory.getDestination(JMSUtils.getDestination(targetAddress)) :
+                jmsConnectionFactory.getSharedDestination();
+        this.producer = jmsConnectionFactory.getMessageProducer(connection, session, destination);
     }
 
     /**
