@@ -32,6 +32,8 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.apache.axis2.transport.base.BaseConstants;
+import org.apache.axis2.transport.jms.iowrappers.BytesMessageInputStream;
+import org.apache.axis2.transport.jms.iowrappers.BytesMessageOutputStream;
 import org.apache.axis2.transport.testkit.endpoint.InOutEndpoint;
 import org.apache.axis2.transport.testkit.endpoint.InOutEndpointSupport;
 import org.apache.axis2.transport.testkit.name.Name;

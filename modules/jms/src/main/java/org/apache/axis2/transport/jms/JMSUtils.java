@@ -16,7 +16,6 @@
 package org.apache.axis2.transport.jms;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.builder.Builder;
@@ -24,7 +23,6 @@ import org.apache.axis2.builder.BuilderUtil;
 import org.apache.axis2.builder.SOAPBuilder;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.Parameter;
 import org.apache.axis2.format.DataSourceMessageBuilder;
 import org.apache.axis2.format.TextMessageBuilder;
 import org.apache.axis2.format.TextMessageBuilderAdapter;
@@ -32,8 +30,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.axis2.transport.TransportUtils;
 import org.apache.axis2.transport.base.BaseUtils;
-import org.apache.axis2.transport.base.BaseConstants;
-import org.apache.axis2.transport.base.threads.WorkerPool;
+import org.apache.axis2.transport.jms.iowrappers.BytesMessageDataSource;
+import org.apache.axis2.transport.jms.iowrappers.BytesMessageInputStream;
 
 import javax.jms.*;
 import javax.jms.Queue;
@@ -42,7 +40,6 @@ import javax.mail.internet.ParseException;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.Reference;
-import javax.xml.stream.XMLStreamException;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -75,51 +72,6 @@ public class JMSUtils extends BaseUtils {
             }
         }
         return false;
-    }
-
-    /**
-     * Get the EPR for the given JMS connection factory and destination
-     * the form of the URL is
-     * jms:/<destination>?[<key>=<value>&]*
-     * Credentials Context.SECURITY_PRINCIPAL, Context.SECURITY_CREDENTIALS
-     * JMSConstants.PARAM_JMS_USERNAME and JMSConstants.PARAM_JMS_USERNAME are filtered
-     *
-     * @param cf the Axis2 JMS connection factory
-     * @param destinationType the type of destination
-     * @param endpoint JMSEndpoint
-     * @return the EPR as a String
-     */
-    static String getEPR(JMSConnectionFactory cf, int destinationType, JMSEndpoint endpoint) {
-        StringBuffer sb = new StringBuffer();
-
-        sb.append(
-            JMSConstants.JMS_PREFIX).append(endpoint.getJndiDestinationName());
-        sb.append("?").
-            append(JMSConstants.PARAM_DEST_TYPE).append("=").append(
-            destinationType == JMSConstants.TOPIC ?
-                JMSConstants.DESTINATION_TYPE_TOPIC : JMSConstants.DESTINATION_TYPE_QUEUE);
-
-        if (endpoint.getContentTypeRuleSet() != null) {
-            String contentTypeProperty =
-                endpoint.getContentTypeRuleSet().getDefaultContentTypeProperty();
-            if (contentTypeProperty != null) {
-                sb.append("&");
-                sb.append(JMSConstants.CONTENT_TYPE_PROPERTY_PARAM);
-                sb.append("=");
-                sb.append(contentTypeProperty);
-            }
-        }
-
-        for (Map.Entry<String,String> entry : cf.getParameters().entrySet()) {
-            if (!Context.SECURITY_PRINCIPAL.equalsIgnoreCase(entry.getKey()) &&
-                !Context.SECURITY_CREDENTIALS.equalsIgnoreCase(entry.getKey()) &&
-                !JMSConstants.PARAM_JMS_USERNAME.equalsIgnoreCase(entry.getKey()) &&
-                !JMSConstants.PARAM_JMS_PASSWORD.equalsIgnoreCase(entry.getKey())) {
-                sb.append("&").append(
-                    entry.getKey()).append("=").append(entry.getValue());
-            }
-        }
-        return sb.toString();
     }
 
     /**
@@ -575,292 +527,6 @@ public class JMSUtils extends BaseUtils {
     }
 
     /**
-     * Create a ServiceTaskManager for the service passed in and its corresponding JMSConnectionFactory
-     * @param jcf
-     * @param service
-     * @param workerPool
-     * @return
-     */
-    public static ServiceTaskManager createTaskManagerForService(JMSConnectionFactory jcf,
-        AxisService service, WorkerPool workerPool) {
-
-        String name = service.getName();
-        Map<String, String> svc = getServiceStringParameters(service.getParameters());
-        Map<String, String> cf  = jcf.getParameters();
-
-        ServiceTaskManager stm = new ServiceTaskManager();
-
-        stm.setServiceName(name);
-        stm.addJmsProperties(cf);
-        stm.addJmsProperties(svc);
-
-        stm.setConnFactoryJNDIName(
-            getRqdStringProperty(JMSConstants.PARAM_CONFAC_JNDI_NAME, svc, cf));
-        String destName = getOptionalStringProperty(JMSConstants.PARAM_DESTINATION, svc, cf);
-        if (destName == null) {
-            destName = service.getName();
-        }
-        stm.setDestinationJNDIName(destName);
-        stm.setDestinationType(getDestinationType(svc, cf));
-
-        stm.setJmsSpec11(
-            getJMSSpecVersion(svc, cf));
-        stm.setTransactionality(
-            getTransactionality(svc, cf));
-        stm.setCacheUserTransaction(
-            getOptionalBooleanProperty(BaseConstants.PARAM_CACHE_USER_TXN, svc, cf));
-        stm.setUserTransactionJNDIName(
-            getOptionalStringProperty(BaseConstants.PARAM_USER_TXN_JNDI_NAME, svc, cf));
-        stm.setSessionTransacted(
-            getOptionalBooleanProperty(JMSConstants.PARAM_SESSION_TRANSACTED, svc, cf));
-        stm.setSessionAckMode(
-            getSessionAck(svc, cf));
-        stm.setMessageSelector(
-            getOptionalStringProperty(JMSConstants.PARAM_MSG_SELECTOR, svc, cf));
-        stm.setSubscriptionDurable(
-            getOptionalBooleanProperty(JMSConstants.PARAM_SUB_DURABLE, svc, cf));
-        stm.setDurableSubscriberName(
-            getOptionalStringProperty(JMSConstants.PARAM_DURABLE_SUB_NAME, svc, cf));
-
-        stm.setCacheLevel(
-            getCacheLevel(svc, cf));
-        stm.setPubSubNoLocal(
-            getOptionalBooleanProperty(JMSConstants.PARAM_PUBSUB_NO_LOCAL, svc, cf));
-
-        Integer value = getOptionalIntProperty(JMSConstants.PARAM_RCV_TIMEOUT, svc, cf);
-        if (value != null) {
-            stm.setReceiveTimeout(value);
-        }
-        value = getOptionalIntProperty(JMSConstants.PARAM_CONCURRENT_CONSUMERS, svc, cf);
-        if (value != null) {
-            stm.setConcurrentConsumers(value);
-        }
-        value = getOptionalIntProperty(JMSConstants.PARAM_MAX_CONSUMERS, svc, cf);
-        if (value != null) {
-            stm.setMaxConcurrentConsumers(value);
-        }
-        value = getOptionalIntProperty(JMSConstants.PARAM_IDLE_TASK_LIMIT, svc, cf);
-        if (value != null) {
-            stm.setIdleTaskExecutionLimit(value);
-        }
-        value = getOptionalIntProperty(JMSConstants.PARAM_MAX_MSGS_PER_TASK, svc, cf);
-        if (value != null) {
-            stm.setMaxMessagesPerTask(value);
-        }
-
-        value = getOptionalIntProperty(JMSConstants.PARAM_RECON_INIT_DURATION, svc, cf);
-        if (value != null) {
-            stm.setInitialReconnectDuration(value);
-        }
-        value = getOptionalIntProperty(JMSConstants.PARAM_RECON_MAX_DURATION, svc, cf);
-        if (value != null) {
-            stm.setMaxReconnectDuration(value);
-        }
-        Double dValue = getOptionalDoubleProperty(JMSConstants.PARAM_RECON_FACTOR, svc, cf);
-        if (dValue != null) {
-            stm.setReconnectionProgressionFactor(dValue);
-        }
-
-        stm.setWorkerPool(workerPool);
-
-        // remove processed properties from property bag
-        stm.removeJmsProperties(JMSConstants.PARAM_CONFAC_JNDI_NAME);
-        stm.removeJmsProperties(JMSConstants.PARAM_DESTINATION);
-        stm.removeJmsProperties(JMSConstants.PARAM_JMS_SPEC_VER);
-        stm.removeJmsProperties(BaseConstants.PARAM_TRANSACTIONALITY);
-        stm.removeJmsProperties(BaseConstants.PARAM_CACHE_USER_TXN);
-        stm.removeJmsProperties(BaseConstants.PARAM_USER_TXN_JNDI_NAME);
-        stm.removeJmsProperties(JMSConstants.PARAM_SESSION_TRANSACTED);
-        stm.removeJmsProperties(JMSConstants.PARAM_MSG_SELECTOR);
-        stm.removeJmsProperties(JMSConstants.PARAM_SUB_DURABLE);
-        stm.removeJmsProperties(JMSConstants.PARAM_DURABLE_SUB_NAME);
-        stm.removeJmsProperties(JMSConstants.PARAM_CACHE_LEVEL);
-        stm.removeJmsProperties(JMSConstants.PARAM_PUBSUB_NO_LOCAL);
-        stm.removeJmsProperties(JMSConstants.PARAM_RCV_TIMEOUT);
-        stm.removeJmsProperties(JMSConstants.PARAM_CONCURRENT_CONSUMERS);
-        stm.removeJmsProperties(JMSConstants.PARAM_MAX_CONSUMERS);
-        stm.removeJmsProperties(JMSConstants.PARAM_IDLE_TASK_LIMIT);
-        stm.removeJmsProperties(JMSConstants.PARAM_MAX_MSGS_PER_TASK);
-        stm.removeJmsProperties(JMSConstants.PARAM_RECON_INIT_DURATION);
-        stm.removeJmsProperties(JMSConstants.PARAM_RECON_MAX_DURATION);
-        stm.removeJmsProperties(JMSConstants.PARAM_RECON_FACTOR);
-
-        return stm;
-    }
-
-    private static Map<String, String> getServiceStringParameters(List list) {
-
-        Map<String, String> map = new HashMap<String, String>();
-        for (Object o : list) {
-            Parameter p = (Parameter) o;
-            if (p.getValue() instanceof String) {
-                map.put(p.getName(), (String) p.getValue());
-            }
-        }
-        return map;
-    }
-
-    private static String getRqdStringProperty(String key, Map svcMap, Map cfMap) {
-        String value = (String) svcMap.get(key);
-        if (value == null) {
-            value = (String) cfMap.get(key);
-        }
-        if (value == null) {
-            throw new AxisJMSException("Service/connection factory property : " + key);
-        }
-        return value;
-    }
-
-    private static String getOptionalStringProperty(String key, Map svcMap, Map cfMap) {
-        String value = (String) svcMap.get(key);
-        if (value == null) {
-            value = (String) cfMap.get(key);
-        }
-        return value;
-    }
-
-    private static Boolean getOptionalBooleanProperty(String key, Map svcMap, Map cfMap) {
-        String value = (String) svcMap.get(key);
-        if (value == null) {
-            value = (String) cfMap.get(key);
-        }
-        if (value == null) {
-            return null;
-        } else {
-            return Boolean.valueOf(value);
-        }
-    }
-
-    private static Integer getOptionalIntProperty(String key, Map svcMap, Map cfMap) {
-        String value = (String) svcMap.get(key);
-        if (value == null) {
-            value = (String) cfMap.get(key);
-        }
-        if (value != null) {
-            try {
-                return Integer.parseInt(value);
-            } catch (NumberFormatException e) {
-                throw new AxisJMSException("Invalid value : " + value + " for " + key);
-            }
-        }
-        return null;
-    }
-
-    private static Double getOptionalDoubleProperty(String key, Map svcMap, Map cfMap) {
-        String value = (String) svcMap.get(key);
-        if (value == null) {
-            value = (String) cfMap.get(key);
-        }
-        if (value != null) {
-            try {
-                return Double.parseDouble(value);
-            } catch (NumberFormatException e) {
-                throw new AxisJMSException("Invalid value : " + value + " for " + key);
-            }
-        }
-        return null;
-    }
-
-    private static int getTransactionality(Map svcMap, Map cfMap) {
-
-        String key = BaseConstants.PARAM_TRANSACTIONALITY;
-        String val = (String) svcMap.get(key);
-        if (val == null) {
-            val = (String) cfMap.get(key);
-        }
-
-        if (val == null) {
-            return BaseConstants.TRANSACTION_NONE;
-
-        } else {    
-            if (BaseConstants.STR_TRANSACTION_JTA.equalsIgnoreCase(val)) {
-                return BaseConstants.TRANSACTION_JTA;
-            } else if (BaseConstants.STR_TRANSACTION_LOCAL.equalsIgnoreCase(val)) {
-                return BaseConstants.TRANSACTION_LOCAL;
-            } else {
-                throw new AxisJMSException("Invalid option : " + val + " for parameter : " +
-                    BaseConstants.STR_TRANSACTION_JTA);
-            }
-        }
-    }
-
-    private static int getDestinationType(Map svcMap, Map cfMap) {
-
-        String key = JMSConstants.PARAM_DEST_TYPE;
-        String val = (String) svcMap.get(key);
-        if (val == null) {
-            val = (String) cfMap.get(key);
-        }
-
-        if (JMSConstants.DESTINATION_TYPE_TOPIC.equalsIgnoreCase(val)) {
-            return JMSConstants.TOPIC;
-        }
-        return JMSConstants.QUEUE;
-    }
-
-    private static int getSessionAck(Map svcMap, Map cfMap) {
-
-        String key = JMSConstants.PARAM_SESSION_ACK;
-        String val = (String) svcMap.get(key);
-        if (val == null) {
-            val = (String) cfMap.get(key);
-        }
-
-        if (val == null || "AUTO_ACKNOWLEDGE".equalsIgnoreCase(val)) {
-            return Session.AUTO_ACKNOWLEDGE;
-        } else if ("CLIENT_ACKNOWLEDGE".equalsIgnoreCase(val)) {
-            return Session.CLIENT_ACKNOWLEDGE;
-        } else if ("DUPS_OK_ACKNOWLEDGE".equals(val)){
-            return Session.DUPS_OK_ACKNOWLEDGE;
-        } else if ("SESSION_TRANSACTED".equals(val)) {
-            return 0; //Session.SESSION_TRANSACTED;
-        } else {
-            try {
-                return Integer.parseInt(val);
-            } catch (NumberFormatException ignore) {
-                throw new AxisJMSException("Invalid session acknowledgement mode : " + val);
-            }
-        }
-    }
-
-    private static int getCacheLevel(Map svcMap, Map cfMap) {
-
-        String key = JMSConstants.PARAM_CACHE_LEVEL;
-        String val = (String) svcMap.get(key);
-        if (val == null) {
-            val = (String) cfMap.get(key);
-        }
-
-        if ("none".equalsIgnoreCase(val)) {
-            return JMSConstants.CACHE_NONE;
-        } else if ("connection".equalsIgnoreCase(val)) {
-            return JMSConstants.CACHE_CONNECTION;
-        } else if ("session".equals(val)){
-            return JMSConstants.CACHE_SESSION;
-        } else if ("consumer".equals(val)) {
-            return JMSConstants.CACHE_CONSUMER;
-        } else if (val != null) {
-            throw new AxisJMSException("Invalid cache level : " + val);
-        }
-        return JMSConstants.CACHE_AUTO;
-    }
-
-    private static boolean getJMSSpecVersion(Map svcMap, Map cfMap) {
-
-        String key = JMSConstants.PARAM_JMS_SPEC_VER;
-        String val = (String) svcMap.get(key);
-        if (val == null) {
-            val = (String) cfMap.get(key);
-        }
-
-        if (val == null || "1.1".equals(val)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
      * This is a JMS spec independent method to create a Connection. Please be cautious when
      * making any changes
      *
@@ -1006,78 +672,6 @@ public class JMSUtils extends BaseUtils {
                 return ((TopicSession) session).createPublisher((Topic) destination);               
             }
         }
-    }
-
-    /**
-     * Create a one time MessageProducer for the given JMS OutTransport information
-     * For simplicity and best compatibility, this method uses only JMS 1.0.2b API.
-     * Please be cautious when making any changes
-     *
-     * @param jmsOut the JMS OutTransport information (contains all properties)
-     * @return a JMSSender based on one-time use resources
-     * @throws JMSException on errors, to be handled and logged by the caller 
-     */
-    public static JMSMessageSender createJMSSender(JMSOutTransportInfo jmsOut)
-        throws JMSException {
-
-        // digest the targetAddress and locate CF from the EPR
-        jmsOut.loadConnectionFactoryFromProperies();
-
-        // create a one time connection and session to be used
-        Hashtable<String,String> jmsProps = jmsOut.getProperties();
-        String user = jmsProps != null ? jmsProps.get(JMSConstants.PARAM_JMS_USERNAME) : null;
-        String pass = jmsProps != null ? jmsProps.get(JMSConstants.PARAM_JMS_PASSWORD) : null;
-
-        QueueConnectionFactory qConFac = null;
-        TopicConnectionFactory tConFac = null;
-
-        int destType = -1;
-        if (JMSConstants.DESTINATION_TYPE_QUEUE.equals(jmsOut.getDestinationType())) {
-            destType = JMSConstants.QUEUE;
-            qConFac = (QueueConnectionFactory) jmsOut.getConnectionFactory();
-
-        } else if (JMSConstants.DESTINATION_TYPE_TOPIC.equals(jmsOut.getDestinationType())) {
-            destType = JMSConstants.TOPIC;
-            tConFac = (TopicConnectionFactory) jmsOut.getConnectionFactory();
-        }
-
-        Connection connection = null;
-        if (user != null && pass != null) {
-            if (qConFac != null) {
-                connection = qConFac.createQueueConnection(user, pass);
-            } else if (tConFac != null) {
-                connection = tConFac.createTopicConnection(user, pass);
-            }
-        } else {
-           if (qConFac != null) {
-                connection = qConFac.createQueueConnection();
-            } else if (tConFac != null)  {
-                connection = tConFac.createTopicConnection();
-            }
-        }
-
-        if (connection == null && jmsOut.getJmsConnectionFactory() != null) {
-            connection = jmsOut.getJmsConnectionFactory().getConnection();
-        }
-
-        Session session = null;
-        MessageProducer producer = null;
-        Destination destination = jmsOut.getDestination();
-
-        if (destType == JMSConstants.QUEUE) {
-            session = ((QueueConnection) connection).
-                createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-            producer = ((QueueSession) session).createSender((Queue) destination);
-        } else {
-            session = ((TopicConnection) connection).
-                createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-            producer = ((TopicSession) session).createPublisher((Topic) destination);
-        }
-
-        return new JMSMessageSender(connection, session, producer,
-            destination, (jmsOut.getJmsConnectionFactory() == null ?
-            JMSConstants.CACHE_NONE : jmsOut.getJmsConnectionFactory().getCacheLevel()), false,
-            destType == -1 ? null : destType == JMSConstants.QUEUE ? Boolean.TRUE : Boolean.FALSE);
     }
 
     /**

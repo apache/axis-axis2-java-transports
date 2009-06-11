@@ -22,8 +22,11 @@ import org.apache.axis2.addressing.EndpointReference;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
+
+import javax.naming.Context;
 
 /**
  * Class that links an Axis2 service to a JMS destination. Additionally, it contains
@@ -80,7 +83,7 @@ public class JMSEndpoint {
                 if ("legacy".equalsIgnoreCase((String) p.getValue())) {
                     // if "legacy" specified, compute and replace it
                     endpointReferences.add(
-                        new EndpointReference(JMSUtils.getEPR(cf, destinationType, this)));
+                        new EndpointReference(getEPR()));
                 } else {
                     endpointReferences.add(new EndpointReference((String) p.getValue()));
                 }
@@ -89,8 +92,49 @@ public class JMSEndpoint {
 
         if (eprs.isEmpty()) {
             // if nothing specified, compute and return legacy EPR
-            endpointReferences.add(new EndpointReference(JMSUtils.getEPR(cf, destinationType, this)));
+            endpointReferences.add(new EndpointReference(getEPR()));
         }
+    }
+
+    /**
+     * Get the EPR for the given JMS connection factory and destination
+     * the form of the URL is
+     * jms:/<destination>?[<key>=<value>&]*
+     * Credentials Context.SECURITY_PRINCIPAL, Context.SECURITY_CREDENTIALS
+     * JMSConstants.PARAM_JMS_USERNAME and JMSConstants.PARAM_JMS_USERNAME are filtered
+     *
+     * @return the EPR as a String
+     */
+    private String getEPR() {
+        StringBuffer sb = new StringBuffer();
+
+        sb.append(
+            JMSConstants.JMS_PREFIX).append(jndiDestinationName);
+        sb.append("?").
+            append(JMSConstants.PARAM_DEST_TYPE).append("=").append(
+            destinationType == JMSConstants.TOPIC ?
+                JMSConstants.DESTINATION_TYPE_TOPIC : JMSConstants.DESTINATION_TYPE_QUEUE);
+
+        if (contentTypeRuleSet != null) {
+            String contentTypeProperty = contentTypeRuleSet.getDefaultContentTypeProperty();
+            if (contentTypeProperty != null) {
+                sb.append("&");
+                sb.append(JMSConstants.CONTENT_TYPE_PROPERTY_PARAM);
+                sb.append("=");
+                sb.append(contentTypeProperty);
+            }
+        }
+
+        for (Map.Entry<String,String> entry : cf.getParameters().entrySet()) {
+            if (!Context.SECURITY_PRINCIPAL.equalsIgnoreCase(entry.getKey()) &&
+                !Context.SECURITY_CREDENTIALS.equalsIgnoreCase(entry.getKey()) &&
+                !JMSConstants.PARAM_JMS_USERNAME.equalsIgnoreCase(entry.getKey()) &&
+                !JMSConstants.PARAM_JMS_PASSWORD.equalsIgnoreCase(entry.getKey())) {
+                sb.append("&").append(
+                    entry.getKey()).append("=").append(entry.getValue());
+            }
+        }
+        return sb.toString();
     }
 
     public ContentTypeRuleSet getContentTypeRuleSet() {

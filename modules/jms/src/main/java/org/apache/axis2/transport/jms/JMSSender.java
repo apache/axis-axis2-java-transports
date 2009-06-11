@@ -30,6 +30,7 @@ import org.apache.axis2.transport.OutTransportInfo;
 import org.apache.axis2.transport.base.*;
 import org.apache.axis2.transport.base.streams.WriterOutputStream;
 import org.apache.axis2.transport.http.HTTPConstants;
+import org.apache.axis2.transport.jms.iowrappers.BytesMessageOutputStream;
 
 import javax.jms.*;
 import javax.activation.DataHandler;
@@ -105,7 +106,7 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
 
             } else {
                 try {
-                    messageSender = JMSUtils.createJMSSender(jmsOut);
+                    messageSender = jmsOut.createJMSSender();
                 } catch (JMSException e) {
                     handleException("Unable to create a JMSMessageSender for : " + outTransportInfo, e);
                 }
@@ -115,7 +116,7 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
 
             jmsOut = (JMSOutTransportInfo) outTransportInfo;
             try {
-                messageSender = JMSUtils.createJMSSender(jmsOut);
+                messageSender = jmsOut.createJMSSender();
             } catch (JMSException e) {
                 handleException("Unable to create a JMSMessageSender for : " + outTransportInfo, e);
             }

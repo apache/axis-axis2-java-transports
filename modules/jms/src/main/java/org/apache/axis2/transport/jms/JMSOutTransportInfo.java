@@ -20,9 +20,20 @@ import org.apache.axis2.transport.base.BaseUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.MessageProducer;
+import javax.jms.Queue;
+import javax.jms.QueueConnection;
+import javax.jms.QueueConnectionFactory;
+import javax.jms.QueueSession;
+import javax.jms.Session;
 import javax.jms.Topic;
+import javax.jms.TopicConnection;
+import javax.jms.TopicConnectionFactory;
+import javax.jms.TopicSession;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NameNotFoundException;
@@ -301,5 +312,73 @@ public class JMSOutTransportInfo implements OutTransportInfo {
 
     public void setContentTypeProperty(String contentTypeProperty) {
         this.contentTypeProperty = contentTypeProperty;
+    }
+
+    /**
+     * Create a one time MessageProducer for this JMS OutTransport information.
+     * For simplicity and best compatibility, this method uses only JMS 1.0.2b API.
+     * Please be cautious when making any changes
+     *
+     * @return a JMSSender based on one-time use resources
+     * @throws JMSException on errors, to be handled and logged by the caller 
+     */
+    public JMSMessageSender createJMSSender() throws JMSException {
+
+        // digest the targetAddress and locate CF from the EPR
+        loadConnectionFactoryFromProperies();
+
+        // create a one time connection and session to be used
+        String user = properties != null ? properties.get(JMSConstants.PARAM_JMS_USERNAME) : null;
+        String pass = properties != null ? properties.get(JMSConstants.PARAM_JMS_PASSWORD) : null;
+
+        QueueConnectionFactory qConFac = null;
+        TopicConnectionFactory tConFac = null;
+
+        int destType = -1;
+        if (JMSConstants.DESTINATION_TYPE_QUEUE.equals(destinationType)) {
+            destType = JMSConstants.QUEUE;
+            qConFac = (QueueConnectionFactory) connectionFactory;
+
+        } else if (JMSConstants.DESTINATION_TYPE_TOPIC.equals(destinationType)) {
+            destType = JMSConstants.TOPIC;
+            tConFac = (TopicConnectionFactory) connectionFactory;
+        }
+
+        Connection connection = null;
+        if (user != null && pass != null) {
+            if (qConFac != null) {
+                connection = qConFac.createQueueConnection(user, pass);
+            } else if (tConFac != null) {
+                connection = tConFac.createTopicConnection(user, pass);
+            }
+        } else {
+           if (qConFac != null) {
+                connection = qConFac.createQueueConnection();
+            } else if (tConFac != null)  {
+                connection = tConFac.createTopicConnection();
+            }
+        }
+
+        if (connection == null && jmsConnectionFactory != null) {
+            connection = jmsConnectionFactory.getConnection();
+        }
+
+        Session session = null;
+        MessageProducer producer = null;
+
+        if (destType == JMSConstants.QUEUE) {
+            session = ((QueueConnection) connection).
+                createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+            producer = ((QueueSession) session).createSender((Queue) destination);
+        } else {
+            session = ((TopicConnection) connection).
+                createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+            producer = ((TopicSession) session).createPublisher((Topic) destination);
+        }
+
+        return new JMSMessageSender(connection, session, producer,
+            destination, (jmsConnectionFactory == null ?
+            JMSConstants.CACHE_NONE : jmsConnectionFactory.getCacheLevel()), false,
+            destType == -1 ? null : destType == JMSConstants.QUEUE ? Boolean.TRUE : Boolean.FALSE);
     }
 }

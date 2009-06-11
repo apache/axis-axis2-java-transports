@@ -159,7 +159,7 @@ public class JMSListener extends AbstractTransportListener implements Management
         endpoint.computeEPRs(); // compute service EPR and keep for later use        
         serviceNameToEndpointMap.put(service.getName(), endpoint);
         
-        ServiceTaskManager stm = JMSUtils.createTaskManagerForService(cf, service, workerPool);
+        ServiceTaskManager stm = ServiceTaskManagerFactory.createTaskManagerForService(cf, service, workerPool);
         stm.setJmsMessageReceiver(new JMSMessageReceiver(this, cf, endpoint));
         stm.start();
         serviceNameToSTMMap.put(service.getName(), stm);
