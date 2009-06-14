@@ -40,6 +40,7 @@ public class JMSEndpoint {
     private int destinationType = JMSConstants.GENERIC;
     private Set<EndpointReference> endpointReferences = new HashSet<EndpointReference>();
     private ContentTypeRuleSet contentTypeRuleSet;
+    private ServiceTaskManager serviceTaskManager;
 
     public AxisService getService() {
         return service;
@@ -151,5 +152,13 @@ public class JMSEndpoint {
 
     public void setCf(JMSConnectionFactory cf) {
         this.cf = cf;
+    }
+
+    public ServiceTaskManager getServiceTaskManager() {
+        return serviceTaskManager;
+    }
+
+    public void setServiceTaskManager(ServiceTaskManager serviceTaskManager) {
+        this.serviceTaskManager = serviceTaskManager;
     }
 }

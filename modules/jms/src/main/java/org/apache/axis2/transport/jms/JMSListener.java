@@ -65,9 +65,7 @@ public class JMSListener extends AbstractTransportListener implements Management
     private JMSConnectionFactoryManager connFacManager;
     /** A Map of service name to the JMS endpoints */
     private Map<String,JMSEndpoint> serviceNameToEndpointMap = new HashMap<String,JMSEndpoint>();
-    /** A Map of service name to its ServiceTaskManager instances */
-    private Map<String, ServiceTaskManager> serviceNameToSTMMap =
-        new HashMap<String, ServiceTaskManager>();
+
     private final TransportErrorSourceSupport tess = new TransportErrorSourceSupport(this);
     
     /**
@@ -157,13 +155,14 @@ public class JMSListener extends AbstractTransportListener implements Management
         }
 
         endpoint.computeEPRs(); // compute service EPR and keep for later use        
-        serviceNameToEndpointMap.put(service.getName(), endpoint);
         
         ServiceTaskManager stm = ServiceTaskManagerFactory.createTaskManagerForService(cf, service, workerPool);
         stm.setJmsMessageReceiver(new JMSMessageReceiver(this, cf, endpoint));
         stm.start();
-        serviceNameToSTMMap.put(service.getName(), stm);
+        endpoint.setServiceTaskManager(stm);
 
+        serviceNameToEndpointMap.put(service.getName(), endpoint);
+        
         for (int i=0; i<3; i++) {
             if (stm.getActiveTaskCount() > 0) {
                 log.info("Started to listen on destination : " + stm.getDestinationJNDIName() +
@@ -188,8 +187,9 @@ public class JMSListener extends AbstractTransportListener implements Management
      */
     protected void stopListeningForService(AxisService service) {
 
-        ServiceTaskManager stm = serviceNameToSTMMap.get(service.getName());
-        if (stm != null) {
+        JMSEndpoint endpoint = serviceNameToEndpointMap.get(service.getName());
+        if (endpoint != null) {
+            ServiceTaskManager stm = endpoint.getServiceTaskManager();
             if (log.isDebugEnabled()) {
                 log.debug("Stopping listening on destination : " + stm.getDestinationJNDIName() +
                     " for service : " + stm.getServiceName());
@@ -197,7 +197,6 @@ public class JMSListener extends AbstractTransportListener implements Management
 
             stm.stop();
 
-            serviceNameToSTMMap.remove(service.getName());
             serviceNameToEndpointMap.remove(service.getName());
             log.info("Stopped listening for JMS messages to service : " + service.getName());
 
@@ -234,8 +233,8 @@ public class JMSListener extends AbstractTransportListener implements Management
     public void pause() throws AxisFault {
         if (state != BaseConstants.STARTED) return;
         try {
-            for (ServiceTaskManager stm : serviceNameToSTMMap.values()) {
-                stm.pause();
+            for (JMSEndpoint endpoint : serviceNameToEndpointMap.values()) {
+                endpoint.getServiceTaskManager().pause();
             }
             state = BaseConstants.PAUSED;
             log.info("Listener paused");
@@ -251,8 +250,8 @@ public class JMSListener extends AbstractTransportListener implements Management
     public void resume() throws AxisFault {
         if (state != BaseConstants.PAUSED) return;
         try {
-            for (ServiceTaskManager stm : serviceNameToSTMMap.values()) {
-                stm.resume();
+            for (JMSEndpoint endpoint : serviceNameToEndpointMap.values()) {
+                endpoint.getServiceTaskManager().resume();
             }
             state = BaseConstants.STARTED;
             log.info("Listener resumed");
