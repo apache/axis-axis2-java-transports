@@ -105,6 +105,7 @@ public class JMSMessageReceiver {
         }
 
         // has this message already expired? expiration time == 0 means never expires
+        // TODO: explain why this is necessary; normally it is the responsibility of the provider to handle message expiration
         try {
             long expiryTime = message.getJMSExpiration();
             if (expiryTime > 0 && System.currentTimeMillis() > expiryTime) {
