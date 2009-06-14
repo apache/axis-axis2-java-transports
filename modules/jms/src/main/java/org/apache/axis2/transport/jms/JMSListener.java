@@ -17,12 +17,11 @@ package org.apache.axis2.transport.jms;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
-import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.TransportInDescription;
-import org.apache.axis2.transport.base.AbstractTransportListener;
+import org.apache.axis2.transport.base.AbstractTransportListenerEx;
 import org.apache.axis2.transport.base.BaseConstants;
 import org.apache.axis2.transport.base.ManagementSupport;
 import org.apache.axis2.transport.base.event.TransportErrorListener;
@@ -32,9 +31,6 @@ import org.apache.axis2.transport.jms.ctype.ContentTypeRuleFactory;
 import org.apache.axis2.transport.jms.ctype.ContentTypeRuleSet;
 import org.apache.axis2.transport.jms.ctype.MessageTypeRule;
 import org.apache.axis2.transport.jms.ctype.PropertyRule;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.jms.BytesMessage;
 import javax.jms.TextMessage;
@@ -56,15 +52,13 @@ import javax.jms.TextMessage;
  * <p>
  * All Destinations / JMS Administered objects used MUST be pre-created or already available 
  */
-public class JMSListener extends AbstractTransportListener implements ManagementSupport,
+public class JMSListener extends AbstractTransportListenerEx<JMSEndpoint> implements ManagementSupport,
     TransportErrorSource {
 
     public static final String TRANSPORT_NAME = Constants.TRANSPORT_JMS;
 
     /** The JMSConnectionFactoryManager which centralizes the management of defined factories */
     private JMSConnectionFactoryManager connFacManager;
-    /** A Map of service name to the JMS endpoints */
-    private Map<String,JMSEndpoint> serviceNameToEndpointMap = new HashMap<String,JMSEndpoint>();
 
     private final TransportErrorSourceSupport tess = new TransportErrorSourceSupport(this);
     
@@ -82,27 +76,9 @@ public class JMSListener extends AbstractTransportListener implements Management
         log.info("JMS Transport Receiver/Listener initialized...");
     }
 
-    /**
-     * Returns EPRs for the given service over the JMS transport
-     *
-     * @param serviceName service name
-     * @return the JMS EPRs for the service
-     */
-    public EndpointReference[] getEPRsForService(String serviceName) {
-        //Strip out the operation name
-        if (serviceName.indexOf('/') != -1) {
-            serviceName = serviceName.substring(0, serviceName.indexOf('/'));
-        }
-        // strip out the endpoint name if present
-        if (serviceName.indexOf('.') != -1) {
-            serviceName = serviceName.substring(0, serviceName.indexOf('.'));
-        }
-        JMSEndpoint endpoint = serviceNameToEndpointMap.get(serviceName);
-        if (endpoint != null) {
-            return endpoint.getEndpointReferences();
-        } else {
-            return null;
-        }
+    @Override
+    protected JMSEndpoint createEndpoint() {
+        return new JMSEndpoint();
     }
 
     /**
@@ -110,15 +86,14 @@ public class JMSListener extends AbstractTransportListener implements Management
      *
      * @param service the Axis service for which to listen for messages
      */
-    protected void startListeningForService(AxisService service) throws AxisFault {
+    @Override
+    protected void configureAndStartEndpoint(JMSEndpoint endpoint, AxisService service) throws AxisFault {
         JMSConnectionFactory cf = getConnectionFactory(service);
         if (cf == null) {
             throw new AxisFault("The service doesn't specify a JMS connection factory or refers " +
                 "to an invalid factory.");
         }
 
-        JMSEndpoint endpoint = new JMSEndpoint();
-        endpoint.setService(service);
         endpoint.setCf(cf);
 
         Parameter destParam = service.getParameter(JMSConstants.PARAM_DESTINATION);
@@ -161,8 +136,6 @@ public class JMSListener extends AbstractTransportListener implements Management
         stm.start();
         endpoint.setServiceTaskManager(stm);
 
-        serviceNameToEndpointMap.put(service.getName(), endpoint);
-        
         for (int i=0; i<3; i++) {
             if (stm.getActiveTaskCount() > 0) {
                 log.info("Started to listen on destination : " + stm.getDestinationJNDIName() +
@@ -185,26 +158,19 @@ public class JMSListener extends AbstractTransportListener implements Management
      *
      * @param service the service that was undeployed or stopped
      */
-    protected void stopListeningForService(AxisService service) {
-
-        JMSEndpoint endpoint = serviceNameToEndpointMap.get(service.getName());
-        if (endpoint != null) {
-            ServiceTaskManager stm = endpoint.getServiceTaskManager();
-            if (log.isDebugEnabled()) {
-                log.debug("Stopping listening on destination : " + stm.getDestinationJNDIName() +
-                    " for service : " + stm.getServiceName());
-            }
-
-            stm.stop();
-
-            serviceNameToEndpointMap.remove(service.getName());
-            log.info("Stopped listening for JMS messages to service : " + service.getName());
-
-        } else {
-            log.error("Unable to stop service : " + service.getName() +
-                " - unable to find its ServiceTaskManager");
+    @Override
+    protected void stopEndpoint(JMSEndpoint endpoint) {
+        ServiceTaskManager stm = endpoint.getServiceTaskManager();
+        if (log.isDebugEnabled()) {
+            log.debug("Stopping listening on destination : " + stm.getDestinationJNDIName() +
+                " for service : " + stm.getServiceName());
         }
+
+        stm.stop();
+
+        log.info("Stopped listening for JMS messages to service : " + endpoint.getServiceName());
     }
+
     /**
      * Return the connection factory name for this service. If this service
      * refers to an invalid factory or defaults to a non-existent default
@@ -233,7 +199,7 @@ public class JMSListener extends AbstractTransportListener implements Management
     public void pause() throws AxisFault {
         if (state != BaseConstants.STARTED) return;
         try {
-            for (JMSEndpoint endpoint : serviceNameToEndpointMap.values()) {
+            for (JMSEndpoint endpoint : getEndpoints()) {
                 endpoint.getServiceTaskManager().pause();
             }
             state = BaseConstants.PAUSED;
@@ -250,7 +216,7 @@ public class JMSListener extends AbstractTransportListener implements Management
     public void resume() throws AxisFault {
         if (state != BaseConstants.PAUSED) return;
         try {
-            for (JMSEndpoint endpoint : serviceNameToEndpointMap.values()) {
+            for (JMSEndpoint endpoint : getEndpoints()) {
                 endpoint.getServiceTaskManager().resume();
             }
             state = BaseConstants.STARTED;

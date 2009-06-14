@@ -20,21 +20,17 @@ package org.apache.axis2.transport.base.datagram;
 
 import java.io.IOException;
 import java.net.SocketException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.TransportInDescription;
-import org.apache.axis2.transport.base.AbstractTransportListener;
+import org.apache.axis2.transport.base.AbstractTransportListenerEx;
 import org.apache.axis2.transport.base.ParamUtils;
 
 public abstract class AbstractDatagramTransportListener<E extends DatagramEndpoint>
-        extends AbstractTransportListener {
+        extends AbstractTransportListenerEx<E> {
     
-    private final Map<String,E> endpoints = new HashMap<String,E>();
 	private DatagramDispatcher<E> dispatcher;
     private String defaultIp;
 	
@@ -61,10 +57,8 @@ public abstract class AbstractDatagramTransportListener<E extends DatagramEndpoi
     }
 	
     @Override
-    protected void startListeningForService(AxisService service) throws AxisFault {
-        E endpoint = createEndpoint(service);
+    protected void configureAndStartEndpoint(E endpoint, AxisService service) throws AxisFault {
         endpoint.setListener(this);
-        endpoint.setService(service);
         endpoint.setContentType(ParamUtils.getRequiredParam(
                 service, "transport." + getTransportName() + ".contentType"));
         endpoint.setMetrics(metrics);
@@ -73,24 +67,22 @@ public abstract class AbstractDatagramTransportListener<E extends DatagramEndpoi
             dispatcher.addEndpoint(endpoint);
         } catch (IOException ex) {
             throw new AxisFault("Unable to listen on endpoint "
-                    + endpoint.getEndpointReference(defaultIp), ex);
+                    + endpoint.getEndpointReferences(defaultIp)[0], ex);
         }
         if (log.isDebugEnabled()) {
-            log.debug("Started listening on endpoint " + endpoint.getEndpointReference(defaultIp)
+            log.debug("Started listening on endpoint " + endpoint.getEndpointReferences(defaultIp)[0]
                     + " [contentType=" + endpoint.getContentType()
                     + "; service=" + service.getName() + "]");
         }
-        endpoints.put(service.getName(), endpoint);
     }
     
     @Override
-    protected void stopListeningForService(AxisService service) {
+    protected void stopEndpoint(E endpoint) {
         try {
-            dispatcher.removeEndpoint(endpoints.get(service.getName()));
+            dispatcher.removeEndpoint(endpoint);
         } catch (IOException ex) {
-            log.error("I/O exception while stopping listener for service " + service.getName(), ex);
+            log.error("I/O exception while stopping listener for service " + endpoint.getServiceName(), ex);
         }
-        endpoints.remove(service.getName());
     }
 
     @Override
@@ -103,24 +95,6 @@ public abstract class AbstractDatagramTransportListener<E extends DatagramEndpoi
         }
     }
 
-    public EndpointReference[] getEPRsForService(String serviceName, String ip) throws AxisFault {
-
-        // strip out the endpoint name if present
-        if (serviceName.indexOf('.') != -1) {
-            serviceName = serviceName.substring(0, serviceName.indexOf('.'));
-        }
-
-        E endpoint = endpoints.get(serviceName);
-        if (endpoint == null) {
-            return null;
-        } else {
-            return new EndpointReference[] {
-                    endpoint.getEndpointReference(ip == null ? defaultIp : ip) };
-        }
-    }
-    
 	protected abstract DatagramDispatcher<E> createDispatcher(DatagramDispatcherCallback callback)
             throws IOException;
-    
-    protected abstract E createEndpoint(AxisService service) throws AxisFault;
 }

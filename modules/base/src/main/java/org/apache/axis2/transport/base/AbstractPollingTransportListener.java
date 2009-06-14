@@ -212,7 +212,7 @@ public abstract class AbstractPollingTransportListener<T extends AbstractPollTab
                 String candidateName = service.getName();
                 if (candidateName.equals(serviceName) ||
                         serviceName.startsWith(candidateName + ".")) {
-                    return new EndpointReference[]{ entry.getEndpointReference() };
+                    return entry.getEndpointReferences(ip);
                 }
             }
         }

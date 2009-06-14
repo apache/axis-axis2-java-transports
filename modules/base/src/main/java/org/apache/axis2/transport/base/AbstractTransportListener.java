@@ -337,6 +337,10 @@ public abstract class AbstractTransportListener implements TransportListener {
         return transportIn.getName();
     }
 
+    public ConfigurationContext getConfigurationContext() {
+        return cfgCtx;
+    }
+    
     public MetricsCollector getMetricsCollector() {
         return metrics;
     }

@@ -86,8 +86,9 @@ public class PollTableEntry extends AbstractPollTableEntry {
     private long reconnectTimeout;
 
     @Override
-    public EndpointReference getEndpointReference() {
-        return new EndpointReference(MailConstants.TRANSPORT_PREFIX + emailAddress);
+    public EndpointReference[] getEndpointReferences(String ip) {
+        return new EndpointReference[] { new EndpointReference(MailConstants.TRANSPORT_PREFIX
+                + emailAddress) };
     }
 
     public InternetAddress getEmailAddress() {

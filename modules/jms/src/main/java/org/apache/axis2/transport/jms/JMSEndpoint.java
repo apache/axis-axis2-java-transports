@@ -15,8 +15,8 @@
 */
 package org.apache.axis2.transport.jms;
 
-import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
+import org.apache.axis2.transport.base.ProtocolEndpoint;
 import org.apache.axis2.transport.jms.ctype.ContentTypeRuleSet;
 import org.apache.axis2.addressing.EndpointReference;
 
@@ -33,26 +33,13 @@ import javax.naming.Context;
  * all the required information to process incoming JMS messages and to inject them
  * into Axis2.
  */
-public class JMSEndpoint {
+public class JMSEndpoint extends ProtocolEndpoint {
     private JMSConnectionFactory cf;
-    private AxisService service;
     private String jndiDestinationName;
     private int destinationType = JMSConstants.GENERIC;
     private Set<EndpointReference> endpointReferences = new HashSet<EndpointReference>();
     private ContentTypeRuleSet contentTypeRuleSet;
     private ServiceTaskManager serviceTaskManager;
-
-    public AxisService getService() {
-        return service;
-    }
-
-    public void setService(AxisService service) {
-        this.service = service;
-    }
-    
-    public String getServiceName() {
-        return service.getName();
-    }
 
     public String getJndiDestinationName() {
         return jndiDestinationName;
@@ -72,7 +59,8 @@ public class JMSEndpoint {
         }
     }
 
-    public EndpointReference[] getEndpointReferences() {
+    @Override
+    public EndpointReference[] getEndpointReferences(String ip) {
         return endpointReferences.toArray(new EndpointReference[endpointReferences.size()]);
     }
 

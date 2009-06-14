@@ -18,8 +18,12 @@
  */
 package org.apache.axis2.transport.udp;
 
+import java.net.SocketException;
+
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.transport.base.datagram.DatagramEndpoint;
+import org.apache.axis2.util.Utils;
 
 /**
  * UDP endpoint description.
@@ -44,7 +48,16 @@ public class Endpoint extends DatagramEndpoint {
 		this.maxPacketSize = maxPacketSize;
 	}
 
-	public EndpointReference getEndpointReference(String ip) {
-        return new EndpointReference("udp://" + ip + ":" + getPort() + "?contentType=" + getContentType());
+	@Override
+    public EndpointReference[] getEndpointReferences(String ip) throws AxisFault {
+	    if (ip == null) {
+	        try {
+	            ip = Utils.getIpAddress(getListener().getConfigurationContext().getAxisConfiguration());
+	        } catch (SocketException ex) {
+	            throw new AxisFault("Unable to determine the host's IP address", ex);
+	        }
+	    }
+        return new EndpointReference[] { new EndpointReference("udp://" + ip + ":" + getPort()
+                + "?contentType=" + getContentType()) };
     }
 }

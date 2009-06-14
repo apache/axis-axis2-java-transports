@@ -54,10 +54,14 @@ public class UDPListener extends AbstractDatagramTransportListener<Endpoint> imp
     }
 
     @Override
-    protected Endpoint createEndpoint(AxisService service) throws AxisFault {
-    	Endpoint endpoint = new Endpoint();
-    	endpoint.setPort(ParamUtils.getRequiredParamInt(service, UDPConstants.PORT_KEY));
-    	endpoint.setMaxPacketSize(ParamUtils.getOptionalParamInt(service, UDPConstants.MAX_PACKET_SIZE_KEY, UDPConstants.DEFAULT_MAX_PACKET_SIZE));
-    	return endpoint;
+    protected Endpoint createEndpoint() {
+    	return new Endpoint();
+    }
+
+    @Override
+    protected void configureAndStartEndpoint(Endpoint endpoint, AxisService service) throws AxisFault {
+        endpoint.setPort(ParamUtils.getRequiredParamInt(service, UDPConstants.PORT_KEY));
+        endpoint.setMaxPacketSize(ParamUtils.getOptionalParamInt(service, UDPConstants.MAX_PACKET_SIZE_KEY, UDPConstants.DEFAULT_MAX_PACKET_SIZE));
+        super.configureAndStartEndpoint(endpoint, service);
     }
 }

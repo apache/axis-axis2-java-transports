@@ -18,9 +18,8 @@
  */
 package org.apache.axis2.transport.base.datagram;
 
-import org.apache.axis2.addressing.EndpointReference;
-import org.apache.axis2.description.AxisService;
 import org.apache.axis2.transport.base.MetricsCollector;
+import org.apache.axis2.transport.base.ProtocolEndpoint;
 
 /**
  * Endpoint description.
@@ -30,10 +29,9 @@ import org.apache.axis2.transport.base.MetricsCollector;
  * transport specific information, such as the port number
  * the transport listens on.
  */
-public abstract class DatagramEndpoint {
+public abstract class DatagramEndpoint extends ProtocolEndpoint {
     private AbstractDatagramTransportListener listener;
     private String contentType;
-    private AxisService service;
     private MetricsCollector metrics;
 
     public AbstractDatagramTransportListener getListener() {
@@ -52,14 +50,6 @@ public abstract class DatagramEndpoint {
 		this.contentType = contentType;
 	}
 
-	public AxisService getService() {
-        return service;
-    }
-
-    public void setService(AxisService service) {
-		this.service = service;
-	}
-
 	public MetricsCollector getMetrics() {
         return metrics;
     }
@@ -67,6 +57,4 @@ public abstract class DatagramEndpoint {
 	public void setMetrics(MetricsCollector metrics) {
 		this.metrics = metrics;
 	}
-	
-	public abstract EndpointReference getEndpointReference(String ip);
 }

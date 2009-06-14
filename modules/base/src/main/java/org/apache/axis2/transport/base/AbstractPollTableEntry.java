@@ -21,18 +21,13 @@ package org.apache.axis2.transport.base;
 
 import java.util.TimerTask;
 
-import org.apache.axis2.addressing.EndpointReference;
-import org.apache.axis2.description.AxisService;
-
-public abstract class AbstractPollTableEntry {
+public abstract class AbstractPollTableEntry extends ProtocolEndpoint {
     // status of last scan
     public static final int SUCCSESSFUL = 0;
     public static final int WITH_ERRORS = 1;
     public static final int FAILED      = 2;
     public static final int NONE        = 3;
 
-    /** Axis2 service */
-    private AxisService service;
     /** next poll time */
     private long nextPollTime;
     /** last poll performed at */
@@ -48,16 +43,6 @@ public abstract class AbstractPollTableEntry {
     /** Flag indicating whether polling has been canceled. */
     boolean canceled;
     
-    public AxisService getService() {
-        return service;
-    }
-
-    void setService(AxisService service) {
-        this.service = service;
-    }
-    
-    public abstract EndpointReference getEndpointReference();
-
     public long getNextPollTime() {
         return nextPollTime;
     }
