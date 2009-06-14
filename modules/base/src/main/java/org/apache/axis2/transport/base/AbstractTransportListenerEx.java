@@ -107,7 +107,7 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
     @Override
     protected final void startListeningForService(AxisService service) throws AxisFault {
         E endpoint = createEndpoint();
-        endpoint.setService(service);
+        endpoint.init(this, service);
         if (endpoint.loadConfiguration(service)) {
             startEndpoint(endpoint);
             endpoints.add(endpoint);

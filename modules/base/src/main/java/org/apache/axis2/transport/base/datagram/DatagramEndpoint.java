@@ -33,17 +33,8 @@ import org.apache.axis2.transport.base.ProtocolEndpoint;
  * the transport listens on.
  */
 public abstract class DatagramEndpoint extends ProtocolEndpoint {
-    private AbstractDatagramTransportListener listener;
     private String contentType;
     private MetricsCollector metrics;
-
-    public AbstractDatagramTransportListener getListener() {
-        return listener;
-    }
-
-    public void setListener(AbstractDatagramTransportListener listener) {
-		this.listener = listener;
-	}
 
 	public String getContentType() {
         return contentType;
@@ -60,7 +51,7 @@ public abstract class DatagramEndpoint extends ProtocolEndpoint {
     @Override
     public boolean loadConfiguration(ParameterInclude params) throws AxisFault {
         contentType = ParamUtils.getRequiredParam(
-                params, "transport." + listener.getTransportName() + ".contentType");
+                params, "transport." + getListener().getTransportName() + ".contentType");
         return true;
     }
 }

@@ -57,7 +57,6 @@ public abstract class AbstractDatagramTransportListener<E extends DatagramEndpoi
     @Override
     protected final E createEndpoint() {
         E endpoint = doCreateEndpoint();
-        endpoint.setListener(this);
         endpoint.setMetrics(metrics);
         return endpoint;
     }

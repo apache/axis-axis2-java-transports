@@ -29,18 +29,24 @@ import org.apache.axis2.description.ParameterInclude;
  * service.
  */
 public abstract class ProtocolEndpoint {
+    private AbstractTransportListenerEx<?> listener;
     /** Axis2 service */
     private AxisService service;
     
+    // This is called only by AbstractTransportListenerEx and must have package access
+    void init(AbstractTransportListenerEx<?> listener, AxisService service) {
+        this.listener = listener;
+        this.service = service;
+    }
+    
+    public final AbstractTransportListenerEx<?> getListener() {
+        return listener;
+    }
+
     public final AxisService getService() {
         return service;
     }
 
-    // TODO: this should only be called by AbstractTransportListener and declared with package access
-    public final void setService(AxisService service) {
-        this.service = service;
-    }
-    
     public final String getServiceName() {
         return service.getName();
     }
