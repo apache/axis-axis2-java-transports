@@ -15,22 +15,16 @@
 */
 package org.apache.axis2.transport.jms;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
-import javax.jms.JMSException;
 import javax.naming.Context;
-import javax.naming.NamingException;
 
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.ParameterInclude;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.axis2.transport.base.threads.WorkerPool;
 
 /**
  * Class managing a set of {@link JMSConnectionFactory} objects.

@@ -143,11 +143,10 @@ public class ServiceTaskManagerFactory {
         return stm;
     }
 
-    private static Map<String, String> getServiceStringParameters(List list) {
+    private static Map<String, String> getServiceStringParameters(List<Parameter> list) {
 
         Map<String, String> map = new HashMap<String, String>();
-        for (Object o : list) {
-            Parameter p = (Parameter) o;
+        for (Parameter p : list) {
             if (p.getValue() instanceof String) {
                 map.put(p.getName(), (String) p.getValue());
             }
@@ -155,10 +154,12 @@ public class ServiceTaskManagerFactory {
         return map;
     }
 
-    private static String getRqdStringProperty(String key, Map svcMap, Map cfMap) {
-        String value = (String) svcMap.get(key);
+    private static String getRqdStringProperty(String key, Map<String,String> svcMap,
+            Map<String,String> cfMap) {
+        
+        String value = svcMap.get(key);
         if (value == null) {
-            value = (String) cfMap.get(key);
+            value = cfMap.get(key);
         }
         if (value == null) {
             throw new AxisJMSException("Service/connection factory property : " + key);
@@ -166,18 +167,22 @@ public class ServiceTaskManagerFactory {
         return value;
     }
 
-    private static String getOptionalStringProperty(String key, Map svcMap, Map cfMap) {
-        String value = (String) svcMap.get(key);
+    private static String getOptionalStringProperty(String key, Map<String,String> svcMap,
+            Map<String,String> cfMap) {
+        
+        String value = svcMap.get(key);
         if (value == null) {
-            value = (String) cfMap.get(key);
+            value = cfMap.get(key);
         }
         return value;
     }
 
-    private static Boolean getOptionalBooleanProperty(String key, Map svcMap, Map cfMap) {
-        String value = (String) svcMap.get(key);
+    private static Boolean getOptionalBooleanProperty(String key, Map<String,String> svcMap,
+            Map<String,String> cfMap) {
+        
+        String value = svcMap.get(key);
         if (value == null) {
-            value = (String) cfMap.get(key);
+            value = cfMap.get(key);
         }
         if (value == null) {
             return null;
@@ -186,10 +191,12 @@ public class ServiceTaskManagerFactory {
         }
     }
 
-    private static Integer getOptionalIntProperty(String key, Map svcMap, Map cfMap) {
-        String value = (String) svcMap.get(key);
+    private static Integer getOptionalIntProperty(String key, Map<String,String> svcMap,
+            Map<String,String> cfMap) {
+        
+        String value = svcMap.get(key);
         if (value == null) {
-            value = (String) cfMap.get(key);
+            value = cfMap.get(key);
         }
         if (value != null) {
             try {
@@ -201,10 +208,12 @@ public class ServiceTaskManagerFactory {
         return null;
     }
 
-    private static Double getOptionalDoubleProperty(String key, Map svcMap, Map cfMap) {
-        String value = (String) svcMap.get(key);
+    private static Double getOptionalDoubleProperty(String key, Map<String,String> svcMap,
+            Map<String,String> cfMap) {
+        
+        String value = svcMap.get(key);
         if (value == null) {
-            value = (String) cfMap.get(key);
+            value = cfMap.get(key);
         }
         if (value != null) {
             try {
@@ -216,12 +225,12 @@ public class ServiceTaskManagerFactory {
         return null;
     }
 
-    private static int getTransactionality(Map svcMap, Map cfMap) {
+    private static int getTransactionality(Map<String,String> svcMap, Map<String,String> cfMap) {
 
         String key = BaseConstants.PARAM_TRANSACTIONALITY;
-        String val = (String) svcMap.get(key);
+        String val = svcMap.get(key);
         if (val == null) {
-            val = (String) cfMap.get(key);
+            val = cfMap.get(key);
         }
 
         if (val == null) {
@@ -239,12 +248,12 @@ public class ServiceTaskManagerFactory {
         }
     }
 
-    private static int getDestinationType(Map svcMap, Map cfMap) {
+    private static int getDestinationType(Map<String,String> svcMap, Map<String,String> cfMap) {
 
         String key = JMSConstants.PARAM_DEST_TYPE;
-        String val = (String) svcMap.get(key);
+        String val = svcMap.get(key);
         if (val == null) {
-            val = (String) cfMap.get(key);
+            val = cfMap.get(key);
         }
 
         if (JMSConstants.DESTINATION_TYPE_TOPIC.equalsIgnoreCase(val)) {
@@ -253,12 +262,12 @@ public class ServiceTaskManagerFactory {
         return JMSConstants.QUEUE;
     }
 
-    private static int getSessionAck(Map svcMap, Map cfMap) {
+    private static int getSessionAck(Map<String,String> svcMap, Map<String,String> cfMap) {
 
         String key = JMSConstants.PARAM_SESSION_ACK;
-        String val = (String) svcMap.get(key);
+        String val = svcMap.get(key);
         if (val == null) {
-            val = (String) cfMap.get(key);
+            val = cfMap.get(key);
         }
 
         if (val == null || "AUTO_ACKNOWLEDGE".equalsIgnoreCase(val)) {
@@ -278,12 +287,12 @@ public class ServiceTaskManagerFactory {
         }
     }
 
-    private static int getCacheLevel(Map svcMap, Map cfMap) {
+    private static int getCacheLevel(Map<String,String> svcMap, Map<String,String> cfMap) {
 
         String key = JMSConstants.PARAM_CACHE_LEVEL;
-        String val = (String) svcMap.get(key);
+        String val = svcMap.get(key);
         if (val == null) {
-            val = (String) cfMap.get(key);
+            val = cfMap.get(key);
         }
 
         if ("none".equalsIgnoreCase(val)) {
@@ -300,12 +309,12 @@ public class ServiceTaskManagerFactory {
         return JMSConstants.CACHE_AUTO;
     }
 
-    private static boolean getJMSSpecVersion(Map svcMap, Map cfMap) {
+    private static boolean getJMSSpecVersion(Map<String,String> svcMap, Map<String,String> cfMap) {
 
         String key = JMSConstants.PARAM_JMS_SPEC_VER;
-        String val = (String) svcMap.get(key);
+        String val = svcMap.get(key);
         if (val == null) {
-            val = (String) cfMap.get(key);
+            val = cfMap.get(key);
         }
 
         if (val == null || "1.1".equals(val)) {

@@ -16,6 +16,7 @@
 package org.apache.axis2.transport.jms;
 
 public class AxisJMSException extends RuntimeException {
+    private static final long serialVersionUID = 630157137524249401L;
 
     AxisJMSException() {
         super();

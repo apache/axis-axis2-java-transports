@@ -58,6 +58,7 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
      * @param transportOut the transport sender definition from axis2.xml
      * @throws AxisFault on error
      */
+    @Override
     public void init(ConfigurationContext cfgCtx, TransportOutDescription transportOut) throws AxisFault {
         super.init(cfgCtx, transportOut);
         connFacManager = new JMSConnectionFactoryManager(transportOut);
@@ -88,6 +89,7 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
     /**
      * Performs the actual sending of the JMS message
      */
+    @Override
     public void sendMessage(MessageContext msgCtx, String targetAddress,
         OutTransportInfo outTransportInfo) throws AxisFault {
 

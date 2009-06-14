@@ -61,6 +61,7 @@ public class JMSListener extends AbstractTransportListenerEx<JMSEndpoint> implem
      * @param cfgCtx the Axis configuration context
      * @param trpInDesc the TransportIn description
      */
+    @Override
     public void init(ConfigurationContext cfgCtx,
         TransportInDescription trpInDesc) throws AxisFault {
 
@@ -145,6 +146,7 @@ public class JMSListener extends AbstractTransportListenerEx<JMSEndpoint> implem
      * messages until they complete. This helps bring an instance into a maintenence mode
      * @throws AxisFault on error
      */
+    @Override
     public void pause() throws AxisFault {
         if (state != BaseConstants.STARTED) return;
         try {
@@ -162,6 +164,7 @@ public class JMSListener extends AbstractTransportListenerEx<JMSEndpoint> implem
      * Resume the lister - Brings the lister into active mode back from a paused state
      * @throws AxisFault on error
      */
+    @Override
     public void resume() throws AxisFault {
         if (state != BaseConstants.PAUSED) return;
         try {
@@ -182,6 +185,7 @@ public class JMSListener extends AbstractTransportListenerEx<JMSEndpoint> implem
      * @param millis a number of milliseconds to wait until pending requests are allowed to complete
      * @throws AxisFault on error
      */
+    @Override
     public void maintenenceShutdown(long millis) throws AxisFault {
         if (state != BaseConstants.STARTED) return;
         try {

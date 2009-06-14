@@ -50,7 +50,7 @@ import java.util.*;
 public class JMSUtils extends BaseUtils {
 
     private static final Log log = LogFactory.getLog(JMSUtils.class);
-    private static final Class[]  NOARGS  = new Class[] {};
+    private static final Class<?>[]  NOARGS  = new Class<?>[] {};
     private static final Object[] NOPARMS = new Object[] {};
 
     /**
@@ -64,8 +64,7 @@ public class JMSUtils extends BaseUtils {
             return true;
 
         } else {
-            List transports = service.getExposedTransports();
-            for (Object transport : transports) {
+            for (String transport : service.getExposedTransports()) {
                 if (JMSListener.TRANSPORT_NAME.equals(transport)) {
                     return true;
                 }
@@ -226,7 +225,7 @@ public class JMSUtils extends BaseUtils {
     public static void setTransportHeaders(MessageContext msgContext, Message message)
         throws JMSException {
 
-        Map headerMap = (Map) msgContext.getProperty(MessageContext.TRANSPORT_HEADERS);
+        Map<?,?> headerMap = (Map<?,?>) msgContext.getProperty(MessageContext.TRANSPORT_HEADERS);
 
         if (headerMap == null) {
             return;
@@ -380,7 +379,7 @@ public class JMSUtils extends BaseUtils {
         } catch (JMSException ignore) {}
 
         // any other transport properties / headers
-        Enumeration e = null;
+        Enumeration<?> e = null;
         try {
             e = message.getPropertyNames();
         } catch (JMSException ignore) {}
