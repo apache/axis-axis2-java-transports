@@ -15,10 +15,20 @@
 */
 package org.apache.axis2.transport.jms;
 
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
+import org.apache.axis2.description.ParameterInclude;
+import org.apache.axis2.transport.base.BaseConstants;
 import org.apache.axis2.transport.base.ProtocolEndpoint;
+import org.apache.axis2.transport.base.threads.WorkerPool;
+import org.apache.axis2.transport.jms.ctype.ContentTypeRuleFactory;
 import org.apache.axis2.transport.jms.ctype.ContentTypeRuleSet;
+import org.apache.axis2.transport.jms.ctype.MessageTypeRule;
+import org.apache.axis2.transport.jms.ctype.PropertyRule;
 import org.apache.axis2.addressing.EndpointReference;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -26,6 +36,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 
+import javax.jms.BytesMessage;
+import javax.jms.TextMessage;
 import javax.naming.Context;
 
 /**
@@ -34,6 +46,11 @@ import javax.naming.Context;
  * into Axis2.
  */
 public class JMSEndpoint extends ProtocolEndpoint {
+    private static final Log log = LogFactory.getLog(JMSEndpoint.class);
+    
+    private final JMSListener listener;
+    private final WorkerPool workerPool;
+    
     private JMSConnectionFactory cf;
     private String jndiDestinationName;
     private int destinationType = JMSConstants.GENERIC;
@@ -41,15 +58,16 @@ public class JMSEndpoint extends ProtocolEndpoint {
     private ContentTypeRuleSet contentTypeRuleSet;
     private ServiceTaskManager serviceTaskManager;
 
+    public JMSEndpoint(JMSListener listener, WorkerPool workerPool) {
+        this.listener = listener;
+        this.workerPool = workerPool;
+    }
+
     public String getJndiDestinationName() {
         return jndiDestinationName;
     }
 
-    public void setJndiDestinationName(String destinationJNDIName) {
-        this.jndiDestinationName = destinationJNDIName;
-    }
-
-    public void setDestinationType(String destinationType) {
+    private void setDestinationType(String destinationType) {
         if (JMSConstants.DESTINATION_TYPE_TOPIC.equalsIgnoreCase(destinationType)) {
             this.destinationType = JMSConstants.TOPIC;
         } else if (JMSConstants.DESTINATION_TYPE_QUEUE.equalsIgnoreCase(destinationType)) {
@@ -64,7 +82,7 @@ public class JMSEndpoint extends ProtocolEndpoint {
         return endpointReferences.toArray(new EndpointReference[endpointReferences.size()]);
     }
 
-    public void computeEPRs() {
+    private void computeEPRs() {
         List<EndpointReference> eprs = new ArrayList<EndpointReference>();
         for (Object o : getService().getParameters()) {
             Parameter p = (Parameter) o;
@@ -130,16 +148,8 @@ public class JMSEndpoint extends ProtocolEndpoint {
         return contentTypeRuleSet;
     }
 
-    public void setContentTypeRuleSet(ContentTypeRuleSet contentTypeRuleSet) {
-        this.contentTypeRuleSet = contentTypeRuleSet;
-    }
-
     public JMSConnectionFactory getCf() {
         return cf;
-    }
-
-    public void setCf(JMSConnectionFactory cf) {
-        this.cf = cf;
     }
 
     public ServiceTaskManager getServiceTaskManager() {
@@ -148,5 +158,59 @@ public class JMSEndpoint extends ProtocolEndpoint {
 
     public void setServiceTaskManager(ServiceTaskManager serviceTaskManager) {
         this.serviceTaskManager = serviceTaskManager;
+    }
+
+    @Override
+    public boolean loadConfiguration(ParameterInclude params) throws AxisFault {
+        // We only support endpoints configured at service level
+        if (!(params instanceof AxisService)) {
+            return false;
+        }
+        
+        AxisService service = (AxisService)params;
+        
+        cf = listener.getConnectionFactory(service);
+        if (cf == null) {
+            return false;
+        }
+
+        Parameter destParam = service.getParameter(JMSConstants.PARAM_DESTINATION);
+        if (destParam != null) {
+            jndiDestinationName = (String)destParam.getValue();
+        } else {
+            // Assume that the JNDI destination name is the same as the service name
+            jndiDestinationName = service.getName();
+        }
+        
+        Parameter destTypeParam = service.getParameter(JMSConstants.PARAM_DEST_TYPE);
+        if (destTypeParam != null) {
+            String paramValue = (String) destTypeParam.getValue();
+            if (JMSConstants.DESTINATION_TYPE_QUEUE.equals(paramValue) ||
+                    JMSConstants.DESTINATION_TYPE_TOPIC.equals(paramValue) )  {
+                setDestinationType(paramValue);
+            } else {
+                throw new AxisFault("Invalid destinaton type value " + paramValue);
+            }
+        } else {
+            log.debug("JMS destination type not given. default queue");
+            destinationType = JMSConstants.QUEUE;
+        }
+        
+        Parameter contentTypeParam = service.getParameter(JMSConstants.CONTENT_TYPE_PARAM);
+        if (contentTypeParam == null) {
+            contentTypeRuleSet = new ContentTypeRuleSet();
+            contentTypeRuleSet.addRule(new PropertyRule(BaseConstants.CONTENT_TYPE));
+            contentTypeRuleSet.addRule(new MessageTypeRule(BytesMessage.class, "application/octet-stream"));
+            contentTypeRuleSet.addRule(new MessageTypeRule(TextMessage.class, "text/plain"));
+        } else {
+            contentTypeRuleSet = ContentTypeRuleFactory.parse(contentTypeParam);
+        }
+
+        computeEPRs(); // compute service EPR and keep for later use        
+        
+        serviceTaskManager = ServiceTaskManagerFactory.createTaskManagerForService(cf, service, workerPool);
+        serviceTaskManager.setJmsMessageReceiver(new JMSMessageReceiver(listener, cf, this));
+        
+        return true;
     }
 }

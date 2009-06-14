@@ -20,10 +20,7 @@ package org.apache.axis2.transport.udp;
 
 import java.io.IOException;
 
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.description.AxisService;
 import org.apache.axis2.transport.base.ManagementSupport;
-import org.apache.axis2.transport.base.ParamUtils;
 import org.apache.axis2.transport.base.datagram.AbstractDatagramTransportListener;
 import org.apache.axis2.transport.base.datagram.DatagramDispatcherCallback;
 
@@ -54,14 +51,7 @@ public class UDPListener extends AbstractDatagramTransportListener<Endpoint> imp
     }
 
     @Override
-    protected Endpoint createEndpoint() {
+    protected Endpoint doCreateEndpoint() {
     	return new Endpoint();
-    }
-
-    @Override
-    protected void configureAndStartEndpoint(Endpoint endpoint, AxisService service) throws AxisFault {
-        endpoint.setPort(ParamUtils.getRequiredParamInt(service, UDPConstants.PORT_KEY));
-        endpoint.setMaxPacketSize(ParamUtils.getOptionalParamInt(service, UDPConstants.MAX_PACKET_SIZE_KEY, UDPConstants.DEFAULT_MAX_PACKET_SIZE));
-        super.configureAndStartEndpoint(endpoint, service);
     }
 }

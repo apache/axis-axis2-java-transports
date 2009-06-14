@@ -18,14 +18,16 @@
 */
 package org.apache.axis2.transport.base;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisService;
+import org.apache.axis2.description.TransportInDescription;
 
 /**
  * Partial implementation of {@link AbstractTransportListener} with a higher level
@@ -41,7 +43,39 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
         extends AbstractTransportListener {
     
     /** A Map of service name to the protocol endpoints */
-    private Map<String,E> endpoints = new HashMap<String,E>();
+    private List<E> endpoints = new ArrayList<E>();
+
+    @Override
+    public void init(ConfigurationContext cfgCtx,
+            TransportInDescription transportIn) throws AxisFault {
+
+        super.init(cfgCtx, transportIn);
+        
+        // Create endpoint configured at transport level (if available)
+        E endpoint = createEndpoint();
+        if (endpoint.loadConfiguration(transportIn)) {
+            startEndpoint(endpoint);
+            endpoints.add(endpoint);
+        }
+    }
+    
+    @Override
+    public void destroy() {
+        // Explicitly stop all endpoints not predispatched to services. All other endpoints will
+        // be stopped by stopListeningForService.
+        List<E> endpointsToStop = new ArrayList<E>();
+        for (E endpoint : endpoints) {
+            if (endpoint.getService() == null) {
+                endpointsToStop.add(endpoint);
+            }
+        }
+        for (E endpoint : endpointsToStop) {
+            stopEndpoint(endpoint);
+            endpoints.remove(endpoint);
+        }
+        
+        super.destroy();
+    }
 
     @Override
     public EndpointReference[] getEPRsForService(String serviceName, String ip) throws AxisFault {
@@ -53,16 +87,19 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
         if (serviceName.indexOf('.') != -1) {
             serviceName = serviceName.substring(0, serviceName.indexOf('.'));
         }
-        E endpoint = endpoints.get(serviceName);
-        if (endpoint != null) {
-            return endpoint.getEndpointReferences(ip);
-        } else {
-            return null;
+        for (E endpoint : endpoints) {
+            AxisService service = endpoint.getService();
+            if (service != null) {
+                if (service.getName().equals(serviceName)) {
+                    return endpoint.getEndpointReferences(ip);
+                }
+            }
         }
+        return null;
     }
 
     public final Collection<E> getEndpoints() {
-        return Collections.unmodifiableCollection(endpoints.values());
+        return Collections.unmodifiableCollection(endpoints);
     }
 
     protected abstract E createEndpoint();
@@ -71,22 +108,28 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
     protected final void startListeningForService(AxisService service) throws AxisFault {
         E endpoint = createEndpoint();
         endpoint.setService(service);
-        configureAndStartEndpoint(endpoint, service);
-        endpoints.put(service.getName(), endpoint);
+        if (endpoint.loadConfiguration(service)) {
+            startEndpoint(endpoint);
+            endpoints.add(endpoint);
+        } else {
+            throw new AxisFault("Service doesn't have configuration information for transport " +
+                    getTransportName());
+        }
     }
 
-    protected abstract void configureAndStartEndpoint(E endpoint, AxisService service) throws AxisFault;
+    protected abstract void startEndpoint(E endpoint) throws AxisFault;
 
     @Override
     protected final void stopListeningForService(AxisService service) {
-        E endpoint = endpoints.get(service.getName());
-        if (endpoint != null) {
-            stopEndpoint(endpoint);
-            endpoints.remove(service.getName());
-        } else {
-            log.error("Unable to stop service : " + service.getName() +
-                " - unable to find the corresponding protocol endpoint");
+        for (E endpoint : endpoints) {
+            if (service == endpoint.getService()) {
+                stopEndpoint(endpoint);
+                endpoints.remove(endpoint);
+                return;
+            }
         }
+        log.error("Unable to stop service : " + service.getName() +
+                " - unable to find the corresponding protocol endpoint");
     }
     
     protected abstract void stopEndpoint(E endpoint);

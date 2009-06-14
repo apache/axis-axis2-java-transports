@@ -23,10 +23,8 @@ import java.net.SocketException;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.transport.base.AbstractTransportListenerEx;
-import org.apache.axis2.transport.base.ParamUtils;
 
 public abstract class AbstractDatagramTransportListener<E extends DatagramEndpoint>
         extends AbstractTransportListenerEx<E> {
@@ -57,12 +55,17 @@ public abstract class AbstractDatagramTransportListener<E extends DatagramEndpoi
     }
 	
     @Override
-    protected void configureAndStartEndpoint(E endpoint, AxisService service) throws AxisFault {
+    protected final E createEndpoint() {
+        E endpoint = doCreateEndpoint();
         endpoint.setListener(this);
-        endpoint.setContentType(ParamUtils.getRequiredParam(
-                service, "transport." + getTransportName() + ".contentType"));
         endpoint.setMetrics(metrics);
-        
+        return endpoint;
+    }
+    
+    protected abstract E doCreateEndpoint();
+
+    @Override
+    protected void startEndpoint(E endpoint) throws AxisFault {
         try {
             dispatcher.addEndpoint(endpoint);
         } catch (IOException ex) {
@@ -72,7 +75,7 @@ public abstract class AbstractDatagramTransportListener<E extends DatagramEndpoi
         if (log.isDebugEnabled()) {
             log.debug("Started listening on endpoint " + endpoint.getEndpointReferences(defaultIp)[0]
                     + " [contentType=" + endpoint.getContentType()
-                    + "; service=" + service.getName() + "]");
+                    + "; service=" + endpoint.getServiceName() + "]");
         }
     }
     

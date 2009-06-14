@@ -18,7 +18,10 @@
  */
 package org.apache.axis2.transport.base.datagram;
 
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.description.ParameterInclude;
 import org.apache.axis2.transport.base.MetricsCollector;
+import org.apache.axis2.transport.base.ParamUtils;
 import org.apache.axis2.transport.base.ProtocolEndpoint;
 
 /**
@@ -46,10 +49,6 @@ public abstract class DatagramEndpoint extends ProtocolEndpoint {
         return contentType;
     }
 
-    public void setContentType(String contentType) {
-		this.contentType = contentType;
-	}
-
 	public MetricsCollector getMetrics() {
         return metrics;
     }
@@ -57,4 +56,11 @@ public abstract class DatagramEndpoint extends ProtocolEndpoint {
 	public void setMetrics(MetricsCollector metrics) {
 		this.metrics = metrics;
 	}
+
+    @Override
+    public boolean loadConfiguration(ParameterInclude params) throws AxisFault {
+        contentType = ParamUtils.getRequiredParam(
+                params, "transport." + listener.getTransportName() + ".contentType");
+        return true;
+    }
 }

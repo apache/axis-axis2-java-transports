@@ -21,6 +21,7 @@ package org.apache.axis2.transport.base;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.description.AxisService;
+import org.apache.axis2.description.ParameterInclude;
 
 /**
  * Describes a protocol specific endpoint. This might be a TCP/UDP port, a mail account,
@@ -44,6 +45,24 @@ public abstract class ProtocolEndpoint {
         return service.getName();
     }
 
+    /**
+     * Configure the endpoint based on the provided parameters.
+     * If no relevant parameters are found, the implementation should
+     * return <code>false</code>. An exception should only be thrown if there is an
+     * error or inconsistency in the parameters.
+     * 
+     * @param params The source of the parameters to construct the
+     *               poll table entry. If the parameters are defined on
+     *               a service, this will be an {@link AxisService}
+     *               instance.
+     * @return <code>true</code> if the parameters contained the required configuration
+     *         information and the endpoint has been configured, <code>false</code> if
+     *         the no configuration for the endpoint is present in the parameters
+     * @throws AxisFault if configuration information is present, but there is an
+     *         error or inconsistency in the parameters
+     */
+    public abstract boolean loadConfiguration(ParameterInclude params) throws AxisFault;
+    
     /**
      * Get the endpoint references for this protocol endpoint.
      * 

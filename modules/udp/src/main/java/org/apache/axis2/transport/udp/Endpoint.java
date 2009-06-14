@@ -22,6 +22,8 @@ import java.net.SocketException;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
+import org.apache.axis2.description.ParameterInclude;
+import org.apache.axis2.transport.base.ParamUtils;
 import org.apache.axis2.transport.base.datagram.DatagramEndpoint;
 import org.apache.axis2.util.Utils;
 
@@ -36,17 +38,20 @@ public class Endpoint extends DatagramEndpoint {
         return port;
     }
     
-    public void setPort(int port) {
-		this.port = port;
-	}
-
 	public int getMaxPacketSize() {
         return maxPacketSize;
     }
 
-    public void setMaxPacketSize(int maxPacketSize) {
-		this.maxPacketSize = maxPacketSize;
-	}
+    @Override
+    public boolean loadConfiguration(ParameterInclude params) throws AxisFault {
+        port = ParamUtils.getOptionalParamInt(params, UDPConstants.PORT_KEY, -1);
+        if (port == -1) {
+            return false;
+        }
+        maxPacketSize = ParamUtils.getOptionalParamInt(params, UDPConstants.MAX_PACKET_SIZE_KEY,
+                UDPConstants.DEFAULT_MAX_PACKET_SIZE);
+        return super.loadConfiguration(params);
+    }
 
 	@Override
     public EndpointReference[] getEndpointReferences(String ip) throws AxisFault {

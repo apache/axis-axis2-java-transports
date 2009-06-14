@@ -21,6 +21,7 @@ package org.apache.axis2.transport.mail;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Collections;
 
@@ -28,14 +29,21 @@ import javax.mail.Session;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
+import org.apache.axis2.description.Parameter;
+import org.apache.axis2.description.ParameterInclude;
 import org.apache.axis2.transport.base.AbstractPollTableEntry;
+import org.apache.axis2.transport.base.BaseConstants;
+import org.apache.axis2.transport.base.ParamUtils;
+import org.apache.commons.logging.Log;
 
 /**
  * Holds information about an entry in the VFS transport poll table used by the
  * VFS Transport Listener
  */
 public class PollTableEntry extends AbstractPollTableEntry {
+    private final Log log;
 
     // operation after mail check
     public static final int DELETE = 0;
@@ -85,6 +93,10 @@ public class PollTableEntry extends AbstractPollTableEntry {
     private int maxRetryCount;
     private long reconnectTimeout;
 
+    public PollTableEntry(Log log) {
+        this.log = log;
+    }
+
     @Override
     public EndpointReference[] getEndpointReferences(String ip) {
         return new EndpointReference[] { new EndpointReference(MailConstants.TRANSPORT_PREFIX
@@ -95,106 +107,52 @@ public class PollTableEntry extends AbstractPollTableEntry {
         return emailAddress;
     }
 
-    public void setEmailAddress(String emailAddress) throws AddressException {        
-        this.emailAddress = new InternetAddress(emailAddress);
-    }
-
     public String getUserName() {
         return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
     }
 
     public String getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String getXServicePath() {
         return xServicePath;
-    }
-
-    public void setXServicePath(String xServicePath) {
-        this.xServicePath = xServicePath;
     }
 
     public String getContentType() {
         return contentType;
     }
 
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
-
     public int getActionAfterProcess() {
         return actionAfterProcess;
-    }
-
-    public void setActionAfterProcess(int actionAfterProcess) {
-        this.actionAfterProcess = actionAfterProcess;
     }
 
     public int getActionAfterFailure() {
         return actionAfterFailure;
     }
 
-    public void setActionAfterFailure(int actionAfterFailure) {
-        this.actionAfterFailure = actionAfterFailure;
-    }
-
     public String getMoveAfterProcess() {
         return moveAfterProcess;
-    }
-
-    public void setMoveAfterProcess(String moveAfterProcess) {
-        this.moveAfterProcess = moveAfterProcess;
     }
 
     public String getMoveAfterFailure() {
         return moveAfterFailure;
     }
 
-    public void setMoveAfterFailure(String moveAfterFailure) {
-        this.moveAfterFailure = moveAfterFailure;
-    }
-
     public int getMaxRetryCount() {
       return maxRetryCount;
-    }
-
-    public void setMaxRetryCount(int maxRetryCount) {
-      this.maxRetryCount = maxRetryCount;
     }
 
     public long getReconnectTimeout() {
       return reconnectTimeout;
     }
 
-    public void setReconnectTimeout(long reconnectTimeout) {
-      this.reconnectTimeout = reconnectTimeout;
-    }
-
     public String getFolder() {
         return folder;
     }
 
-    public void setFolder(String folder) {
-        this.folder = folder;
-    }
-
     public InternetAddress getReplyAddress() {
         return replyAddress;
-    }
-
-    public void setReplyAddress(String replyAddress) throws AddressException {
-        if (replyAddress != null) {
-            this.replyAddress = new InternetAddress(replyAddress);   
-        }
     }
 
     /**
@@ -207,25 +165,11 @@ public class PollTableEntry extends AbstractPollTableEntry {
         return protocol;
     }
 
-    /**
-     * Set the mail store protocol.
-     * This protocol identifier is used in calls to {@link Session#getStore()}.
-     * 
-     * @param protocol the mail store protocol
-     */
-    public void setProtocol(String protocol) {
-        this.protocol = protocol;
-    }
-
     public Session getSession() {
         return session;
     }
 
-    public void setSession(Session session) {
-        this.session = session;
-    }
-
-    public void addPreserveHeaders(String headerList) {
+    private void addPreserveHeaders(String headerList) {
         if (headerList == null) return;
         StringTokenizer st = new StringTokenizer(headerList, " ,");
         preserveHeaders = new ArrayList<String>();
@@ -237,7 +181,7 @@ public class PollTableEntry extends AbstractPollTableEntry {
         }
     }
 
-    public void addRemoveHeaders(String headerList) {
+    private void addRemoveHeaders(String headerList) {
         if (headerList == null) return;
         StringTokenizer st = new StringTokenizer(headerList, " ,");
         removeHeaders = new ArrayList<String>();
@@ -263,8 +207,111 @@ public class PollTableEntry extends AbstractPollTableEntry {
         return processingMailInParallel;
     }
 
-    public void setProcessingMailInParallel(boolean processingMailInParallel) {
-        this.processingMailInParallel = processingMailInParallel;
+    @Override
+    public boolean loadConfiguration(ParameterInclude paramIncl) throws AxisFault {
+        String address =
+            ParamUtils.getOptionalParam(paramIncl, MailConstants.TRANSPORT_MAIL_ADDRESS);
+        if (address == null) {
+            return false;
+        } else {
+            try {
+                emailAddress = new InternetAddress(address);
+            } catch (AddressException e) {
+                throw new AxisFault("Invalid email address specified by '" +
+                        MailConstants.TRANSPORT_MAIL_ADDRESS + "' parameter :: " + e.getMessage());
+            }
+
+            List<Parameter> params = paramIncl.getParameters();
+            Properties props = new Properties();
+            for (Parameter p : params) {
+                if (p.getName().startsWith("mail.")) {
+                    props.setProperty(p.getName(), (String) p.getValue());
+                }
+
+                if (MailConstants.MAIL_POP3_USERNAME.equals(p.getName()) ||
+                    MailConstants.MAIL_IMAP_USERNAME.equals(p.getName())) {
+                    userName = (String) p.getValue();
+                }
+                if (MailConstants.MAIL_POP3_PASSWORD.equals(p.getName()) ||
+                    MailConstants.MAIL_IMAP_PASSWORD.equals(p.getName())) {
+                    password = (String) p.getValue();
+                }
+                if (MailConstants.TRANSPORT_MAIL_PROTOCOL.equals(p.getName())) {
+                    protocol = (String) p.getValue();
+                }
+            }
+
+            session = Session.getInstance(props, null);
+            MailUtils.setupLogging(session, log, paramIncl);
+
+            contentType =
+                ParamUtils.getOptionalParam(paramIncl, MailConstants.TRANSPORT_MAIL_CONTENT_TYPE);
+            try {
+                String replyAddress = 
+                    ParamUtils.getOptionalParam(paramIncl, MailConstants.TRANSPORT_MAIL_REPLY_ADDRESS);
+                if (replyAddress != null) {
+                    this.replyAddress = new InternetAddress(replyAddress);   
+                }
+            } catch (AddressException e) {
+                throw new AxisFault("Invalid email address specified by '" +
+                        MailConstants.TRANSPORT_MAIL_REPLY_ADDRESS + "' parameter :: " +
+                        e.getMessage());
+            }
+
+            folder =
+                ParamUtils.getOptionalParam(paramIncl, MailConstants.TRANSPORT_MAIL_FOLDER);
+
+            addPreserveHeaders(
+                ParamUtils.getOptionalParam(paramIncl, MailConstants.TRANSPORT_MAIL_PRESERVE_HEADERS));
+            addRemoveHeaders(
+                ParamUtils.getOptionalParam(paramIncl, MailConstants.TRANSPORT_MAIL_REMOVE_HEADERS));
+
+            String option = ParamUtils.getOptionalParam(
+                paramIncl, MailConstants.TRANSPORT_MAIL_ACTION_AFTER_PROCESS);
+            actionAfterProcess =
+                MailTransportListener.MOVE.equals(option) ? PollTableEntry.MOVE : PollTableEntry.DELETE;
+            option = ParamUtils.getOptionalParam(
+                paramIncl, MailConstants.TRANSPORT_MAIL_ACTION_AFTER_FAILURE);
+            actionAfterFailure =
+                MailTransportListener.MOVE.equals(option) ? PollTableEntry.MOVE : PollTableEntry.DELETE;
+
+            moveAfterProcess = ParamUtils.getOptionalParam(
+                paramIncl, MailConstants.TRANSPORT_MAIL_MOVE_AFTER_PROCESS);
+            moveAfterFailure = ParamUtils.getOptionalParam(
+                paramIncl, MailConstants.TRANSPORT_MAIL_MOVE_AFTER_FAILURE);
+
+            String processInParallel = ParamUtils.getOptionalParam(
+                paramIncl, MailConstants.TRANSPORT_MAIL_PROCESS_IN_PARALLEL);
+            if (processInParallel != null) {
+                processingMailInParallel = Boolean.parseBoolean(processInParallel);
+                if (log.isDebugEnabled() && processingMailInParallel) {
+                    log.debug("Parallel mail processing enabled for : " + address);
+                }
+            }
+
+            String pollInParallel = ParamUtils.getOptionalParam(
+                paramIncl, BaseConstants.TRANSPORT_POLL_IN_PARALLEL);
+            if (pollInParallel != null) {
+                setConcurrentPollingAllowed(Boolean.parseBoolean(pollInParallel));
+                if (log.isDebugEnabled() && isConcurrentPollingAllowed()) {
+                    log.debug("Concurrent mail polling enabled for : " + address);
+                }
+            }
+
+            String strMaxRetryCount = ParamUtils.getOptionalParam(
+                paramIncl, MailConstants.MAX_RETRY_COUNT);
+            if (strMaxRetryCount != null) {
+                maxRetryCount = Integer.parseInt(strMaxRetryCount);
+            }
+
+            String strReconnectTimeout = ParamUtils.getOptionalParam(
+                paramIncl, MailConstants.RECONNECT_TIMEOUT);
+            if (strReconnectTimeout != null) {
+                reconnectTimeout = Integer.parseInt(strReconnectTimeout) * 1000;
+            }
+
+            return super.loadConfiguration(paramIncl);
+        }
     }
 
     public synchronized void processingUID(String uid) {

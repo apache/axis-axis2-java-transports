@@ -27,13 +27,6 @@ import org.apache.axis2.transport.base.ManagementSupport;
 import org.apache.axis2.transport.base.event.TransportErrorListener;
 import org.apache.axis2.transport.base.event.TransportErrorSource;
 import org.apache.axis2.transport.base.event.TransportErrorSourceSupport;
-import org.apache.axis2.transport.jms.ctype.ContentTypeRuleFactory;
-import org.apache.axis2.transport.jms.ctype.ContentTypeRuleSet;
-import org.apache.axis2.transport.jms.ctype.MessageTypeRule;
-import org.apache.axis2.transport.jms.ctype.PropertyRule;
-
-import javax.jms.BytesMessage;
-import javax.jms.TextMessage;
 
 /**
  * The revamped JMS Transport listener implementation. Creates {@link ServiceTaskManager} instances
@@ -78,7 +71,7 @@ public class JMSListener extends AbstractTransportListenerEx<JMSEndpoint> implem
 
     @Override
     protected JMSEndpoint createEndpoint() {
-        return new JMSEndpoint();
+        return new JMSEndpoint(this, workerPool);
     }
 
     /**
@@ -87,54 +80,10 @@ public class JMSListener extends AbstractTransportListenerEx<JMSEndpoint> implem
      * @param service the Axis service for which to listen for messages
      */
     @Override
-    protected void configureAndStartEndpoint(JMSEndpoint endpoint, AxisService service) throws AxisFault {
-        JMSConnectionFactory cf = getConnectionFactory(service);
-        if (cf == null) {
-            throw new AxisFault("The service doesn't specify a JMS connection factory or refers " +
-                "to an invalid factory.");
-        }
-
-        endpoint.setCf(cf);
-
-        Parameter destParam = service.getParameter(JMSConstants.PARAM_DESTINATION);
-        if (destParam != null) {
-            endpoint.setJndiDestinationName((String)destParam.getValue());
-        } else {
-            // Assume that the JNDI destination name is the same as the service name
-            endpoint.setJndiDestinationName(service.getName());
-        }
+    protected void startEndpoint(JMSEndpoint endpoint) throws AxisFault {
+        ServiceTaskManager stm = endpoint.getServiceTaskManager();
         
-        Parameter destTypeParam = service.getParameter(JMSConstants.PARAM_DEST_TYPE);
-        if (destTypeParam != null) {
-            String paramValue = (String) destTypeParam.getValue();
-            if (JMSConstants.DESTINATION_TYPE_QUEUE.equals(paramValue) ||
-                    JMSConstants.DESTINATION_TYPE_TOPIC.equals(paramValue) )  {
-                endpoint.setDestinationType(paramValue);
-            } else {
-                throw new AxisFault("Invalid destinaton type value " + paramValue);
-            }
-        } else {
-            log.debug("JMS destination type not given. default queue");
-            endpoint.setDestinationType(JMSConstants.DESTINATION_TYPE_QUEUE);
-        }
-        
-        Parameter contentTypeParam = service.getParameter(JMSConstants.CONTENT_TYPE_PARAM);
-        if (contentTypeParam == null) {
-            ContentTypeRuleSet contentTypeRuleSet = new ContentTypeRuleSet();
-            contentTypeRuleSet.addRule(new PropertyRule(BaseConstants.CONTENT_TYPE));
-            contentTypeRuleSet.addRule(new MessageTypeRule(BytesMessage.class, "application/octet-stream"));
-            contentTypeRuleSet.addRule(new MessageTypeRule(TextMessage.class, "text/plain"));
-            endpoint.setContentTypeRuleSet(contentTypeRuleSet);
-        } else {
-            endpoint.setContentTypeRuleSet(ContentTypeRuleFactory.parse(contentTypeParam));
-        }
-
-        endpoint.computeEPRs(); // compute service EPR and keep for later use        
-        
-        ServiceTaskManager stm = ServiceTaskManagerFactory.createTaskManagerForService(cf, service, workerPool);
-        stm.setJmsMessageReceiver(new JMSMessageReceiver(this, cf, endpoint));
         stm.start();
-        endpoint.setServiceTaskManager(stm);
 
         for (int i=0; i<3; i++) {
             if (stm.getActiveTaskCount() > 0) {

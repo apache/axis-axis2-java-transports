@@ -21,7 +21,15 @@ package org.apache.axis2.transport.base;
 
 import java.util.TimerTask;
 
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.description.Parameter;
+import org.apache.axis2.description.ParameterInclude;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public abstract class AbstractPollTableEntry extends ProtocolEndpoint {
+    private static final Log log = LogFactory.getLog(AbstractPollTableEntry.class);
+    
     // status of last scan
     public static final int SUCCSESSFUL = 0;
     public static final int WITH_ERRORS = 1;
@@ -81,5 +89,28 @@ public abstract class AbstractPollTableEntry extends ProtocolEndpoint {
 
     public void setConcurrentPollingAllowed(boolean concurrentPollingAllowed) {
         this.concurrentPollingAllowed = concurrentPollingAllowed;
+    }
+
+    @Override
+    public boolean loadConfiguration(ParameterInclude params) throws AxisFault {
+        Parameter param = params.getParameter(BaseConstants.TRANSPORT_POLL_INTERVAL);
+        pollInterval = BaseConstants.DEFAULT_POLL_INTERVAL;
+        if (param != null && param.getValue() instanceof String) {
+            String s = (String)param.getValue();
+            int multiplier;
+            if (s.endsWith("ms")) {
+                s = s.substring(0, s.length()-2);
+                multiplier = 1;
+            } else {
+                multiplier = 1000;
+            }
+            try {
+                pollInterval = Integer.parseInt(s) * multiplier;
+            } catch (NumberFormatException e) {
+                log.error("Invalid poll interval : " + param.getValue() + ",  default to : "
+                        + (BaseConstants.DEFAULT_POLL_INTERVAL / 1000) + "sec", e);
+            }
+        }
+        return true;
     }
 }

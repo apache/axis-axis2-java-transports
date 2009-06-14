@@ -18,11 +18,7 @@
 */
 package org.apache.axis2.transport.base;
 
-import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.Parameter;
-import org.apache.axis2.description.ParameterInclude;
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.AxisFault;
 
@@ -32,12 +28,12 @@ import java.util.TimerTask;
 import java.util.Timer;
 
 public abstract class AbstractPollingTransportListener<T extends AbstractPollTableEntry>
-        extends AbstractTransportListener {
+        extends AbstractTransportListenerEx<T> {
 
     /** The main timer. */
     private Timer timer;
     /** Keep the list of endpoints and poll durations */
-    private final List<T> pollTable = new ArrayList<T>();
+    private final List<T> endpoints = new ArrayList<T>();
 
     @Override
     public void init(ConfigurationContext cfgCtx,
@@ -45,29 +41,10 @@ public abstract class AbstractPollingTransportListener<T extends AbstractPollTab
 
         timer = new Timer("PollTimer");
         super.init(cfgCtx, transportIn);
-        T entry = createPollTableEntry(transportIn);
-        if (entry != null) {
-            entry.setPollInterval(getPollInterval(transportIn));
-            schedulePoll(entry);
-            pollTable.add(entry);
-        }
     }
 
     @Override
     public void destroy() {
-        // Explicitly cancel all polls not predispatched to services. All other polls will
-        // be canceled by stopListeningForService. Pay attention to the fact the cancelPoll
-        // modifies pollTable.
-        List<T> entriesToCancel = new ArrayList<T>();
-        for (T entry : pollTable) {
-            if (entry.getService() == null) {
-                entriesToCancel.add(entry);
-            }
-        }
-        for (T entry : entriesToCancel) {
-            cancelPoll(entry);
-        }
-        
         super.destroy();
         timer.cancel();
         timer = null;
@@ -110,12 +87,17 @@ public abstract class AbstractPollingTransportListener<T extends AbstractPollTab
         }
     }
 
-    private void cancelPoll(T entry) {
-        synchronized (entry) {
-            entry.timerTask.cancel();
-            entry.canceled = true;
+    @Override
+    protected void startEndpoint(T endpoint) throws AxisFault {
+        schedulePoll(endpoint);
+    }
+
+    @Override
+    protected void stopEndpoint(T endpoint) {
+        synchronized (endpoint) {
+            endpoint.timerTask.cancel();
+            endpoint.canceled = true;
         }
-        pollTable.remove(entry);
     }
 
     protected abstract void poll(T entry);
@@ -147,86 +129,6 @@ public abstract class AbstractPollingTransportListener<T extends AbstractPollTab
         entry.setLastPollTime(now);
         entry.setNextPollTime(now + entry.getPollInterval());
         onPollCompletion(entry);
-    }
-
-    private long getPollInterval(ParameterInclude params) {
-        Parameter param = params.getParameter(BaseConstants.TRANSPORT_POLL_INTERVAL);
-        long pollInterval = BaseConstants.DEFAULT_POLL_INTERVAL;
-        if (param != null && param.getValue() instanceof String) {
-            String s = (String)param.getValue();
-            int multiplier;
-            if (s.endsWith("ms")) {
-                s = s.substring(0, s.length()-2);
-                multiplier = 1;
-            } else {
-                multiplier = 1000;
-            }
-            try {
-                pollInterval = Integer.parseInt(s) * multiplier;
-            } catch (NumberFormatException e) {
-                log.error("Invalid poll interval : " + param.getValue() + ",  default to : "
-                        + (BaseConstants.DEFAULT_POLL_INTERVAL / 1000) + "sec", e);
-            }
-        }
-        return pollInterval;
-    }
-    
-    @Override
-    protected void startListeningForService(AxisService service) throws AxisFault {
-        T entry = createPollTableEntry(service);
-        if (entry == null) {
-            throw new AxisFault("The service has no configuration for the transport");
-        }
-        entry.setService(service);
-        entry.setPollInterval(getPollInterval(service));
-        schedulePoll(entry);
-        pollTable.add(entry);
-    }
-    
-    /**
-     * Create a poll table entry based on the provided parameters.
-     * If no relevant parameters are found, the implementation should
-     * return null. An exception should only be thrown if there is an
-     * error or inconsistency in the parameters.
-     * 
-     * @param params The source of the parameters to construct the
-     *               poll table entry. If the parameters were defined on
-     *               a service, this will be an {@link AxisService}
-     *               instance.
-     * @return
-     */
-    protected abstract T createPollTableEntry(ParameterInclude params) throws AxisFault;
-
-    /**
-     * Get the EPR for the given service
-     * 
-     * @param serviceName service name
-     * @param ip          ignored
-     * @return the EPR for the service
-     * @throws AxisFault not used
-     */
-    public EndpointReference[] getEPRsForService(String serviceName, String ip) throws AxisFault {
-        for (T entry : pollTable) {
-            AxisService service = entry.getService();
-            if (service != null) {
-                String candidateName = service.getName();
-                if (candidateName.equals(serviceName) ||
-                        serviceName.startsWith(candidateName + ".")) {
-                    return entry.getEndpointReferences(ip);
-                }
-            }
-        }
-        return null;
-    }
-
-    @Override
-    protected void stopListeningForService(AxisService service) {
-        for (T entry : pollTable) {
-            if (service == entry.getService()) {
-                cancelPoll(entry);
-                break;
-            }
-        }
     }
 
     // -- jmx/management methods--
