@@ -53,6 +53,7 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
         
         // Create endpoint configured at transport level (if available)
         E endpoint = createEndpoint();
+        endpoint.init(this, null);
         if (endpoint.loadConfiguration(transportIn)) {
             startEndpoint(endpoint);
             endpoints.add(endpoint);
