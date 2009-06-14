@@ -66,10 +66,12 @@ public class ServiceTaskManager {
     /** The ConnectionFactory MUST refer to an XAConnectionFactory to use JTA */
     private String connFactoryJNDIName;
     /** The JNDI name of the Destination Queue or Topic */
+    // TODO: this overlaps with JMSEndpoint#jndiDestinationName; needs to be clarified
     private String destinationJNDIName;
     /** JNDI location for the JTA UserTransaction */
     private String userTransactionJNDIName = "java:comp/UserTransaction";
     /** The type of destination - P2P or PubSub (or JMS 1.1 API generic?) */
+    // TODO: this overlaps with JMSEndpoint#destinationType; needs to be clarified
     private int destinationType = JMSConstants.GENERIC;
     /** An optional message selector */
     private String messageSelector = null;
