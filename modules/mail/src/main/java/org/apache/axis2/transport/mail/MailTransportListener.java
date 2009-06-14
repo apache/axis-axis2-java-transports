@@ -24,31 +24,23 @@ import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.description.AxisOperation;
-import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.Parameter;
-import org.apache.axis2.description.ParameterInclude;
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.TransportUtils;
 import org.apache.axis2.transport.RequestResponseTransport;
 import org.apache.axis2.transport.base.AbstractPollingTransportListener;
 import org.apache.axis2.transport.base.BaseConstants;
-import org.apache.axis2.transport.base.BaseUtils;
 import org.apache.axis2.transport.base.ManagementSupport;
-import org.apache.axis2.transport.base.ParamUtils;
 import org.apache.axis2.transport.base.event.TransportErrorListener;
 import org.apache.axis2.transport.base.event.TransportErrorSource;
 import org.apache.axis2.transport.base.event.TransportErrorSourceSupport;
 
 import javax.mail.*;
-import javax.mail.internet.AddressException;
 import javax.mail.internet.ContentType;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.ParseException;
-import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
 import java.io.IOException;
@@ -483,7 +475,7 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
             log.debug("Processing message as Content-Type : " + contentType);
         }
 
-        MessageContext msgContext = createMessageContext(entry);
+        MessageContext msgContext = entry.createMessageContext();
 
         // Extract the charset encoding from the configured content type and
         // set the CHARACTER_SET_ENCODING property as e.g. SOAPBuilder relies on this.
@@ -621,30 +613,6 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
         } else {
             return message;
         }
-    }
-
-    // TODO: the same code is used by other transports; the method should be moved to Abstract(Polling)TransportListener
-    private MessageContext createMessageContext(PollTableEntry entry) throws AxisFault {
-        MessageContext msgContext = createMessageContext();
-        
-        AxisService service = entry.getService();
-        if (service != null) {
-            msgContext.setAxisService(service);
-    
-            // find the operation for the message, or default to one
-            Parameter operationParam = service.getParameter(BaseConstants.OPERATION_PARAM);
-            QName operationQName = (
-                operationParam != null ?
-                    BaseUtils.getQNameFromString(operationParam.getValue()) :
-                    BaseConstants.DEFAULT_OPERATION);
-    
-            AxisOperation operation = service.getOperation(operationQName);
-            if (operation != null) {
-                msgContext.setAxisOperation(operation);
-                msgContext.setSoapAction("urn:" + operation.getName().getLocalPart());
-            }
-        }
-        return msgContext;
     }
 
     private MailOutTransportInfo buildOutTransportInfo(Message message,

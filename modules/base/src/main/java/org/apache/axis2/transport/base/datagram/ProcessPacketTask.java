@@ -51,8 +51,7 @@ public class ProcessPacketTask implements Runnable {
         MetricsCollector metrics = endpoint.getMetrics();
         try {
             InputStream inputStream = new ByteArrayInputStream(data, 0, length);
-            MessageContext msgContext = endpoint.getListener().createMessageContext();
-            msgContext.setAxisService(endpoint.getService());
+            MessageContext msgContext = endpoint.createMessageContext();
             SOAPEnvelope envelope = TransportUtils.createSOAPMessage(msgContext, inputStream, endpoint.getContentType());
             msgContext.setEnvelope(envelope);
             AxisEngine.receive(msgContext);

@@ -17,19 +17,16 @@ package org.apache.axis2.transport.jms;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
-import org.apache.axis2.transport.base.BaseUtils;
 import org.apache.axis2.transport.base.BaseConstants;
 import org.apache.axis2.transport.base.MetricsCollector;
 import org.apache.axis2.transport.jms.ctype.ContentTypeInfo;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.jms.*;
-import javax.xml.namespace.QName;
 import javax.transaction.UserTransaction;
 
 /**
@@ -155,7 +152,7 @@ public class JMSMessageReceiver {
     private boolean processThoughEngine(Message message, UserTransaction ut)
         throws JMSException, AxisFault {
 
-        MessageContext msgContext = jmsListener.createMessageContext();
+        MessageContext msgContext = endpoint.createMessageContext();
 
         // set the JMS Message ID as the Message ID of the MessageContext
         try {
@@ -166,20 +163,6 @@ public class JMSMessageReceiver {
         String soapAction = JMSUtils.getProperty(message, BaseConstants.SOAPACTION);
 
         AxisService service = endpoint.getService();
-        msgContext.setAxisService(service);
-
-        // find the operation for the message, or default to one
-        Parameter operationParam = service.getParameter(BaseConstants.OPERATION_PARAM);
-        QName operationQName = (
-            operationParam != null ?
-                BaseUtils.getQNameFromString(operationParam.getValue()) :
-                BaseConstants.DEFAULT_OPERATION);
-
-        AxisOperation operation = service.getOperation(operationQName);
-        if (operation != null) {
-            msgContext.setAxisOperation(operation);
-            msgContext.setSoapAction("urn:" + operation.getName().getLocalPart());
-        }
 
         ContentTypeInfo contentTypeInfo =
             endpoint.getContentTypeRuleSet().getContentTypeInfo(message);

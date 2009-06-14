@@ -18,10 +18,16 @@
 */
 package org.apache.axis2.transport.base;
 
+import javax.xml.namespace.QName;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
+import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
+import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.ParameterInclude;
+import org.apache.axis2.description.WSDL2Constants;
 
 /**
  * Describes a protocol specific endpoint. This might be a TCP/UDP port, a mail account,
@@ -83,4 +89,28 @@ public abstract class ProtocolEndpoint {
      * @see org.apache.axis2.transport.TransportListener#getEPRsForService(String, String)
      */
     public abstract EndpointReference[] getEndpointReferences(String ip) throws AxisFault;
+
+    public MessageContext createMessageContext() throws AxisFault {
+        MessageContext msgContext = listener.createMessageContext();
+        
+        if (service != null) {
+            msgContext.setAxisService(service);
+    
+            // find the operation for the message, or default to one
+            Parameter operationParam = service.getParameter(BaseConstants.OPERATION_PARAM);
+            QName operationQName = (
+                operationParam != null ?
+                    BaseUtils.getQNameFromString(operationParam.getValue()) :
+                    BaseConstants.DEFAULT_OPERATION);
+    
+            AxisOperation operation = service.getOperation(operationQName);
+            if (operation != null) {
+                msgContext.setAxisOperation(operation);
+                msgContext.setAxisMessage(
+                        operation.getMessage(WSDL2Constants.MESSAGE_LABEL_IN));
+                msgContext.setSoapAction("urn:" + operation.getName().getLocalPart());
+            }
+        }
+        return msgContext;
+    }
 }
