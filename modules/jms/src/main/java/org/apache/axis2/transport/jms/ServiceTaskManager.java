@@ -910,7 +910,7 @@ public class ServiceTaskManager {
                 return
                     JMSUtils.lookup(context, UserTransaction.class, getUserTransactionJNDIName());
             } catch (NamingException e) {
-                handleException("Error looking up UserTransaction : " + getDestinationJNDIName() +
+                handleException("Error looking up UserTransaction : " + getUserTransactionJNDIName() +
                     " using JNDI properties : " + jmsProperties, e);
             }
         }
@@ -924,7 +924,7 @@ public class ServiceTaskManager {
                     log.debug("Acquired shared UserTransaction for service : " + serviceName);
                 }
             } catch (NamingException e) {
-                handleException("Error looking up UserTransaction : " + getDestinationJNDIName() +
+                handleException("Error looking up UserTransaction : " + getUserTransactionJNDIName() +
                     " using JNDI properties : " + jmsProperties, e);
             }
         }
