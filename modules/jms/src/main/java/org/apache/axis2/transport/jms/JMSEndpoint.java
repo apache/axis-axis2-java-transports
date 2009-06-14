@@ -20,6 +20,7 @@ import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.ParameterInclude;
 import org.apache.axis2.transport.base.BaseConstants;
+import org.apache.axis2.transport.base.ParamUtils;
 import org.apache.axis2.transport.base.ProtocolEndpoint;
 import org.apache.axis2.transport.base.threads.WorkerPool;
 import org.apache.axis2.transport.jms.ctype.ContentTypeRuleFactory;
@@ -54,6 +55,7 @@ public class JMSEndpoint extends ProtocolEndpoint {
     private JMSConnectionFactory cf;
     private String jndiDestinationName;
     private int destinationType = JMSConstants.GENERIC;
+    private String jndiReplyDestinationName;
     private Set<EndpointReference> endpointReferences = new HashSet<EndpointReference>();
     private ContentTypeRuleSet contentTypeRuleSet;
     private ServiceTaskManager serviceTaskManager;
@@ -75,6 +77,10 @@ public class JMSEndpoint extends ProtocolEndpoint {
         } else {
             this.destinationType = JMSConstants.GENERIC;
         }
+    }
+
+    public String getJndiReplyDestinationName() {
+        return jndiReplyDestinationName;
     }
 
     @Override
@@ -195,6 +201,9 @@ public class JMSEndpoint extends ProtocolEndpoint {
             log.debug("JMS destination type not given. default queue");
             destinationType = JMSConstants.QUEUE;
         }
+        
+        jndiReplyDestinationName = ParamUtils.getOptionalParam(service,
+                JMSConstants.PARAM_REPLY_DESTINATION);
         
         Parameter contentTypeParam = service.getParameter(JMSConstants.CONTENT_TYPE_PARAM);
         if (contentTypeParam == null) {

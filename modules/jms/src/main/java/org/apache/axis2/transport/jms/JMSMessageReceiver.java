@@ -20,8 +20,6 @@ import org.apache.axis2.Constants;
 import org.apache.axis2.transport.base.BaseConstants;
 import org.apache.axis2.transport.base.MetricsCollector;
 import org.apache.axis2.transport.jms.ctype.ContentTypeInfo;
-import org.apache.axis2.description.Parameter;
-import org.apache.axis2.description.AxisService;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -162,8 +160,6 @@ public class JMSMessageReceiver {
 
         String soapAction = JMSUtils.getProperty(message, BaseConstants.SOAPACTION);
 
-        AxisService service = endpoint.getService();
-
         ContentTypeInfo contentTypeInfo =
             endpoint.getContentTypeRuleSet().getContentTypeInfo(message);
         if (contentTypeInfo == null) {
@@ -177,9 +173,9 @@ public class JMSMessageReceiver {
         Destination replyTo = message.getJMSReplyTo();
         if (replyTo == null) {
             // does the service specify a default reply destination ?
-            Parameter param = service.getParameter(JMSConstants.PARAM_REPLY_DESTINATION);
-            if (param != null && param.getValue() != null) {
-                replyTo = jmsConnectionFactory.getDestination((String) param.getValue());
+            String jndiReplyDestinationName = endpoint.getJndiReplyDestinationName();
+            if (jndiReplyDestinationName != null) {
+                replyTo = jmsConnectionFactory.getDestination(jndiReplyDestinationName);
             }
 
         }
