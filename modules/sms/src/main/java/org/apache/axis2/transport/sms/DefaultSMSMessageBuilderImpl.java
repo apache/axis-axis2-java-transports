@@ -21,11 +21,10 @@ package org.apache.axis2.transport.sms;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
-import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.AxisOperation;
-import org.apache.axis2.description.AxisMessage;
+import org.apache.axis2.description.*;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
+import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.util.MultipleEntryHashMap;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.axiom.soap.SOAPEnvelope;
@@ -56,12 +55,12 @@ public class DefaultSMSMessageBuilderImpl implements SMSMessageBuilder {
     /**
      *
      * @param message  the content of the SMS
-     * @param sener senders phone number
+     * @param sender senders phone number
      * @param configurationContext axis2 configuration Context
      * @return Returns the MessageContext built from the SMS
      * @throws InvalidMessageFormatException
      */
-    public MessageContext buildMessaage(String message, String sener, ConfigurationContext configurationContext)
+    public MessageContext buildMessaage(String message, String sender,String receiver ,ConfigurationContext configurationContext)
             throws InvalidMessageFormatException {
 
         String[] parts = message.split(":");
@@ -101,7 +100,17 @@ public class DefaultSMSMessageBuilderImpl implements SMSMessageBuilder {
                     SOAPEnvelope soapEnvelope = createSoapEnvelope(messageContext , params);
                     messageContext.setServerSide(true);
                     messageContext.setEnvelope(soapEnvelope);
-
+                    Parameter sendBack = new Parameter();
+                    sendBack.setName(SMSTransportConstents.SEND_TO);
+                    sendBack.setValue(sender);
+                    Parameter axis2Phone = new Parameter();
+                    axis2Phone.setName(SMSTransportConstents.DESTINATION);
+                    axis2Phone.setValue(receiver);
+                    TransportInDescription in = configurationContext.getAxisConfiguration().getTransportIn("sms");
+                    TransportOutDescription out = configurationContext.getAxisConfiguration().getTransportOut("sms");
+                    out.addParameter(sendBack);
+                    messageContext.setTransportIn(in);
+                    messageContext.setTransportOut(out);
                     return messageContext;
                 }
 

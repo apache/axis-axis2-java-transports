@@ -19,7 +19,10 @@
 package org.apache.axis2.transport.sms;
 
 public class InvalidMessageFormatException extends Exception{
-
+    /**
+     *
+     * @param message that need to be send back to the sender reporing his error
+     */
     public InvalidMessageFormatException(String message) {
         this.messageToSendBack = message;
     }

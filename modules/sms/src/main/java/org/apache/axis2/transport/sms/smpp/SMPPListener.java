@@ -28,10 +28,13 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/**
+ * Listen for the incomming SMPP messages and Start processing them
+ */
 public class SMPPListener implements  MessageReceiverListener{
      /** the reference to the actual commons logger to be used for log messages */
     protected Log log = LogFactory.getLog(this.getClass());
-   
+
 
     public void onAcceptDeliverSm(DeliverSm deliverSm) throws ProcessRequestException {
 
@@ -59,7 +62,7 @@ public class SMPPListener implements  MessageReceiverListener{
         } else {
 
             try {
-                new SMPPDispatcher().dispatch(deliverSm.getSourceAddr() , new String(deliverSm.getShortMessage()));
+                new SMPPDispatcher().dispatch(deliverSm.getSourceAddr() ,deliverSm.getDestAddress() ,new String(deliverSm.getShortMessage()));
 
             } catch (AxisFault axisFault) {
                 log.debug("Error while dispatching SMPP message" , axisFault);

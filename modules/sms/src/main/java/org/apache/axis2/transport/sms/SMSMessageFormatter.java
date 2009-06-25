@@ -19,26 +19,18 @@
 package org.apache.axis2.transport.sms;
 
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.context.ConfigurationContext;
-
+import org.apache.axis2.AxisFault;
 
 /**
- * To allow trasport to accept messages from user defeined formats
- * can implement this builder interface to create a implementation
- *  that can accept a custom SMS format and build a Message to Axis2
+ * Interface for the Message formatters that build the out going SMSMessage from th Axis2 Message Context
  */
-public interface SMSMessageBuilder {
+public interface SMSMessageFormatter {
 
     /**
-     * Build the Axis2 MessageContext from the given message Coming
-     * @param message  the content of the SMS
-     * @param configurationContext axis2 configuration Context
-     * @param sener senders phone number
-     * @param receiver receivers phone number
-     * @return  the Axis2 Message Context build
-     * @throws InvalidMessageFormatException if Message is not in correct format
+     * format the out going SMS message from the MessageContext
+     * @param messageContext
+     * @return SMSMessage thats going to submited to the SMSC
      */
-    public MessageContext buildMessaage(String message ,String sener,String  receiver, ConfigurationContext configurationContext)
-            throws InvalidMessageFormatException;
+    public SMSMessage formatSMS(MessageContext messageContext) throws Exception;
 
 }

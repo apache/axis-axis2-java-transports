@@ -19,47 +19,52 @@
 package org.apache.axis2.transport.sms.smpp;
 
 import org.apache.axis2.transport.sms.SMSImplManager;
-import org.apache.axis2.transport.sms.SMSTransportUtils;
 import org.apache.axis2.transport.sms.SMSTransportConstents;
-import org.apache.axis2.description.Parameter;
+import org.apache.axis2.transport.sms.SMSMessage;
+import org.apache.axis2.description.TransportInDescription;
+import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jsmpp.session.SMPPSession;
 import org.jsmpp.session.BindParameter;
-import org.jsmpp.bean.BindType;
-import org.jsmpp.bean.TypeOfNumber;
-import org.jsmpp.bean.NumberingPlanIndicator;
+import org.jsmpp.bean.*;
+import org.jsmpp.util.TimeFormatter;
+import org.jsmpp.util.AbsoluteTimeFormatter;
+import org.jsmpp.InvalidResponseException;
+import org.jsmpp.PDUException;
+import org.jsmpp.extra.NegativeResponseException;
+import org.jsmpp.extra.ResponseTimeoutException;
 
-import java.util.ArrayList;
 import java.io.IOException;
+import java.util.Date;
 
 public class SMPPImplManager implements SMSImplManager {
 
      /** the reference to the actual commons logger to be used for log messages */
     protected Log log = LogFactory.getLog(this.getClass());
-    private String systemType ="cp";
-    private String systemId;
-    private String password;
-    private String host="127.0.0.1";
-    private int port = 2775;
+    private SMPPTransportInDetails smppTransportInDetails = SMPPTransportInDetails.getInstence();
+    private SMPPTransportOutDetails smppTransportOutDetails = SMPPTransportOutDetails.getInstence();
+
     private volatile boolean stop=true;
 
 
-    private SMPPSession session;
-
+    private SMPPSession inSession;
+    private SMPPSession outSession;
+    private static TimeFormatter timeFormatter = new AbsoluteTimeFormatter();
 
     public void start() {
-        session = new SMPPSession();
+        inSession = new SMPPSession();
         try {
-            session.connectAndBind(host, port, new BindParameter(BindType.BIND_RX, systemId,
-                        password, systemType , TypeOfNumber.UNKNOWN, NumberingPlanIndicator.UNKNOWN, null));
+            inSession.connectAndBind(smppTransportInDetails.getHost(), smppTransportInDetails.getPort(), new BindParameter(BindType.BIND_RX, smppTransportInDetails.getSystemId(),
+                        smppTransportInDetails.getPassword(), smppTransportInDetails.getSystemType() , TypeOfNumber.UNKNOWN, NumberingPlanIndicator.UNKNOWN, null));
 
             SMPPListener listener = new SMPPListener();
-            session.setMessageReceiverListener(listener);
+            inSession.setMessageReceiverListener(listener);
             stop = false;
-            System.out.println("[Axis2] bind and connect to " + port + "on SMPP Transport");
-            
+            System.out.println(" [Axis2] bind and connect to " + smppTransportInDetails.getHost()+" : " +
+                    smppTransportInDetails.getPort() + " on SMPP Transport");
+
         } catch (IOException e) {
             log.error("Unable to conncet" + e);
         }
@@ -67,46 +72,146 @@ public class SMPPImplManager implements SMSImplManager {
     }
 
     public void stop() {
-        log.info("Stopping SMPP Transport...");
+        log.info("Stopping SMPP Transport ...");
         stop = true;
-        session.unbindAndClose();
 
-    }
-
-    public void setTransportParamters(ArrayList<Parameter> params) throws AxisFault {
-
-        String tmp = (String) SMSTransportUtils.getParameterValue(params , SMSTransportConstents.SYSTEM_TYPE);
-
-        if (tmp != null) {
-            systemType = tmp;
+        if(inSession != null) {
+            inSession.unbindAndClose();
         }
 
-        tmp = (String) SMSTransportUtils.getParameterValue(params , SMSTransportConstents.SYSTEM_ID);
+        if(outSession !=null) {
+            outSession.unbindAndClose();
+        }
+    }
 
-        if (tmp != null) {
-            systemId = tmp;
+
+    public void setTransportInDetails(TransportInDescription transportInDetails) throws AxisFault {
+        if(transportInDetails == null) {
+            throw new AxisFault("No transport in details");
+        }
+
+        if(transportInDetails.getParameter(SMSTransportConstents.SYSTEM_TYPE) != null){
+            smppTransportInDetails.setSystemType((String)transportInDetails.getParameter(
+                    SMSTransportConstents.SYSTEM_TYPE).getValue());
+        }
+
+        if (transportInDetails.getParameter(SMSTransportConstents.SYSTEM_ID) != null) {
+            smppTransportInDetails.setSystemId((String)transportInDetails.getParameter(SMSTransportConstents.SYSTEM_ID).
+                    getValue());
         } else {
             throw new AxisFault("System Id not set");
         }
 
-        tmp = (String) SMSTransportUtils.getParameterValue(params , SMSTransportConstents.PASSWORD);
-
-        if (tmp != null) {
-            password = tmp;
+        if (transportInDetails.getParameter(SMSTransportConstents.PASSWORD) != null) {
+            smppTransportInDetails.setPassword((String)transportInDetails.getParameter(SMSTransportConstents.PASSWORD).
+                    getValue());
         } else {
             throw new AxisFault("password not set");
         }
 
-        tmp = (String) SMSTransportUtils.getParameterValue(params , SMSTransportConstents.HOST);
-
-        if (tmp != null) {
-            host = tmp;
+        if(transportInDetails.getParameter(SMSTransportConstents.HOST) != null) {
+            smppTransportInDetails.setHost((String)transportInDetails.getParameter(SMSTransportConstents.HOST).
+                    getValue());
         }
 
-        tmp = (String) SMSTransportUtils.getParameterValue(params , SMSTransportConstents.PORT);
-
-        if (tmp != null) {
-            port = Integer.parseInt(tmp);
+        if(transportInDetails.getParameter(SMSTransportConstents.PORT) != null) {
+            smppTransportInDetails.setPort(Integer.parseInt((String)transportInDetails.getParameter(
+                    SMSTransportConstents.PORT).getValue()));
         }
+
+        if(transportInDetails.getParameter(SMSTransportConstents.PHONE_NUMBER) != null) {
+            smppTransportInDetails.setPhoneNumber((String)transportInDetails.getParameter(
+                    SMSTransportConstents.PHONE_NUMBER).getValue());
+        }
+    }
+
+    public void setTransportOutDetails(TransportOutDescription transportOutDetails) throws AxisFault{
+         if(transportOutDetails == null) {
+            throw new AxisFault("No transport in details");
+        }
+
+        if(transportOutDetails.getParameter(SMSTransportConstents.SYSTEM_TYPE) != null){
+            smppTransportOutDetails.setSystemType((String)transportOutDetails.getParameter(
+                    SMSTransportConstents.SYSTEM_TYPE).getValue());
+        }
+
+        if (transportOutDetails.getParameter(SMSTransportConstents.SYSTEM_ID) != null) {
+            smppTransportOutDetails.setSystemId((String)transportOutDetails.getParameter(SMSTransportConstents.SYSTEM_ID).
+                    getValue());
+        } else {
+            throw new AxisFault("System Id not set");
+        }
+
+        if (transportOutDetails.getParameter(SMSTransportConstents.PASSWORD) != null) {
+            smppTransportOutDetails.setPassword((String)transportOutDetails.getParameter(SMSTransportConstents.PASSWORD).
+                    getValue());
+        } else {
+            throw new AxisFault("password not set");
+        }
+
+        if(transportOutDetails.getParameter(SMSTransportConstents.HOST) != null) {
+            smppTransportOutDetails.setHost((String)transportOutDetails.getParameter(SMSTransportConstents.HOST).
+                    getValue());
+        }
+
+        if(transportOutDetails.getParameter(SMSTransportConstents.PORT) != null) {
+            smppTransportOutDetails.setPort(Integer.parseInt((String)transportOutDetails.getParameter(
+                    SMSTransportConstents.PORT).getValue()));
+        }
+
+        if(transportOutDetails.getParameter(SMSTransportConstents.PHONE_NUMBER) != null) {
+            smppTransportOutDetails.setPhoneNumber((String)transportOutDetails.getParameter(
+                    SMSTransportConstents.PHONE_NUMBER).getValue());
+        }
+    }
+
+    public void sendSMS(SMSMessage sm) {
+        try {
+            if (outSession == null) {
+                outSession = new SMPPSession();
+                outSession.setEnquireLinkTimer(smppTransportOutDetails.getEnquireLinkTimer());
+                outSession.setTransactionTimer(smppTransportOutDetails.getTransactionTimer());
+                outSession.connectAndBind(smppTransportOutDetails.getHost(), smppTransportOutDetails.getPort(),
+                        new BindParameter(BindType.BIND_TX, smppTransportOutDetails.getSystemId(),
+                                smppTransportOutDetails.getPassword(), smppTransportOutDetails.getSystemType(),
+                                TypeOfNumber.UNKNOWN, NumberingPlanIndicator.UNKNOWN, null));
+
+
+            }
+            log.debug("Conected and bind to " + smppTransportOutDetails.getHost());
+
+            String messageId = outSession.submitShortMessage(
+                    "CMT",
+                    TypeOfNumber.UNKNOWN,
+                    NumberingPlanIndicator.UNKNOWN,
+                    sm.getSender(),
+                    TypeOfNumber.UNKNOWN,
+                    NumberingPlanIndicator.UNKNOWN,
+                    sm.getReceiver(),
+                    new ESMClass(),
+                    (byte) 0,
+                    (byte) 1,
+                    timeFormatter.format(new Date()),
+                    null,
+                    new RegisteredDelivery(SMSCDeliveryReceipt.DEFAULT),
+                    (byte) 0,
+                    new GeneralDataCoding(false, false, MessageClass.CLASS1,Alphabet.ALPHA_DEFAULT),
+                    (byte) 0,
+                    sm.getContent().getBytes()
+            );
+
+            log.debug("Message Submited with id" + messageId);
+        } catch (IOException e) {
+            log.error("Unable to Connect ", e);
+        } catch (InvalidResponseException e) {
+            log.debug("Invalid responce Exception", e);
+        } catch (PDUException e) {
+            log.debug("PDU Exception", e);
+        } catch (NegativeResponseException e) {
+            log.debug(e);
+        } catch (ResponseTimeoutException e) {
+            log.debug(e);
+        }
+
     }
 }

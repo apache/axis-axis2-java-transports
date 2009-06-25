@@ -20,25 +20,22 @@ package org.apache.axis2.transport.sms.smpp;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.transport.sms.SMSManager;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.axis2.transport.sms.SMSMessage;
 
-public class SMPPDispatcher implements Runnable{
-   
-    SMPPMessage smppMessage;
+/**
+ * Dispatch the SMS message taken frpm the SMPP PDU to the Axis2
+ */
+public class SMPPDispatcher{
 
-    void dispatch(String source , String message) throws AxisFault {
+    SMSMessage smsMessage;
+
+    void dispatch(String source , String receiver,String message) throws AxisFault {
 
       synchronized (this){
-          smppMessage = new SMPPMessage(source , null, message , SMPPMessage.IN_MESSAGE);
+          smsMessage = new SMSMessage(source ,receiver, message , SMSMessage.IN_MESSAGE);
 
-  }
-      new Thread(this).start();
+     }
+      SMSManager.getSMSManager().dispatchToAxis2(smsMessage);
     }
 
-    public void run() {
-
-        SMSManager.getSMSManager().dispatchToAxis2(smppMessage.getContent() , smppMessage.getSender());
-        
-    }
 }

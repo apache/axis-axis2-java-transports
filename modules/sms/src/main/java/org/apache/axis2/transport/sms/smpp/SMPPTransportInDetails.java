@@ -18,5 +18,93 @@
  */
 package org.apache.axis2.transport.sms.smpp;
 
+/**
+ * holds the SMPP imlimantations Transport in details
+ */
 public class SMPPTransportInDetails {
+    private String systemType ="cp";
+    private String systemId;
+    private String password;
+    private String host="127.0.0.1";
+    private String phoneNumber = "0000";
+    private int port = 2775;
+    private int enquireLinkTimer = 50000;
+    private int transactionTimer = 100000;
+    private static SMPPTransportInDetails smppTransportInDetails;
+
+    private SMPPTransportInDetails(){
+
+    }
+
+    public static SMPPTransportInDetails getInstence() {
+        if(smppTransportInDetails == null) {
+            smppTransportInDetails = new SMPPTransportInDetails();
+        }
+
+        return smppTransportInDetails;
+    }
+
+    public String getSystemType() {
+        return systemType;
+    }
+
+    public void setSystemType(String systemType) {
+        this.systemType = systemType;
+    }
+
+    public String getSystemId() {
+        return systemId;
+    }
+
+    public void setSystemId(String systemId) {
+        this.systemId = systemId;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public int getEnquireLinkTimer() {
+        return enquireLinkTimer;
+    }
+
+    public void setEnquireLinkTimer(int enquireLinkTimer) {
+        this.enquireLinkTimer = enquireLinkTimer;
+    }
+
+    public int getTransactionTimer() {
+        return transactionTimer;
+    }
+
+    public void setTransactionTimer(int transactionTimer) {
+        this.transactionTimer = transactionTimer;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
 }

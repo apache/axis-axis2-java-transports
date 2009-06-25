@@ -18,5 +18,106 @@
  */
 package org.apache.axis2.transport.sms.smpp;
 
+/**
+ * Holds the SMPP implimantations transport out details
+ */
 public class SMPPTransportOutDetails {
+    //smpp system type
+    private String systemType ="cp";
+    private String systemId;
+    private String password;
+    private String host="127.0.0.1";
+    private String phoneNumber="0000";
+    private int port = 2775;
+    private int enquireLinkTimer = 50000;
+    private int transactionTimer = 100000;
+
+    private static SMPPTransportOutDetails smppTransportOutDetails;
+
+    private SMPPTransportOutDetails(){
+
+    }
+
+    /**
+     * Get the referrence to the Singleton instence of the SMPP Transport Out details
+     * at the first request it will create a empty object
+     * @return SMPPTransportOutDetails instence
+     */
+    public static SMPPTransportOutDetails getInstence() {
+        if(smppTransportOutDetails ==null) {
+            smppTransportOutDetails = new SMPPTransportOutDetails();
+        }
+        return smppTransportOutDetails;
+    }
+
+    public int getTransactionTimer() {
+        return transactionTimer;
+    }
+
+    public void setTransactionTimer(int transactionTimer) {
+        this.transactionTimer = transactionTimer;
+    }
+
+    public int getEnquireLinkTimer() {
+        return enquireLinkTimer;
+    }
+
+    public void setEnquireLinkTimer(int enquireLinkTimer) {
+        this.enquireLinkTimer = enquireLinkTimer;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getSystemId() {
+        return systemId;
+    }
+
+    public void setSystemId(String systemId) {
+        this.systemId = systemId;
+    }
+
+    public String getSystemType() {
+        return systemType;
+    }
+
+    public void setSystemType(String systemType) {
+        this.systemType = systemType;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+
+    @Override
+    public String toString() {
+        return "TransportOutDetails::  SystemId: " +systemId +" systemType: "+ systemType + " password: "
+                +password+" host: "+host+" port: " +port+" phone NUmber" + phoneNumber;
+    }
 }

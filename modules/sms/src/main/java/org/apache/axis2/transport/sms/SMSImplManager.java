@@ -19,6 +19,8 @@
 package org.apache.axis2.transport.sms;
 
 import org.apache.axis2.description.Parameter;
+import org.apache.axis2.description.TransportInDescription;
+import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.AxisFault;
 
 import java.util.ArrayList;
@@ -39,11 +41,23 @@ public interface SMSImplManager {
     public void stop();
 
     /**
-     * set the Paramaters needed
-     * for the implementation
-     * @param params ArrayList of Paramters
+     * set the Transport out details that is needed for the implementation manager
+     * @param transportOutDetails
+     * @throws AxisFault
      */
-    public void setTransportParamters(ArrayList<Parameter> params) throws AxisFault;
+    public void setTransportOutDetails(TransportOutDescription transportOutDetails) throws AxisFault;
 
+    /**
+     * set the Transport in details that is needed for the implementation manager
+     * @param transportInDetails
+     * @throws AxisFault
+     */
+    public void setTransportInDetails(TransportInDescription transportInDetails) throws AxisFault;
 
+    /**
+     * send the SMS  that is passed as a parameter using the current implimentation (To know the Content of the SMSMessage Look in to the documantaion of
+     * the SMSMessage )
+     * @param sm  SMSMessage to be send
+     */
+    public void sendSMS(SMSMessage sm);
 }

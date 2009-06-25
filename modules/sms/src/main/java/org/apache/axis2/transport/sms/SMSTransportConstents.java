@@ -18,11 +18,29 @@
  */
 package org.apache.axis2.transport.sms;
 
+/**
+ * Keeps the constets that are need for SMS Transport.Currently The code of the Class is divided in to three sections
+ * for the keep the clarity
+ * 1) SMS Transport Constents : add the constents to this section if you need to add new constents to the gneric
+ *    SMSTransport level.
+ * 2) SMPP Constents : SMPP is one implimentation of SMSTransport.Add Constents to this section if you need to add
+ *    constents related to SMPP section
+ * 3) GSM Constets : This a another implimentation. Add Constents to this section if you need to add constents related
+ *    to GSM section
+ *
+ * if you are going to add a another SMS implimentation add a another section to this class eg:"XXX Transport Constents"
+ */
 public class SMSTransportConstents {
-
+    /**
+     * SMS Transport Constents
+     */
     public static String IMPLIMENTAION_CLASS = "smsImplClass";
     public static String BUILDER_CLASS = "builderClass";
-    
+    public static String FORMATTER_CLASS ="formatterClass";
+    public static String SEND_TO="sms_sender";
+    public static String DESTINATION = "sms_destination";
+    public static String PHONE_NUMBER = "phoneNumber";
+
     /**
      * SMPP constents
      */
@@ -32,6 +50,8 @@ public class SMSTransportConstents {
     public static String HOST = "host";
     public static String PORT = "port";
 
-
+    /**
+     * GSM Constents
+     */
 
 }

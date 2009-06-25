@@ -29,13 +29,11 @@ import org.apache.axis2.transport.TransportListener;
 
 public class SMSMessageReciever implements TransportListener {
 
-    
-    
     private SMSManager smsManeger;
     public void init(ConfigurationContext configurationContext, TransportInDescription transportInDescription) throws AxisFault {
 
         smsManeger = SMSManager.getSMSManager();
-        smsManeger.init(transportInDescription.getParameters() , configurationContext);
+        smsManeger.init(transportInDescription , configurationContext);
 
     }
 

@@ -19,21 +19,54 @@
 package org.apache.axis2.transport.sms;
 
 import org.apache.axis2.description.Parameter;
+import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.addressing.EndpointReference;
 
 import java.util.ArrayList;
 
 public class SMSTransportUtils {
 
+    /**
+     * Given the array list of parameters and a name of the parameter
+     * it will return the Value of that Parameter
+     *
+     * @param list
+     * @param name
+     * @return Object that stores the value of that Parameter
+     */
     public static Object getParameterValue(ArrayList<Parameter> list, String name) {
-        if(name ==null)
-        {
+        if (name == null) {
             return null;
         }
-        for  (Parameter p : list) {
-            if(name.equals(p.getName())) {
+        for (Parameter p : list) {
+            if (name.equals(p.getName())) {
                 return p.getValue();
             }
         }
         return null;
     }
+
+    /**
+     * given the EPR it will return the phone number that the EPR represents
+     * this assumes a EPR of format
+     * sms://<phone_number>/
+     *
+     * @param epr
+     * @return
+     */
+    public static String getPhoneNumber(EndpointReference epr) throws Exception {
+
+        String eprAddress = epr.getAddress();
+        String protocal = eprAddress.substring(0, 3);
+        if (protocal != null && protocal.equals("sms")) {
+            String parts[] = eprAddress.split("/");
+            String phoneNumber = parts[2];
+            return phoneNumber;
+        } else {
+            throw new Exception("Invalid Epr for the SMS Transport : Epr must be of format sms://<phone_number>/");
+        }
+    }
+
+
 }
+
