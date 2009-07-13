@@ -335,6 +335,7 @@ public class JMSOutTransportInfo implements OutTransportInfo {
         TopicConnectionFactory tConFac = null;
 
         int destType = -1;
+        // TODO: there is something missing here for destination type generic
         if (JMSConstants.DESTINATION_TYPE_QUEUE.equals(destinationType)) {
             destType = JMSConstants.QUEUE;
             qConFac = (QueueConnectionFactory) connectionFactory;
