@@ -53,5 +53,12 @@ public class SMSTransportConstents {
     /**
      * GSM Constents
      */
+    
+    public static String MODEM_GATEWAY_ID = "gateway_id";
+    public static String COM_PORT = "com_port";
+    public static String BAUD_RATE = "baud_rate";
+    public static String MANUFACTURER = "manufacturer";
+    public static String MODEL = "model";
+    public static String MODEM_POLL_INTERVAL="modem_poll_interval";
 
 }
