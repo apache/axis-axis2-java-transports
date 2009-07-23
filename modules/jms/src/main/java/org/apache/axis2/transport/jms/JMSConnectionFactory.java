@@ -101,7 +101,7 @@ public class JMSConnectionFactory {
             throw new AxisJMSException("Cannot acquire JNDI context, JMS Connection factory : " +
                 parameters.get(JMSConstants.PARAM_CONFAC_JNDI_NAME) + " or default destination : " +
                 parameters.get(JMSConstants.PARAM_DESTINATION) +
-                " for JMS CF : " + name + " using : " + parameters);
+                " for JMS CF : " + name + " using : " + parameters, e);
         }
     }
 
