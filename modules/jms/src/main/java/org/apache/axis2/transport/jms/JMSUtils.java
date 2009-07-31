@@ -557,9 +557,9 @@ public class JMSUtils extends BaseUtils {
             QueueConnectionFactory qConFac = null;
             TopicConnectionFactory tConFac = null;
             if (isQueue) {
-                tConFac = (TopicConnectionFactory) conFac;
-            } else {
                 qConFac = (QueueConnectionFactory) conFac;
+            } else {
+                tConFac = (TopicConnectionFactory) conFac;
             }
 
             if (user != null && pass != null) {
