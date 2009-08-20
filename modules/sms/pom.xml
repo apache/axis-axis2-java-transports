@@ -112,8 +112,7 @@
                         <id>build-repo</id>
                         <phase>test-compile</phase>
                         <configuration>
-                            <tasks>
-
+                            <tasks unless="maven.test.skip">
                                 <mkdir dir="target/test-resources/samples/conf"/>
                                 <mkdir dir="target/test-resources/samples/repository/modules"/>
                                 <mkdir dir="target/test-resources/samples/repository/services"/>
