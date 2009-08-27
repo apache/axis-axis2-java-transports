@@ -32,6 +32,7 @@ import javax.naming.NamingException;
 import javax.transaction.UserTransaction;
 import javax.transaction.NotSupportedException;
 import javax.transaction.SystemException;
+import javax.transaction.Status;
 import java.util.*;
 
 /**
@@ -393,7 +394,10 @@ public class ServiceTaskManager {
                     try {
                         if (transactionality == BaseConstants.TRANSACTION_JTA) {
                             ut = getUserTransaction();
-                            ut.begin();
+			    // We will only create a new tx if there is no tx alive 
+			    if (ut.getStatus() == Status.STATUS_NO_TRANSACTION) {
+                            	ut.begin();
+			    }	
                         }
                     } catch (NotSupportedException e) {
                         handleException("Listener Task is already associated with a transaction", e);
