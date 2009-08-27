@@ -21,6 +21,7 @@ package org.apache.axis2.transport.sms.gsm;
 import org.apache.axis2.transport.sms.SMSImplManager;
 import org.apache.axis2.transport.sms.SMSMessage;
 import org.apache.axis2.transport.sms.SMSTransportConstents;
+import org.apache.axis2.transport.sms.SMSManager;
 import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.AxisFault;
@@ -54,6 +55,8 @@ public class GSMImplManager implements SMSImplManager {
     private GSMDispatcher dispatcher;
     private Service service = null;
     private SerialModemGateway gateway;
+
+    private SMSManager smsInManeger;
     public void start() {
        
         service = new Service();
@@ -81,7 +84,7 @@ public class GSMImplManager implements SMSImplManager {
 
             // Start! (i.e. connect to all defined Gateways)
             this.service.startService();
-            dispatcher = new GSMDispatcher(service);
+            dispatcher = new GSMDispatcher(service , smsInManeger);
             dispatcher.setPollInterval(gsmTransportInDetails.getModemPollInterval());
             Thread thread = new Thread(dispatcher);
             thread.start();
@@ -223,6 +226,14 @@ public class GSMImplManager implements SMSImplManager {
         } catch (Exception e) {
             log.error(e);
         }
+    }
+
+    public void setSMSInManager(SMSManager manager) {
+        this.smsInManeger = manager;
+    }
+
+    public SMSManager getSMSInManager() {
+        return smsInManeger;
     }
 
 }

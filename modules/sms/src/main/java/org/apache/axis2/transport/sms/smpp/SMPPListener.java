@@ -25,6 +25,7 @@ import org.jsmpp.session.DataSmResult;
 import org.jsmpp.session.MessageReceiverListener;
 import org.jsmpp.util.InvalidDeliveryReceiptException;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.transport.sms.SMSManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -34,8 +35,12 @@ import org.apache.commons.logging.LogFactory;
 public class SMPPListener implements  MessageReceiverListener{
      /** the reference to the actual commons logger to be used for log messages */
     protected Log log = LogFactory.getLog(this.getClass());
+    private SMSManager smsManeger;
 
-
+    public SMPPListener(SMSManager manager){
+        this.smsManeger = manager;
+    }
+    
     public void onAcceptDeliverSm(DeliverSm deliverSm) throws ProcessRequestException {
 
         if (MessageType.SMSC_DEL_RECEIPT.containedIn(deliverSm.getEsmClass())) {
@@ -62,7 +67,7 @@ public class SMPPListener implements  MessageReceiverListener{
         } else {
 
             try {
-                new SMPPDispatcher().dispatch(deliverSm.getSourceAddr() ,deliverSm.getDestAddress() ,new String(deliverSm.getShortMessage()));
+                new SMPPDispatcher(smsManeger).dispatch(deliverSm.getSourceAddr() ,deliverSm.getDestAddress() ,new String(deliverSm.getShortMessage()));
 
             } catch (AxisFault axisFault) {
                 log.debug("Error while dispatching SMPP message" , axisFault);

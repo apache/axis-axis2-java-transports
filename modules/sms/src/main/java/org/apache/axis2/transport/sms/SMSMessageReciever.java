@@ -32,7 +32,7 @@ public class SMSMessageReciever implements TransportListener {
     private SMSManager smsManeger;
     public void init(ConfigurationContext configurationContext, TransportInDescription transportInDescription) throws AxisFault {
 
-        smsManeger = SMSManager.getSMSManager();
+        smsManeger = new SMSManager();
         smsManeger.init(transportInDescription , configurationContext);
 
     }

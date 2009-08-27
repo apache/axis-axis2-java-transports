@@ -46,7 +46,7 @@ public class SMSSender extends AbstractTransportSender {
     }
 
     public void init(ConfigurationContext confContext, TransportOutDescription transportOut) throws AxisFault {
-        smsManager = SMSManager.getSMSManager();
+        smsManager = new SMSManager();
         smsManager.init(transportOut, confContext);
     }
 

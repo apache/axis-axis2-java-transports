@@ -21,6 +21,7 @@ package org.apache.axis2.transport.sms.smpp;
 import org.apache.axis2.transport.sms.SMSImplManager;
 import org.apache.axis2.transport.sms.SMSTransportConstents;
 import org.apache.axis2.transport.sms.SMSMessage;
+import org.apache.axis2.transport.sms.SMSManager;
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.AxisFault;
@@ -47,7 +48,7 @@ public class SMPPImplManager implements SMSImplManager {
     private SMPPTransportOutDetails smppTransportOutDetails = SMPPTransportOutDetails.getInstence();
 
     private volatile boolean stop=true;
-
+    private SMSManager smsInManeger;
 
     private SMPPSession inSession;
     private SMPPSession outSession;
@@ -59,7 +60,7 @@ public class SMPPImplManager implements SMSImplManager {
             inSession.connectAndBind(smppTransportInDetails.getHost(), smppTransportInDetails.getPort(), new BindParameter(BindType.BIND_RX, smppTransportInDetails.getSystemId(),
                         smppTransportInDetails.getPassword(), smppTransportInDetails.getSystemType() , TypeOfNumber.UNKNOWN, NumberingPlanIndicator.UNKNOWN, null));
 
-            SMPPListener listener = new SMPPListener();
+            SMPPListener listener = new SMPPListener(smsInManeger);
             inSession.setMessageReceiverListener(listener);
             stop = false;
             System.out.println(" [Axis2] bind and connect to " + smppTransportInDetails.getHost()+" : " +
@@ -213,5 +214,13 @@ public class SMPPImplManager implements SMSImplManager {
             log.debug(e);
         }
 
+    }
+
+    public void setSMSInManager(SMSManager manager) {
+        this.smsInManeger = manager;    
+    }
+
+    public SMSManager getSMSInManager() {
+        return smsInManeger;
     }
 }

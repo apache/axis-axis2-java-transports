@@ -48,24 +48,7 @@ public class SMSManager {
      /** the reference to the actual commons logger to be used for log messages */
     protected Log log = LogFactory.getLog(this.getClass());
 
-    private static SMSManager ourInstence;
-
-
-
-
-    private SMSManager() {
-
-    }
-
-    /**
-     * @return  singleton Object of the SMSManager
-     */
-    public static SMSManager getSMSManager() {
-        if(ourInstence == null) {
-            ourInstence = new SMSManager();
-        }
-        return ourInstence;
-    }
+    
 
     /**
      * initialize the SMS manager with TransportinDiscription
@@ -143,6 +126,7 @@ public class SMSManager {
                 throw new AxisFault("Error while instentiating class " + implClass, e);
             }
         }
+        currentImplimentation.setSMSInManager(this);
 
     }
     /**

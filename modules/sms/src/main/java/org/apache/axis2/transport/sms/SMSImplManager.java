@@ -60,4 +60,16 @@ public interface SMSImplManager {
      * @param sm  SMSMessage to be send
      */
     public void sendSMS(SMSMessage sm);
+
+    /**
+     * set the SMS manager that carries out SMS In task to the SMSImplimentaion
+     * @param manager
+     */
+    public void setSMSInManager(SMSManager manager);
+
+    /**
+     * get the refferance to the SMSMeneger instance that the implimentaion has
+     * @return
+     */
+    public SMSManager getSMSInManager();
 }

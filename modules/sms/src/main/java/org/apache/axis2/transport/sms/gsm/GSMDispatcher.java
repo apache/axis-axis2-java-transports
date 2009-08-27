@@ -37,13 +37,15 @@ public class GSMDispatcher implements Runnable{
 
     private Service service;
     private long pollInterval=5000;
-
+    private SMSManager smsManager;
     /**
      * To create a GSMDispatcher a service object that is created for the current GSM modem is needed
      * @param service
+     * @param manager
      */
-    public GSMDispatcher(Service service) {
+    public GSMDispatcher(Service service , SMSManager manager) {
         this.service = service;
+        this.smsManager = manager;
     }
 
     public void run() {
@@ -58,7 +60,7 @@ public class GSMDispatcher implements Runnable{
                     synchronized (this) {
                         sms= new SMSMessage(msg.getOriginator(),null,msg.getText() ,SMSMessage.IN_MESSAGE);
                     }
-                    SMSManager.getSMSManager().dispatchToAxis2(sms);
+                    smsManager.dispatchToAxis2(sms);
                     //delete the message form inbox
                     service.deleteMessage(msg);
                 }

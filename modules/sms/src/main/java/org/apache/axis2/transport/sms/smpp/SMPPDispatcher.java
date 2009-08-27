@@ -29,13 +29,19 @@ public class SMPPDispatcher{
 
     SMSMessage smsMessage;
 
+    private SMSManager manager;
+
+    public SMPPDispatcher(SMSManager manager) {
+        this.manager = manager;
+    }
+
     void dispatch(String source , String receiver,String message) throws AxisFault {
 
       synchronized (this){
           smsMessage = new SMSMessage(source ,receiver, message , SMSMessage.IN_MESSAGE);
 
      }
-      SMSManager.getSMSManager().dispatchToAxis2(smsMessage);
+      manager.dispatchToAxis2(smsMessage);
     }
 
 }
