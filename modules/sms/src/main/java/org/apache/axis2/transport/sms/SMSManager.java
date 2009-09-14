@@ -44,6 +44,7 @@ public class SMSManager {
     private ConfigurationContext configurationContext;
     private SMSMessageBuilder messageBuilder;
     private SMSMessageFormatter messageFormatter;
+    private String phoneNumber = null;
 
      /** the reference to the actual commons logger to be used for log messages */
     protected Log log = LogFactory.getLog(this.getClass());
@@ -78,6 +79,11 @@ public class SMSManager {
             }
         }
         currentImplimentation.setTransportInDetails(transportInDescription);
+           // get the Axis phone number form the configuration file
+        Parameter phoneNum = transportInDescription.getParameter(SMSTransportConstents.PHONE_NUMBER);
+        if(phoneNum != null) {
+            this.phoneNumber = (String)phoneNum.getValue();
+        }
         inited = true;
     }
 
@@ -195,5 +201,9 @@ public class SMSManager {
 
     public boolean isInited() {
         return inited;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 }

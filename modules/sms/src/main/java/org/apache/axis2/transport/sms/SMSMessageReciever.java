@@ -26,10 +26,14 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.SessionContext;
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.transport.TransportListener;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class SMSMessageReciever implements TransportListener {
 
     private SMSManager smsManeger;
+     /** the reference to the actual commons logger to be used for log messages */
+    protected Log log = LogFactory.getLog(this.getClass());
     public void init(ConfigurationContext configurationContext, TransportInDescription transportInDescription) throws AxisFault {
 
         smsManeger = new SMSManager();
@@ -53,11 +57,21 @@ public class SMSMessageReciever implements TransportListener {
     }
 
     public EndpointReference getEPRForService(String s, String s1) throws AxisFault {
+
         return null;
     }
 
     public EndpointReference[] getEPRsForService(String s, String s1) throws AxisFault {
-        return new EndpointReference[0];
+         if (smsManeger.getPhoneNumber() != null) {
+                // need to change this after sms transport have a proper standered epr
+                return new EndpointReference[]{
+                        new EndpointReference("sms://"+smsManeger.getPhoneNumber()+"/")};
+
+         } else {
+            log.debug("Unable to generate EPR for the transport sms");   
+         }
+        return null;
+
     }
 
     public SessionContext getSessionContext(MessageContext messageContext) {
