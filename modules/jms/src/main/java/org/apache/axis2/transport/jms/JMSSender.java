@@ -449,22 +449,14 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
         // load any transport headers from received message
         JMSUtils.loadTransportHeaders(message, responseMsgCtx);
 
-        // workaround for Axis2 TransportUtils.createSOAPMessage() issue, where a response
-        // of content type "text/xml" is thought to be REST if !MC.isServerSide(). This
-        // question is still under debate and due to the timelines, I am commiting this
-        // workaround as Axis2 1.2 is about to be released and Synapse 1.0
-        responseMsgCtx.setServerSide(false);
-
-        String contentType =
-                contentTypeProperty == null ? null
-                        : JMSUtils.getProperty(message, contentTypeProperty);
+        String contentType = contentTypeProperty == null ? null
+                : JMSUtils.getProperty(message, contentTypeProperty);
 
         try {
             JMSUtils.setSOAPEnvelope(message, responseMsgCtx, contentType);
         } catch (JMSException ex) {
             throw AxisFault.makeFault(ex);
         }
-//        responseMsgCtx.setServerSide(true);
 
         handleIncomingMessage(
             responseMsgCtx,
