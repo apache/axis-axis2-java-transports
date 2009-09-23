@@ -134,7 +134,6 @@ public abstract class AbstractTransportSender extends AbstractHandler implements
         MessageContext msgCtx, Map trpHeaders,
         String soapAction, String contentType) {
 
-
         // set the soapaction if one is available via a transport header
         if (soapAction != null) {
             msgCtx.setSoapAction(soapAction);
