@@ -30,15 +30,15 @@ import org.apache.axis2.context.ConfigurationContext;
 public interface SMSMessageBuilder {
 
     /**
-     * Build the Axis2 MessageContext from the given message Coming
-     * @param message  the content of the SMS
-     * @param configurationContext axis2 configuration Context
-     * @param sener senders phone number
-     * @param receiver receivers phone number
-     * @return  the Axis2 Message Context build
-     * @throws InvalidMessageFormatException if Message is not in correct format
+     * Build the Axis2 Message Context form the SMSMessage.This is respnsible for handling <br>
+     * the content comming with the SMSMessage, handling the sender receiver details and handling the <br>
+     * and handling the SMSMessage properties to buld the Axis2 Message Context appropriately
+     * @param msg
+     * @param configurationContext
+     * @return
+     * @throws InvalidMessageFormatException
      */
-    public MessageContext buildMessaage(String message ,String sener,String  receiver, ConfigurationContext configurationContext)
+    public MessageContext buildMessaage(SMSMessage msg, ConfigurationContext configurationContext)
             throws InvalidMessageFormatException;
 
 }

@@ -29,6 +29,9 @@ import org.apache.axis2.transport.sms.SMSManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Listen for the incomming SMPP messages and Start processing them
  */
@@ -65,9 +68,22 @@ public class SMPPListener implements  MessageReceiverListener{
 
             }
         } else {
+            Map<String , Object> properties = new HashMap<String,Object>();
+
+            properties.put(SMPPImplManager.SOURCE_ADDRESS_TON ,
+                    TypeOfNumber.valueOf(deliverSm.getSourceAddrTon()).toString());
+
+            properties.put(SMPPImplManager.SOURCE_ADDRESS_NPI ,
+                    NumberingPlanIndicator.valueOf(deliverSm.getSourceAddrNpi()).toString());
+
+            properties.put(SMPPImplManager.DESTINATION_ADDRESS_TON ,
+                    TypeOfNumber.valueOf(deliverSm.getDestAddrTon()).toString());
+            properties.put(SMPPImplManager.DESTINATION_ADDRESS_NPI ,
+                    NumberingPlanIndicator.valueOf(deliverSm.getDestAddrNpi()).toString());
 
             try {
-                new SMPPDispatcher(smsManeger).dispatch(deliverSm.getSourceAddr() ,deliverSm.getDestAddress() ,new String(deliverSm.getShortMessage()));
+                new SMPPDispatcher(smsManeger).dispatch(deliverSm.getSourceAddr() ,deliverSm.getDestAddress() ,
+                        new String(deliverSm.getShortMessage()), properties);
 
             } catch (AxisFault axisFault) {
                 log.debug("Error while dispatching SMPP message" , axisFault);

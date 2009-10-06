@@ -26,6 +26,7 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.sms.smpp.SMPPImplManager;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.engine.AxisEngine;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,12 +40,12 @@ import java.util.ArrayList;
 public class SMSManager {
 
     private SMSImplManager currentImplimentation;
-    private ArrayList<Parameter> transportParameters;
     private boolean inited;
     private ConfigurationContext configurationContext;
     private SMSMessageBuilder messageBuilder;
     private SMSMessageFormatter messageFormatter;
     private String phoneNumber = null;
+    private boolean invertSourceAndDestination = true;
 
      /** the reference to the actual commons logger to be used for log messages */
     protected Log log = LogFactory.getLog(this.getClass());
@@ -112,6 +113,21 @@ public class SMSManager {
             }
         }
         currentImplimentation.setTransportOutDetails(transportOutDescription);
+
+        Parameter invertS_n_D = transportOutDescription.getParameter(
+                SMSTransportConstents.INVERT_SOURCE_AND_DESTINATION);
+        if(invertS_n_D != null) {
+            String val = (String)invertS_n_D.getValue();
+            if("false".equals(val)) {
+                invertSourceAndDestination = false;
+            } else if("true".equals(val)) {
+                invertSourceAndDestination = true;
+            } else {
+                log.warn("Invalid parameter value set to the parameter invert_source_and_destination," +
+                        "setting the default value :true ");
+                invertSourceAndDestination = true;
+            }
+        }
         inited = true;
     }
 
@@ -137,13 +153,12 @@ public class SMSManager {
     }
     /**
      * Dispatch the SMS message to Axis2 Engine
-     * @param message
-     * @param sender
+     * @param sms
      */
     public void dispatchToAxis2(SMSMessage sms)  {
         try {
-            MessageContext msgctx = messageBuilder.buildMessaage(sms.getContent() , sms.getSender() ,sms.getReceiver(),
-                    configurationContext);
+            MessageContext msgctx = messageBuilder.buildMessaage(sms,configurationContext);
+            msgctx.setReplyTo(new EndpointReference("sms://"+sms.getSender()+"/"));
             AxisEngine.receive(msgctx);
         } catch (InvalidMessageFormatException e) {
             log.debug("Invalid message format " + e);
@@ -163,6 +178,7 @@ public class SMSManager {
     public void sendSMS(MessageContext messageContext) {
         try {
             SMSMessage sms = messageFormatter.formatSMS(messageContext);
+            sms.addProperty(SMSTransportConstents.INVERT_SOURCE_AND_DESTINATION ,"" + invertSourceAndDestination);
             currentImplimentation.sendSMS(sms);
         } catch (Exception e) {
             log.error("Error while sending the SMS " , e);
@@ -177,11 +193,6 @@ public class SMSManager {
     public void sentInfo(SMSMessage sms) {
         currentImplimentation.sendSMS(sms);
     }
-    public ArrayList<Parameter> getTransportParameters() {
-        return transportParameters;
-    }
-
-
 
     public SMSImplManager getCurrentImplimentation() {
         return currentImplimentation;
@@ -205,5 +216,13 @@ public class SMSManager {
 
     public String getPhoneNumber() {
         return phoneNumber;
+    }
+
+    public boolean isInvertSourceAndDestination() {
+        return invertSourceAndDestination;
+    }
+
+    public void setInvertSourceAndDestination(boolean invertSourceAndDestination) {
+        this.invertSourceAndDestination = invertSourceAndDestination;
     }
 }

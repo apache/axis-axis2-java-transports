@@ -54,6 +54,18 @@ public class SMPPImplManager implements SMSImplManager {
     private SMPPSession outSession;
     private static TimeFormatter timeFormatter = new AbsoluteTimeFormatter();
 
+
+    /**
+     * SMPP implementation Constents
+     */
+    public static String SOURCE_ADDRESS_TON = "source_address_ton";
+    public static String SOURCE_ADDRESS_NPI = "source_address_npi";
+
+    public static String DESTINATION_ADDRESS_TON = "destination_address_ton";
+    public static String DESTINATION_ADDRESS_NPI = "destination_address_npi";
+
+    
+
     public void start() {
         inSession = new SMPPSession();
         try {
@@ -167,6 +179,11 @@ public class SMPPImplManager implements SMSImplManager {
     }
 
     public void sendSMS(SMSMessage sm) {
+        TypeOfNumber sourceTon =TypeOfNumber.UNKNOWN;
+        NumberingPlanIndicator sourceNpi = NumberingPlanIndicator.UNKNOWN;
+
+        TypeOfNumber destTon = TypeOfNumber.UNKNOWN;
+        NumberingPlanIndicator destNpi = NumberingPlanIndicator.UNKNOWN;
         try {
             if (outSession == null) {
                 outSession = new SMPPSession();
@@ -177,17 +194,60 @@ public class SMPPImplManager implements SMSImplManager {
                                 smppTransportOutDetails.getPassword(), smppTransportOutDetails.getSystemType(),
                                 TypeOfNumber.UNKNOWN, NumberingPlanIndicator.UNKNOWN, null));
 
+                log.debug("Conected and bind to " + smppTransportOutDetails.getHost());
+            }
+
+            boolean invert = true;
+
+            if("false".equals(sm.getProperties().get(SMSTransportConstents.INVERT_SOURCE_AND_DESTINATION))){
+                invert = false;
+            }
+
+            if(invert) {
+                if(sm.getProperties().get(DESTINATION_ADDRESS_NPI) != null) {
+                    sourceNpi = NumberingPlanIndicator.valueOf((String)sm.getProperties().get(DESTINATION_ADDRESS_NPI));
+                }
+                      
+                if(sm.getProperties().get(DESTINATION_ADDRESS_TON) != null) {
+                    sourceTon = TypeOfNumber.valueOf((String)sm.getProperties().get(DESTINATION_ADDRESS_TON));
+                }
+                if(sm.getProperties().get(SOURCE_ADDRESS_NPI) != null) {
+                    destNpi = NumberingPlanIndicator.valueOf((String)sm.getProperties().get(SOURCE_ADDRESS_NPI));
+                }
+                if(sm.getProperties().get(SOURCE_ADDRESS_TON) != null) {
+                    destTon = TypeOfNumber.valueOf((String)sm.getProperties().get(SOURCE_ADDRESS_TON));
+                }
+
+
+            } else {
+
+                if(sm.getProperties().get(DESTINATION_ADDRESS_NPI) != null) {
+                    destNpi = NumberingPlanIndicator.valueOf((String)sm.getProperties().get(DESTINATION_ADDRESS_NPI));
+                }
+
+                if(sm.getProperties().get(DESTINATION_ADDRESS_TON) != null) {
+                    destTon = TypeOfNumber.valueOf((String)sm.getProperties().get(DESTINATION_ADDRESS_TON));
+                }
+
+                if(sm.getProperties().get(SOURCE_ADDRESS_NPI) != null) {
+                    sourceNpi = NumberingPlanIndicator.valueOf((String)sm.getProperties().get(SOURCE_ADDRESS_NPI));
+                }
+
+                if(sm.getProperties().get(SOURCE_ADDRESS_TON) != null) {
+                    sourceTon = TypeOfNumber.valueOf((String)sm.getProperties().get(SOURCE_ADDRESS_TON));
+                }
 
             }
-            log.debug("Conected and bind to " + smppTransportOutDetails.getHost());
+
+
 
             String messageId = outSession.submitShortMessage(
                     "CMT",
-                    TypeOfNumber.UNKNOWN,
-                    NumberingPlanIndicator.UNKNOWN,
+                    sourceTon,
+                    sourceNpi,
                     sm.getSender(),
-                    TypeOfNumber.UNKNOWN,
-                    NumberingPlanIndicator.UNKNOWN,
+                    destTon,
+                    destNpi,
                     sm.getReceiver(),
                     new ESMClass(),
                     (byte) 0,

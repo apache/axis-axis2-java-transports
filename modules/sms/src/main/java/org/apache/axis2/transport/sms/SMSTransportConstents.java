@@ -39,6 +39,15 @@ public class SMSTransportConstents {
     public static String FORMATTER_CLASS ="formatterClass";
     public static String SEND_TO="sms_sender";
     public static String DESTINATION = "sms_destination";
+    /**
+     * if this paprameter is set true in the Transport sender configuration.
+     * sender will use message source specific parameters as destination parameters when sending the message
+     * the default value is true.
+     *
+     * eg: in a SMPP Transport message
+     * SOURCE_ADDRESS_TON will be used as the DESTINATION_ADDRESS_TON is this parameter is not set to false.
+     */
+    public static String INVERT_SOURCE_AND_DESTINATION = "invert_source_and_destination";
     public static String PHONE_NUMBER = "phoneNumber";
 
     /**

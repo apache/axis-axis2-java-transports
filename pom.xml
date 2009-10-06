@@ -43,6 +43,7 @@
         <module>modules/xmpp</module>
         <module>modules/mail</module>
         <module>modules/jms</module>
+        <module>modules/sms</module>
         <module>modules/testkit</module>
     </modules>
 

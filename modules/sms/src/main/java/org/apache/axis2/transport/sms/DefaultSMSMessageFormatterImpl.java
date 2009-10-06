@@ -24,6 +24,8 @@ import org.apache.axis2.transport.sms.smpp.SMPPTransportOutDetails;
 import org.apache.axis2.description.Parameter;
 import org.apache.axiom.om.OMElement;
 
+import java.util.Iterator;
+
 public class DefaultSMSMessageFormatterImpl implements SMSMessageFormatter{
 
 
@@ -31,12 +33,12 @@ public class DefaultSMSMessageFormatterImpl implements SMSMessageFormatter{
         String sendTo;
         //phone number set at the Transport configuration get the precidence
         String axis2PhoneNumber = SMPPTransportOutDetails.getInstence().getPhoneNumber() ;
-        Parameter param = messageContext.getTransportOut().getParameter(SMSTransportConstents.SEND_TO);
-        if (param != null) {
-           sendTo  = (String)param.getValue();
+        Object s= messageContext.getProperty(SMSTransportConstents.SEND_TO);
+        if (s != null) {
+           sendTo  = (String)s;
 
         } else {
-        sendTo = SMSTransportUtils.getPhoneNumber(messageContext.getTo());
+             sendTo = SMSTransportUtils.getPhoneNumber(messageContext.getTo());
         }
         OMElement elem = messageContext.getEnvelope().getBody();
         String content = "Empty responce";
@@ -57,13 +59,26 @@ public class DefaultSMSMessageFormatterImpl implements SMSMessageFormatter{
 
         //if not configured in the Transport configuration
         if("0000".equals(axis2PhoneNumber)) {
-            Parameter axisPhone  = messageContext.getTransportOut().getParameter(SMSTransportConstents.DESTINATION);
+            String axisPhone  = (String)messageContext.getProperty(SMSTransportConstents.DESTINATION);
             if(axisPhone != null) {
-                axis2PhoneNumber = (String)axisPhone.getValue();
+                axis2PhoneNumber = axisPhone;
             }
         }
+        SMSMessage sms = new SMSMessage( axis2PhoneNumber, sendTo , content ,SMSMessage.OUT_MESSAGE);
+        handleMessageContextProperties(sms,messageContext);
+        return sms;
 
-        return new SMSMessage( axis2PhoneNumber, sendTo , content ,SMSMessage.OUT_MESSAGE);
+    }
+
+    private void handleMessageContextProperties(SMSMessage sms , MessageContext messageContext) {
+       
+        Iterator<String> it = messageContext.getPropertyNames();
+
+        while(it.hasNext()) {
+            String key = it.next();
+            sms.addProperty(key , messageContext.getProperty(key));
+        }
+
 
     }
 
