@@ -22,6 +22,8 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.transport.sms.SMSManager;
 import org.apache.axis2.transport.sms.SMSMessage;
 
+import java.util.Map;
+
 /**
  * Dispatch the SMS message taken frpm the SMPP PDU to the Axis2
  */
@@ -35,11 +37,11 @@ public class SMPPDispatcher{
         this.manager = manager;
     }
 
-    void dispatch(String source , String receiver,String message) throws AxisFault {
+    void dispatch(String source , String receiver,String message , Map<String , Object> properties) throws AxisFault {
 
       synchronized (this){
           smsMessage = new SMSMessage(source ,receiver, message , SMSMessage.IN_MESSAGE);
-
+          smsMessage.getProperties().putAll(properties);
      }
       manager.dispatchToAxis2(smsMessage);
     }

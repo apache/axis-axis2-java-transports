@@ -22,11 +22,16 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.Properties;
+import java.util.Map;
+import java.util.HashMap;
+
 /**
  * SMS message is a atomic object wich carries a SMS
  * SMS has can be either a IN message or a OUT message
- * which will have the details sender , receiver and Content
+ * which will have the details sender , receiver ,Content and properties
  * sender , receiver has a implied meaning with the Message direction
+ * <br>
  * eg:
  * in a IN_MESSAGE sender  : the phone number of the phone that sms has been sent to axis2
  *               receiver  : the phone number given from the SMSC to the Axis2
@@ -40,12 +45,14 @@ public class SMSMessage {
     private String receiver;
     private String content;
     private int direction;
+    private Map<String ,Object> properties = new HashMap<String , Object>();
+    
 
     public static int IN_MESSAGE =1;
     public static int OUT_MESSAGE =2;
 
     /**
-     *
+     *  
      * @param sender
      * @param reciever
      * @param content
@@ -97,5 +104,24 @@ public class SMSMessage {
      */
     public int getDirection() {
         return direction;
+    }
+
+    /**
+     * add the Implementation level properties that properties will be add to the Axis2 Message Context
+     * @param key
+     * @param value
+     */
+    public void addProperty(String key, Object value) {
+        if(key != null && value != null) {
+            properties.put(key,value);
+        }
+    }
+
+    /**
+     * Return the properties of the SMS message
+     * @return
+     */
+    public Map<String , Object> getProperties() {
+        return properties;
     }
 }

@@ -20,6 +20,7 @@ package org.apache.axis2.transport.sms;
 
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.context.AbstractContext;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.description.*;
 import org.apache.axis2.AxisFault;
@@ -52,17 +53,12 @@ public class DefaultSMSMessageBuilderImpl implements SMSMessageBuilder {
      /** the reference to the actual commons logger to be used for log messages */
     protected Log log = LogFactory.getLog(this.getClass());
 
-    /**
-     *
-     * @param message  the content of the SMS
-     * @param sender senders phone number
-     * @param configurationContext axis2 configuration Context
-     * @return Returns the MessageContext built from the SMS
-     * @throws InvalidMessageFormatException
-     */
-    public MessageContext buildMessaage(String message, String sender,String receiver ,ConfigurationContext configurationContext)
-            throws InvalidMessageFormatException {
 
+    public MessageContext buildMessaage(SMSMessage msg,ConfigurationContext configurationContext)
+            throws InvalidMessageFormatException {
+        String message = msg.getContent();
+        String sender =  msg.getSender();
+        String receiver = msg.getReceiver();
         String[] parts = message.split(":");
 
 
@@ -100,17 +96,13 @@ public class DefaultSMSMessageBuilderImpl implements SMSMessageBuilder {
                     SOAPEnvelope soapEnvelope = createSoapEnvelope(messageContext , params);
                     messageContext.setServerSide(true);
                     messageContext.setEnvelope(soapEnvelope);
-                    Parameter sendBack = new Parameter();
-                    sendBack.setName(SMSTransportConstents.SEND_TO);
-                    sendBack.setValue(sender);
-                    Parameter axis2Phone = new Parameter();
-                    axis2Phone.setName(SMSTransportConstents.DESTINATION);
-                    axis2Phone.setValue(receiver);
                     TransportInDescription in = configurationContext.getAxisConfiguration().getTransportIn("sms");
                     TransportOutDescription out = configurationContext.getAxisConfiguration().getTransportOut("sms");
-                    out.addParameter(sendBack);
+                    messageContext.setProperty(SMSTransportConstents.SEND_TO , sender);
+                    messageContext.setProperty(SMSTransportConstents.DESTINATION , receiver);
                     messageContext.setTransportIn(in);
                     messageContext.setTransportOut(out);
+                    handleSMSProperties(msg , messageContext);
                     return messageContext;
                 }
 
@@ -126,6 +118,21 @@ public class DefaultSMSMessageBuilderImpl implements SMSMessageBuilder {
         return null;
     }
 
+    /**
+     * this will add the SMSMessage properties to the Axis2MessageContext 
+     * @param msg
+     * @param messageContext
+     */
+    protected void handleSMSProperties(SMSMessage msg , MessageContext messageContext) {
+
+        Iterator<String> it = msg.getProperties().keySet().iterator();
+        while (it.hasNext()) {
+            String key = it.next();
+            messageContext.setProperty(key , msg.getProperties().get(key));
+        }
+
+       
+    }
     private SOAPEnvelope createSoapEnvelope(MessageContext messageContext , Map params) {
         SOAPFactory soapFactory = OMAbstractFactory.getSOAP12Factory();
         SOAPEnvelope inEnvlope = soapFactory.getDefaultEnvelope();
