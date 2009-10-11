@@ -19,16 +19,6 @@
 
 package org.apache.axis2.transport.base;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.StringTokenizer;
-
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMOutputFormat;
 import org.apache.axiom.om.impl.builder.StAXBuilder;
@@ -39,16 +29,24 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
-import org.apache.axis2.transport.MessageFormatter;
-import org.apache.axis2.transport.TransportUtils;
-import org.apache.axis2.util.JavaUtils;
-import org.apache.axis2.context.OperationContext;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.axis2.format.BinaryFormatter;
 import org.apache.axis2.format.PlainTextFormatter;
+import org.apache.axis2.transport.MessageFormatter;
+import org.apache.axis2.transport.TransportUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Properties;
+import java.util.StringTokenizer;
 
 public class BaseUtils {
 
@@ -228,5 +226,51 @@ public class BaseUtils {
             }
         }
         return h;
+    }
+
+    /**
+     * Loads the properties from a given property file path
+     *
+     * @param filePath Path of the property file
+     * @return Properties loaded from given file
+     */
+    public static Properties loadProperties(String filePath) {
+
+        Properties properties = new Properties();
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+
+        if (log.isDebugEnabled()) {
+            log.debug("Loading a file '" + filePath + "' from classpath");
+        }
+
+        InputStream in = cl.getResourceAsStream(filePath);
+        if (in == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Unable to load file  '" + filePath + "'");
+            }
+
+            filePath = "conf" +
+                    File.separatorChar + filePath;
+            if (log.isDebugEnabled()) {
+                log.debug("Loading a file '" + filePath + "' from classpath");
+            }
+
+            in = cl.getResourceAsStream(filePath);
+            if (in == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Unable to load file  ' " + filePath + " '");
+                }
+            }
+        }
+        if (in != null) {
+            try {
+                properties.load(in);
+            } catch (IOException e) {
+                String msg = "Error loading properties from a file at :" + filePath;
+                log.error(msg, e);
+                throw new BaseTransportException(msg, e);
+            }
+        }
+        return properties;
     }
 }
