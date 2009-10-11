@@ -70,6 +70,8 @@ public abstract class AbstractTransportListener implements TransportListener {
     private TransportMBeanSupport mbeanSupport;
     /** Metrics collector for this transport */
     protected MetricsCollector metrics = new MetricsCollector();
+    /** Transport Configuration for the respective transports */
+    protected TransportConfiguration config;
 
     /**
      * A constructor that makes subclasses pick up the correct logger
@@ -92,13 +94,19 @@ public abstract class AbstractTransportListener implements TransportListener {
         this.cfgCtx = cfgCtx;
         this.transportIn  = transportIn;
         this.transportOut = cfgCtx.getAxisConfiguration().getTransportOut(getTransportName());
+        this.config = TransportConfiguration.getConfiguration(getTransportName());
 
         if (useAxis2ThreadPool) {
             //this.workerPool = cfgCtx.getThreadPool(); not yet implemented
             throw new AxisFault("Unsupported thread pool for task execution - Axis2 thread pool");
         } else {
             this.workerPool = WorkerPoolFactory.getWorkerPool(
-            10, 20, 5, -1, getTransportName() + "Server Worker thread group", getTransportName() + "-Worker");
+                    config.getServerCoreThreads(),
+                    config.getServerMaxThreads(),
+                    config.getServerKeepalive(),
+                    config.getServerQueueLen(),
+                    getTransportName() + "Server Worker thread group",
+                    getTransportName() + "-Worker");
         }
 
         // register to receive updates on services for lifetime management
