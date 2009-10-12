@@ -40,6 +40,7 @@ import javax.mail.internet.ParseException;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.Reference;
+import javax.naming.NameNotFoundException;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -686,5 +687,37 @@ public class JMSUtils extends BaseUtils {
         } else {
             return "Generic";
         }
+    }
+
+    /**
+     * Return the JMS destination with the given destination name looked up from the context
+     * 
+     * @param context the Context to lookup
+     * @param destinationName name of the destination to be looked up
+     * @param destinationType type of the destination to be looked up
+     * @return the JMS destination, or null if it does not exist
+     */
+    public static Destination lookupDestination(Context context, String destinationName,
+                                                String destinationType) {
+
+        if (destinationName == null) {
+            return null;
+        }
+
+        try {
+            return JMSUtils.lookup(context, Destination.class, destinationName);
+        } catch (NameNotFoundException e) {
+            try {
+                return JMSUtils.lookup(context, Destination.class,
+                    (JMSConstants.DESTINATION_TYPE_TOPIC.equals(destinationType) ?
+                        "dynamicTopics/" : "dynamicQueues/") + destinationName);
+            } catch (NamingException x) {
+                handleException("Cannot locate destination : " + destinationName);
+            }
+        } catch (NamingException e) {
+            handleException("Cannot locate destination : " + destinationName, e);
+        }
+
+        return null;
     }
 }

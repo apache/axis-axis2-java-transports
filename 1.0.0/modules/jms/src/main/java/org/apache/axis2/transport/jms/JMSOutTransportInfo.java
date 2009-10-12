@@ -20,23 +20,9 @@ import org.apache.axis2.transport.base.BaseUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.MessageProducer;
-import javax.jms.Queue;
-import javax.jms.QueueConnection;
-import javax.jms.QueueConnectionFactory;
-import javax.jms.QueueSession;
-import javax.jms.Session;
-import javax.jms.Topic;
-import javax.jms.TopicConnection;
-import javax.jms.TopicConnectionFactory;
-import javax.jms.TopicSession;
+import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 import java.util.Hashtable;
 
@@ -88,7 +74,7 @@ public class JMSOutTransportInfo implements OutTransportInfo {
      *
      * @param jmsConnectionFactory the JMS connection factory
      * @param dest the destination
-     * @param contentTypeProperty
+     * @param contentTypeProperty the content type
      */
     JMSOutTransportInfo(JMSConnectionFactory jmsConnectionFactory, Destination dest,
             String contentTypeProperty) {
@@ -176,20 +162,11 @@ public class JMSOutTransportInfo implements OutTransportInfo {
      */
     private Destination getDestination(Context context, String url) {
         String destinationName = JMSUtils.getDestination(url);
-        try {
-            return JMSUtils.lookup(context, Destination.class, destinationName);
-        } catch (NameNotFoundException e) {
-            try {
-                return JMSUtils.lookup(context, Destination.class,
-                    (JMSConstants.DESTINATION_TYPE_TOPIC.equals(destinationType) ?
-                        "dynamicTopics/" : "dynamicQueues/") + destinationName);
-            } catch (NamingException x) {
-                handleException("Cannot locate destination : " + destinationName + " using " + url);
-            }
-        } catch (NamingException e) {
-            handleException("Cannot locate destination : " + destinationName + " using " + url, e);
+        if (log.isDebugEnabled()) {
+            log.debug("Lookup the JMS destination " + destinationName + " of type "
+                    + destinationType + " extracted from the URL " + url);
         }
-        return null;
+        return JMSUtils.lookupDestination(context, destinationName, destinationType);
     }
 
     /**
@@ -201,21 +178,11 @@ public class JMSOutTransportInfo implements OutTransportInfo {
      */
     private Destination getReplyDestination(Context context, String url) {
         String replyDestinationName = properties.get(JMSConstants.PARAM_REPLY_DESTINATION);
-        if(replyDestinationName == null) {
-            return null;
+        if (log.isDebugEnabled()) {
+            log.debug("Lookup the JMS destination " + replyDestinationName + " of type "
+                    + replyDestinationType + " extracted from the URL " + url);
         }
-
-        try {
-            return JMSUtils.lookup(context, Destination.class, replyDestinationName);
-        } catch (NameNotFoundException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Cannot locate destination : " + replyDestinationName + " using " + url);
-            }
-        } catch (NamingException e) {
-            handleException("Cannot locate destination : " + replyDestinationName + " using " + url, e);
-        }
-
-        return null;
+        return JMSUtils.lookupDestination(context, replyDestinationName, replyDestinationType);
     }
 
     /**
@@ -224,17 +191,12 @@ public class JMSOutTransportInfo implements OutTransportInfo {
      * @return Destination for the JNDI name passed
      */
     public Destination getReplyDestination(String replyDest) {
-        try {
-            return JMSUtils.lookup(jmsConnectionFactory.getContext(), Destination.class,
-                    replyDest);
-        } catch (NameNotFoundException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Cannot locate reply destination : " + replyDest, e);
-            }
-        } catch (NamingException e) {
-            handleException("Cannot locate reply destination : " + replyDest, e);
+        if (log.isDebugEnabled()) {
+            log.debug("Lookup the JMS destination " + replyDest + " of type "
+                    + replyDestinationType);
         }
-        return null;
+        return JMSUtils.lookupDestination(
+                jmsConnectionFactory.getContext(), replyDest, replyDestinationType);
     }
 
 
@@ -360,26 +322,36 @@ public class JMSOutTransportInfo implements OutTransportInfo {
             }
         }
 
-        if (connection == null && jmsConnectionFactory != null) {
-            connection = jmsConnectionFactory.getConnection();
+        if (connection == null) {
+            connection = jmsConnectionFactory != null ? jmsConnectionFactory.getConnection() : null;
         }
 
         Session session = null;
         MessageProducer producer = null;
 
-        if (destType == JMSConstants.QUEUE) {
-            session = ((QueueConnection) connection).
-                createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-            producer = ((QueueSession) session).createSender((Queue) destination);
-        } else {
-            session = ((TopicConnection) connection).
-                createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-            producer = ((TopicSession) session).createPublisher((Topic) destination);
+        if (connection != null) {
+            if (destType == JMSConstants.QUEUE) {
+                session = ((QueueConnection) connection).
+                        createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+                producer = ((QueueSession) session).createSender((Queue) destination);
+            } else {
+                session = ((TopicConnection) connection).
+                        createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+                producer = ((TopicSession) session).createPublisher((Topic) destination);
+            }
         }
 
-        return new JMSMessageSender(connection, session, producer,
-            destination, (jmsConnectionFactory == null ?
-            JMSConstants.CACHE_NONE : jmsConnectionFactory.getCacheLevel()), false,
-            destType == -1 ? null : destType == JMSConstants.QUEUE ? Boolean.TRUE : Boolean.FALSE);
+        return new JMSMessageSender(
+                connection,
+                session,
+                producer,
+                destination,
+                jmsConnectionFactory == null ?
+                        JMSConstants.CACHE_NONE : jmsConnectionFactory.getCacheLevel(),
+                false,
+                destType == -1 ?
+                        null : destType == JMSConstants.QUEUE ? Boolean.TRUE : Boolean.FALSE
+        );
+
     }
 }
