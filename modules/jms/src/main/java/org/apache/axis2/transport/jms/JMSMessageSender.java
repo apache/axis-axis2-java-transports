@@ -87,7 +87,8 @@ public class JMSMessageSender {
         this.session     = jmsConnectionFactory.getSession(connection);
         this.destination =
             jmsConnectionFactory.getSharedDestination() == null ?
-                jmsConnectionFactory.getDestination(JMSUtils.getDestination(targetAddress)) :
+                jmsConnectionFactory.getDestination(JMSUtils.getDestination(targetAddress),
+                        JMSConstants.DESTINATION_TYPE_GENERIC) :
                 jmsConnectionFactory.getSharedDestination();
         this.producer = jmsConnectionFactory.getMessageProducer(connection, session, destination);
     }

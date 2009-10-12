@@ -168,16 +168,12 @@ public class JMSConnectionFactory {
 
     /**
      * Lookup a Destination using this JMS CF definitions and JNDI name
-     * @param name JNDI name of the Destionation
+     * @param destinationName JNDI name of the Destionation
+     * @param destinationType looking up destination type 
      * @return JMS Destination for the given JNDI name or null
      */
-    public Destination getDestination(String name) {
-        try {
-            return JMSUtils.lookup(context, Destination.class, name);
-        } catch (NamingException e) {
-            handleException("Unknown JMS Destination : " + name + " using : " + parameters, e);
-        }
-        return null;
+    public Destination getDestination(String destinationName, String destinationType) {
+        return JMSUtils.lookupDestination(context, destinationName, destinationType);
     }
 
     /**
@@ -186,6 +182,16 @@ public class JMSConnectionFactory {
      */
     public String getReplyToDestination() {
         return parameters.get(JMSConstants.PARAM_REPLY_DESTINATION);
+    }
+
+    /**
+     * Get the reply destination type from the PARAM_REPLY_DEST_TYPE parameter
+     * @return reply destination defined in the JMS CF
+     */
+    public String getReplyDestinationType() {
+        return parameters.get(JMSConstants.PARAM_REPLY_DEST_TYPE) != null ?
+                parameters.get(JMSConstants.PARAM_REPLY_DEST_TYPE) :
+                JMSConstants.DESTINATION_TYPE_GENERIC;
     }
 
     private void handleException(String msg, Exception e) {

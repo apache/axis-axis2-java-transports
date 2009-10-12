@@ -173,9 +173,15 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
                 replyDestName = jmsConnectionFactory.getReplyToDestination();
             }
 
+            String replyDestType = (String) msgCtx.getProperty(JMSConstants.JMS_REPLY_TO_TYPE);
+            if (replyDestType == null && jmsConnectionFactory != null) {
+                replyDestType = jmsConnectionFactory.getReplyDestinationType();
+            }
+
             if (replyDestName != null) {
                 if (jmsConnectionFactory != null) {
-                    replyDestination = jmsConnectionFactory.getDestination(replyDestName);
+                    replyDestination = jmsConnectionFactory.getDestination(
+                            replyDestName, replyDestType);
                 } else {
                     replyDestination = jmsOut.getReplyDestination(replyDestName);
                 }
