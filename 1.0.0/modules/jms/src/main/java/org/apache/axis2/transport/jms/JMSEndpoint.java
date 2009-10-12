@@ -56,6 +56,7 @@ public class JMSEndpoint extends ProtocolEndpoint {
     private String jndiDestinationName;
     private int destinationType = JMSConstants.GENERIC;
     private String jndiReplyDestinationName;
+    private String replyDestinationType = JMSConstants.DESTINATION_TYPE_GENERIC;
     private Set<EndpointReference> endpointReferences = new HashSet<EndpointReference>();
     private ContentTypeRuleSet contentTypeRuleSet;
     private ServiceTaskManager serviceTaskManager;
@@ -79,8 +80,22 @@ public class JMSEndpoint extends ProtocolEndpoint {
         }
     }
 
+    private void setReplyDestinationType(String destinationType) {
+        if (JMSConstants.DESTINATION_TYPE_TOPIC.equalsIgnoreCase(destinationType)) {
+            this.replyDestinationType = JMSConstants.DESTINATION_TYPE_TOPIC;
+        } else if (JMSConstants.DESTINATION_TYPE_QUEUE.equalsIgnoreCase(destinationType)) {
+            this.replyDestinationType = JMSConstants.DESTINATION_TYPE_QUEUE;
+        } else {
+            this.replyDestinationType = JMSConstants.DESTINATION_TYPE_GENERIC;
+        }
+    }
+
     public String getJndiReplyDestinationName() {
         return jndiReplyDestinationName;
+    }
+
+    public String getReplyDestinationType() {
+        return replyDestinationType;
     }
 
     @Override
@@ -199,6 +214,20 @@ public class JMSEndpoint extends ProtocolEndpoint {
             }
         } else {
             log.debug("JMS destination type not given. default queue");
+            destinationType = JMSConstants.QUEUE;
+        }
+
+        Parameter replyDestTypeParam = service.getParameter(JMSConstants.PARAM_REPLY_DEST_TYPE);
+        if (replyDestTypeParam != null) {
+            String paramValue = (String) replyDestTypeParam.getValue();
+            if (JMSConstants.DESTINATION_TYPE_QUEUE.equals(paramValue) ||
+                    JMSConstants.DESTINATION_TYPE_TOPIC.equals(paramValue) )  {
+                setReplyDestinationType(paramValue);
+            } else {
+                throw new AxisFault("Invalid destinaton type value " + paramValue);
+            }
+        } else {
+            log.debug("JMS reply destination type not given. default queue");
             destinationType = JMSConstants.QUEUE;
         }
         

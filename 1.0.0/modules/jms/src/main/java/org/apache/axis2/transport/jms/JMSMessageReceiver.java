@@ -176,7 +176,8 @@ public class JMSMessageReceiver {
             // does the service specify a default reply destination ?
             String jndiReplyDestinationName = endpoint.getJndiReplyDestinationName();
             if (jndiReplyDestinationName != null) {
-                replyTo = jmsConnectionFactory.getDestination(jndiReplyDestinationName);
+                replyTo = jmsConnectionFactory.getDestination(jndiReplyDestinationName,
+                        endpoint.getReplyDestinationType());
             }
 
         }
