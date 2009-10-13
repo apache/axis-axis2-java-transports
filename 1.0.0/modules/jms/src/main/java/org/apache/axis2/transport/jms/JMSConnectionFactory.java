@@ -173,7 +173,15 @@ public class JMSConnectionFactory {
      * @return JMS Destination for the given JNDI name or null
      */
     public Destination getDestination(String destinationName, String destinationType) {
-        return JMSUtils.lookupDestination(context, destinationName, destinationType);
+        try {
+            return JMSUtils.lookupDestination(context, destinationName, destinationType);
+        } catch (NamingException e) {
+            handleException("Error looking up the JMS destination with name " + destinationName
+                    + " of type " + destinationType, e);
+        }
+
+        // never executes but keeps the compiler happy
+        return null;
     }
 
     /**

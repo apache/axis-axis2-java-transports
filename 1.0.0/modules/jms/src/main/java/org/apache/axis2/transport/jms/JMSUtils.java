@@ -698,7 +698,7 @@ public class JMSUtils extends BaseUtils {
      * @return the JMS destination, or null if it does not exist
      */
     public static Destination lookupDestination(Context context, String destinationName,
-                                                String destinationType) {
+                                                String destinationType) throws NamingException {
 
         if (destinationName == null) {
             return null;
@@ -712,12 +712,12 @@ public class JMSUtils extends BaseUtils {
                     (JMSConstants.DESTINATION_TYPE_TOPIC.equals(destinationType) ?
                         "dynamicTopics/" : "dynamicQueues/") + destinationName);
             } catch (NamingException x) {
-                handleException("Cannot locate destination : " + destinationName);
+                log.warn("Cannot locate destination : " + destinationName);
+                throw x;
             }
         } catch (NamingException e) {
-            handleException("Cannot locate destination : " + destinationName, e);
+            log.warn("Cannot locate destination : " + destinationName, e);
+            throw e;
         }
-
-        return null;
     }
 }
