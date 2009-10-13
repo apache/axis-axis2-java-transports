@@ -166,7 +166,16 @@ public class JMSOutTransportInfo implements OutTransportInfo {
             log.debug("Lookup the JMS destination " + destinationName + " of type "
                     + destinationType + " extracted from the URL " + url);
         }
-        return JMSUtils.lookupDestination(context, destinationName, destinationType);
+        
+        try {
+            return JMSUtils.lookupDestination(context, destinationName, destinationType);
+        } catch (NamingException e) {
+            handleException("Couldn't locate the JMS destination " + destinationName
+                    + " of type " + destinationType + " extracted from the URL " + url);
+        }
+
+        // never executes but keeps the compiler happy
+        return null;
     }
 
     /**
@@ -182,7 +191,16 @@ public class JMSOutTransportInfo implements OutTransportInfo {
             log.debug("Lookup the JMS destination " + replyDestinationName + " of type "
                     + replyDestinationType + " extracted from the URL " + url);
         }
-        return JMSUtils.lookupDestination(context, replyDestinationName, replyDestinationType);
+        
+        try {
+            return JMSUtils.lookupDestination(context, replyDestinationName, replyDestinationType);
+        } catch (NamingException e) {
+            handleException("Couldn't locate the JMS destination " + replyDestinationName
+                    + " of type " + replyDestinationType + " extracted from the URL " + url);
+        }
+
+        // never executes but keeps the compiler happy
+        return null;
     }
 
     /**
@@ -195,8 +213,17 @@ public class JMSOutTransportInfo implements OutTransportInfo {
             log.debug("Lookup the JMS destination " + replyDest + " of type "
                     + replyDestinationType);
         }
-        return JMSUtils.lookupDestination(
-                jmsConnectionFactory.getContext(), replyDest, replyDestinationType);
+
+        try {
+            return JMSUtils.lookupDestination(
+                    jmsConnectionFactory.getContext(), replyDest, replyDestinationType);
+        } catch (NamingException e) {
+            handleException("Couldn't locate the JMS destination " + replyDest
+                    + " of type " + replyDestinationType);
+        }
+
+        // never executes but keeps the compiler happy
+        return null;
     }
 
 

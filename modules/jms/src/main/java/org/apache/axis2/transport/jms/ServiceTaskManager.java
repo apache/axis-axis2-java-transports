@@ -864,13 +864,15 @@ public class ServiceTaskManager {
 
     /**
      * Return the JMS Destination for the JNDI name of the Destination from the InitialContext
+     * @param session which is used to create the destinations if not present and if possible 
      * @return the JMS Destination to which this STM listens for messages
      */
     private Destination getDestination(Session session) {
         if (destination == null) {
             try {
                 context = getInitialContext();
-                destination = JMSUtils.lookup(context, Destination.class, getDestinationJNDIName());
+                destination = JMSUtils.lookupDestination(context, getDestinationJNDIName(),
+                        JMSUtils.getDestinationTypeAsString(destinationType));
                 if (log.isDebugEnabled()) {
                     log.debug("JMS Destination with JNDI name : " + getDestinationJNDIName() +
                         " found for service " + serviceName);
@@ -893,8 +895,9 @@ public class ServiceTaskManager {
                         }
                     }
                 } catch (JMSException j) {
-                    handleException("Error looking up and creating JMS destination : " +
-                        getDestinationJNDIName() + " using JNDI properties : " + jmsProperties, e);
+                    handleException("Error looking up JMS destination and auto " +
+                            "creating JMS destination : " + getDestinationJNDIName() +
+                            " using JNDI properties : " + jmsProperties, e);
                 }
             }
         }
