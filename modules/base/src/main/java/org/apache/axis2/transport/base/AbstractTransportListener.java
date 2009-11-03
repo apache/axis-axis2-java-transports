@@ -129,8 +129,11 @@ public abstract class AbstractTransportListener implements TransportListener {
                 });
 
         // register with JMX
-        mbeanSupport = new TransportMBeanSupport(this, getTransportName());
-        mbeanSupport.register();
+        if (mbeanSupport == null) {
+            mbeanSupport = new TransportMBeanSupport(this, getTransportName());
+            mbeanSupport.register();
+        }
+
     }
 
     public void destroy() {
