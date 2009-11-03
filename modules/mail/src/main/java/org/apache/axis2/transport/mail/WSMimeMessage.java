@@ -46,7 +46,9 @@ public class WSMimeMessage extends MimeMessage {
     @Override
     protected void updateMessageID() throws MessagingException {
 	    if (getHeader(MailConstants.MAIL_HEADER_MESSAGE_ID) == null) {
-            setHeader(MailConstants.MAIL_HEADER_MESSAGE_ID, UUIDGenerator.getUUID());    
+            String uuid = UUIDGenerator.getUUID();
+            setHeader(MailConstants.MAIL_HEADER_MESSAGE_ID, uuid);
+            setHeader(MailConstants.MAIL_HEADER_X_MESSAGE_ID, uuid);
         }
     }
 

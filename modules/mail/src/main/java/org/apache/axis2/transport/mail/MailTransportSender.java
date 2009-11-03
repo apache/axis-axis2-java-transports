@@ -25,10 +25,7 @@ import org.apache.axis2.transport.base.*;
 import org.apache.commons.logging.LogFactory;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.description.TransportOutDescription;
-import org.apache.axis2.description.Parameter;
-import org.apache.axis2.description.OutOnlyAxisOperation;
-import org.apache.axis2.description.TransportInDescription;
+import org.apache.axis2.description.*;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.transport.OutTransportInfo;
@@ -194,7 +191,7 @@ public class MailTransportSender extends AbstractTransportSender
     private void waitForReply(MessageContext msgContext, String mailMessageID) throws AxisFault {
         // piggy back message constant is used to pass a piggy back
         // message context in asnych model
-        if (msgContext.getAxisOperation() instanceof OutOnlyAxisOperation &&
+        if (!(msgContext.getAxisOperation() instanceof OutInAxisOperation) &&
                 (msgContext.getProperty(org.apache.axis2.Constants.PIGGYBACK_MESSAGE) == null)) {
             return;
         }
