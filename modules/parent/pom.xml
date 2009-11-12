@@ -107,6 +107,18 @@
             <email>sanjiva AT wso2.com</email>
             <organization>WSO2</organization>
         </developer>
+        <developer>
+            <name>Asankha Perera</name>
+            <id>asankha</id>
+            <email>asankha AT apache.org</email>
+            <organization>Apache</organization>
+        </developer>
+        <developer>
+            <name>Ruwan Linton</name>
+            <id>ruwan</id>
+            <email>ruwan AT apache.org</email>
+            <organization>WSO2</organization>
+        </developer>
     </developers>
     <licenses>
         <license>
