@@ -392,6 +392,7 @@ public class MailTransportSender extends AbstractTransportSender
         // set Date
         message.setSentDate(new Date());
 
+
         // set SOAPAction header
         message.setHeader(BaseConstants.SOAPACTION, msgContext.getSoapAction());
 
@@ -439,10 +440,25 @@ public class MailTransportSender extends AbstractTransportSender
             // always use quoted-printable transfer encoding. Note that JavaMail is a bit smarter
             // here because it can choose between 7bit and quoted-printable automatically, but it
             // needs to scan the entire content to determine this.
-            String contentType = dataHandler.getContentType().toLowerCase();
-            if (!contentType.startsWith("multipart/") && CommonUtils.isTextualPart(contentType)) {
-                mainPart.setHeader("Content-Transfer-Encoding", "quoted-printable");
+            if (msgContext.getOptions().getProperty("Content-Transfer-Encoding") != null) {
+                mainPart.setHeader("Content-Transfer-Encoding",
+                        (String) msgContext.getOptions().getProperty("Content-Transfer-Encoding"));
+            } else {
+                String contentType = dataHandler.getContentType().toLowerCase();
+                if (!contentType.startsWith("multipart/") && CommonUtils.isTextualPart(contentType)) {
+                    mainPart.setHeader("Content-Transfer-Encoding", "quoted-printable");
+                }
             }
+
+            //setting any custom headers defined by the user
+            if (msgContext.getOptions().getProperty(MailConstants.TRANSPORT_MAIL_CUSTOM_HEADERS) != null) {
+                Map customTransportHeaders = (Map)msgContext.getOptions().getProperty(MailConstants.TRANSPORT_MAIL_CUSTOM_HEADERS);
+                for (Object header: customTransportHeaders.keySet()){
+                    mainPart.setHeader((String)header,(String)customTransportHeaders.get(header));
+                }
+            }
+
+
             
             log.debug("Sending message");
             Transport.send(message);
