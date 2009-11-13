@@ -100,13 +100,16 @@ public abstract class AbstractTransportListener implements TransportListener {
             //this.workerPool = cfgCtx.getThreadPool(); not yet implemented
             throw new AxisFault("Unsupported thread pool for task execution - Axis2 thread pool");
         } else {
-            this.workerPool = WorkerPoolFactory.getWorkerPool(
-                    config.getServerCoreThreads(),
-                    config.getServerMaxThreads(),
-                    config.getServerKeepalive(),
-                    config.getServerQueueLen(),
-                    getTransportName() + "Server Worker thread group",
-                    getTransportName() + "-Worker");
+            if (this.workerPool == null) {
+                this.workerPool = WorkerPoolFactory.getWorkerPool(
+                        config.getServerCoreThreads(),
+                        config.getServerMaxThreads(),
+                        config.getServerKeepalive(),
+                        config.getServerQueueLen(),
+                        getTransportName() + "Server Worker thread group",
+                        getTransportName() + "-Worker");
+            }
+            
         }
 
         // register to receive updates on services for lifetime management
