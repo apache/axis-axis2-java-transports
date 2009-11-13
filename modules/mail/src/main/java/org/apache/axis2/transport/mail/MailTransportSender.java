@@ -249,7 +249,7 @@ public class MailTransportSender extends AbstractTransportSender
                     messageFormatter.getClass().getSimpleName());
         }
 
-        WSMimeMessage message = new WSMimeMessage(session);
+        WSMimeMessage message = new WSMimeMessage(session, outInfo.getFromAddress().getAddress());
         Map trpHeaders = (Map) msgContext.getProperty(MessageContext.TRANSPORT_HEADERS);
         if (log.isDebugEnabled() && trpHeaders != null) {
             log.debug("Using transport headers: " + trpHeaders);
