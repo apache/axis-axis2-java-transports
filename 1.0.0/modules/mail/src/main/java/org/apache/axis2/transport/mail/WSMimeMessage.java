@@ -38,15 +38,24 @@ import javax.mail.Session;
  */
 public class WSMimeMessage extends MimeMessage {
     private long bytesSent = -1;
+    private String fromAddress;
 
-    WSMimeMessage(Session session) {
+
+    WSMimeMessage(Session session, String fromAddress) {
         super(session);
+        this.fromAddress = fromAddress;
     }
 
     @Override
     protected void updateMessageID() throws MessagingException {
-	    if (getHeader(MailConstants.MAIL_HEADER_MESSAGE_ID) == null) {
-            setHeader(MailConstants.MAIL_HEADER_MESSAGE_ID, UUIDGenerator.getUUID());    
+        // although MailConstants.MAIL_HEADER_X_MESSAGE_ID solves the gmail problem with axis2-axis2
+        // invocations it is not a generic solution.
+        // we can over come gmail problem by setting the message id as follows with a valid gmail address
+        // <xxxx@gmail.com> this can be achived by appending from address at the end of uuid
+
+        if (getHeader(MailConstants.MAIL_HEADER_MESSAGE_ID) == null) {
+            String uuid = "<" + UUIDGenerator.getUUID().replaceAll(":",".") + fromAddress +">";
+            setHeader(MailConstants.MAIL_HEADER_MESSAGE_ID, uuid);
         }
     }
 
