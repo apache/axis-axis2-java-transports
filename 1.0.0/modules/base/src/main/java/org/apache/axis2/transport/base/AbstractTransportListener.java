@@ -100,13 +100,16 @@ public abstract class AbstractTransportListener implements TransportListener {
             //this.workerPool = cfgCtx.getThreadPool(); not yet implemented
             throw new AxisFault("Unsupported thread pool for task execution - Axis2 thread pool");
         } else {
-            this.workerPool = WorkerPoolFactory.getWorkerPool(
-                    config.getServerCoreThreads(),
-                    config.getServerMaxThreads(),
-                    config.getServerKeepalive(),
-                    config.getServerQueueLen(),
-                    getTransportName() + "Server Worker thread group",
-                    getTransportName() + "-Worker");
+            if (this.workerPool == null) { // FIXME <-- workaround for AXIS2-4552
+                this.workerPool = WorkerPoolFactory.getWorkerPool(
+                        config.getServerCoreThreads(),
+                        config.getServerMaxThreads(),
+                        config.getServerKeepalive(),
+                        config.getServerQueueLen(),
+                        getTransportName() + "Server Worker thread group",
+                        getTransportName() + "-Worker");
+            }
+
         }
 
         // register to receive updates on services for lifetime management
@@ -129,8 +132,11 @@ public abstract class AbstractTransportListener implements TransportListener {
                 });
 
         // register with JMX
-        mbeanSupport = new TransportMBeanSupport(this, getTransportName());
-        mbeanSupport.register();
+        if (mbeanSupport == null) { // FIXME <-- workaround for AXIS2-4552
+            mbeanSupport = new TransportMBeanSupport(this, getTransportName());
+            mbeanSupport.register();
+        }
+
     }
 
     public void destroy() {
