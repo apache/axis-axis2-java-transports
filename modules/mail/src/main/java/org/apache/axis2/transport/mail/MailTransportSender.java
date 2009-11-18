@@ -195,7 +195,7 @@ public class MailTransportSender extends AbstractTransportSender
                 (msgContext.getProperty(org.apache.axis2.Constants.PIGGYBACK_MESSAGE) == null)) {
             return;
         }
-
+        
         ConfigurationContext configContext = msgContext.getConfigurationContext();
         // if the mail message listner has not started we need to start it
         if (!configContext.getListenerManager().isListenerRunning(MailConstants.TRANSPORT_NAME)) {
@@ -249,7 +249,14 @@ public class MailTransportSender extends AbstractTransportSender
                     messageFormatter.getClass().getSimpleName());
         }
 
-        WSMimeMessage message = new WSMimeMessage(session, outInfo.getFromAddress().getAddress());
+        WSMimeMessage message = null;
+        if (outInfo.getFromAddress() != null) {
+            message = new WSMimeMessage(session, outInfo.getFromAddress().getAddress());
+        } else {
+            message = new WSMimeMessage(session, "");
+        }
+
+
         Map trpHeaders = (Map) msgContext.getProperty(MessageContext.TRANSPORT_HEADERS);
         if (log.isDebugEnabled() && trpHeaders != null) {
             log.debug("Using transport headers: " + trpHeaders);
