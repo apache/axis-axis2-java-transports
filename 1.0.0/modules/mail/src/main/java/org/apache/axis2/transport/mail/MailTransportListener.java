@@ -561,7 +561,16 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
     }
 
     private Map getTransportHeaders(Message message, PollTableEntry entry) {
-        Map trpHeaders = new HashMap();
+        //use a comaprator to ignore the case for headers.
+        Comparator comparator = new Comparator(){
+            public int compare(Object o1, Object o2) {
+                String string1 = (String) o1;
+                String string2 = (String) o2;
+                return string1.compareToIgnoreCase(string2);
+            }
+        };
+
+        Map trpHeaders = new TreeMap(comparator);
         try {
             Enumeration e = message.getAllHeaders();
             while (e.hasMoreElements()) {
