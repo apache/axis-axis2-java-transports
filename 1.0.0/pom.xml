@@ -33,6 +33,111 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Apache Axis2 - Transport - Root</name>
+    <url>http://ws.apache.org/commons/transport/</url>
+    <issueManagement>
+        <system>JIRA</system>
+        <url>http://issues.apache.org/jira/browse/WSCOMMONS</url>
+    </issueManagement>
+    <mailingLists>
+        <mailingList>
+            <name>WS Commons Developers</name>
+            <subscribe>commons-dev-subscribe@ws.apache.org</subscribe>
+            <unsubscribe>commons-dev-unsubscribe@ws.apache.org</unsubscribe>
+            <post>commons-dev@ws.apache.org</post>
+            <archive>http://mail-archives.apache.org/mod_mbox/ws-commons-dev/</archive>
+        </mailingList>
+    </mailingLists>
+    <inceptionYear>2004</inceptionYear>
+    <developers>
+        <developer>
+            <name>Saminda Abeyruwan</name>
+            <id>saminda</id>
+            <email>saminda AT wso2.com</email>
+            <organization>WSO2</organization>
+        </developer>
+        <developer>
+            <name>Eran Chinthaka</name>
+            <id>chinthaka</id>
+            <email>chinthaka AT wso2.com</email>
+            <organization>WSO2</organization>
+            <url>http://www.apache.org/~chinthaka</url>
+        </developer>
+        <developer>
+            <name>Glen Daniels</name>
+            <id>gdaniels</id>
+            <email>gdaniels AT apache.org</email>
+            <organization>Sonic Software</organization>
+        </developer>
+        <developer>
+            <name>Deepal Jayasinghe</name>
+            <id>deepal</id>
+            <email>deepal AT wso2.com</email>
+            <organization>WSO2</organization>
+            <url>http://www.apache.org/~deepal</url>
+        </developer>
+        <developer>
+            <name>Srinath Perera</name>
+            <id>hemapani</id>
+            <email>hemapani AT apache.org</email>
+            <organization>Lanka Software Foundation</organization>
+            <url>http://www.apache.org/~hemapani</url>
+        </developer>
+        <developer>
+            <name>Ajith Ranabahu</name>
+            <id>ajith</id>
+            <email>ajith AT wso2.com</email>
+            <organization>WSO2</organization>
+            <url>http://www.apache.org/~ajith</url>
+        </developer>
+        <developer>
+            <name>Davanum Srinivas</name>
+            <id>dims</id>
+            <email>dims AT wso2.com</email>
+            <organization>WSO2</organization>
+        </developer>
+        <developer>
+            <name>Andreas Veithen</name>
+            <id>veithen</id>
+            <email>veithen AT apache.org</email>
+            <url>http://www.linkedin.com/in/aveithen</url>
+        </developer>
+        <developer>
+            <name>Sanjiva Weerawarana</name>
+            <id>sanjiva</id>
+            <email>sanjiva AT wso2.com</email>
+            <organization>WSO2</organization>
+        </developer>
+        <developer>
+            <name>Asankha Perera</name>
+            <id>asankha</id>
+            <email>asankha AT apache.org</email>
+            <organization>Apache</organization>
+        </developer>
+        <developer>
+            <name>Ruwan Linton</name>
+            <id>ruwan</id>
+            <email>ruwan AT apache.org</email>
+            <organization>WSO2</organization>
+        </developer>
+    </developers>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/webservices/commons/trunk/modules/transport</connection>
+        <developerConnection>
+            scm:svn:https://svn.apache.org/repos/asf/webservices/commons/trunk/modules/transport
+        </developerConnection>
+        <url>http://svn.apache.org/viewcvs.cgi/webservices/commons/trunk/modules/transport</url>
+    </scm>
+    <organization>
+        <name>The Apache Software Foundation</name>
+        <url>http://www.apache.org/</url>
+    </organization>
 
     <modules>
         <module>modules/parent</module>
@@ -230,13 +335,6 @@
             </build>
         </profile>
     </profiles>
-    <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/webservices/commons/trunk/modules/transport</connection>
-        <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/webservices/commons/trunk/modules/transport
-        </developerConnection>
-        <url>http://svn.apache.org/viewcvs.cgi/webservices/commons/trunk/modules/transport</url>
-    </scm>
     <distributionManagement>
         <repository>
             <id>apache-repo</id>
