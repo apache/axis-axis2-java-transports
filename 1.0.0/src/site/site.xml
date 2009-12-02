@@ -56,7 +56,7 @@
                 <item name="JMS" href="jms.html"/>
                 <item name="Mail" href="mail.html"/>
                 <item name="TCP" href="tcp-transport.html"/>
-                <item name="XMPP" href="xmpp.html"/>
+                <!--<item name="XMPP" href="xmpp.html"/>-->
                 <item name="SMS" href="sms.html"/>
             </item>
             <item name="Project Information" href="project-info.html">

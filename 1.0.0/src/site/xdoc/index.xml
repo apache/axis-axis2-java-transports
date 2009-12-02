@@ -46,7 +46,7 @@
   <li><a href="./mail.html">E-Mail Transport</a></li>
   <li><a href="./sms.html">SMS Transport</a></li>
   <li><a href="./tcp-transport.html">TCP Transport</a></li>
-  <li><a href="./xmpp.html">XMPP Transport</a></li>
+  <!--<li><a href="./xmpp.html">XMPP Transport</a></li>-->
   <li>The Developer mailing list:  <a href="mailto:commons-dev-subscribe@ws.apache.org">Subscribe</a></li>
   <!--li>The Synapse Wiki <a href="http://wiki.apache.org/ws/Synapse">http://wiki.apache.org/ws/Synapse</a></li-->
   </ul>
