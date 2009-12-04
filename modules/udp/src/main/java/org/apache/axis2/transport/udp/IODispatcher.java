@@ -252,7 +252,7 @@ public class IODispatcher implements DatagramDispatcher<Endpoint>, Runnable {
             if (log.isDebugEnabled()) {
                 log.debug("Received packet from " + address + " with length " + length);
             }
-            callback.receive(endpoint, data, length);
+            callback.receive(address, endpoint, data, length);
         } catch (IOException ex) {
             endpoint.getMetrics().incrementFaultsReceiving();
             log.error("Error receiving UDP packet", ex);

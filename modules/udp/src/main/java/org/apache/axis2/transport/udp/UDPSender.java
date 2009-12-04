@@ -19,21 +19,32 @@
 package org.apache.axis2.transport.udp;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketAddress;
+import java.nio.channels.DatagramChannel;
+import java.nio.ByteBuffer;
 
 import org.apache.axiom.om.OMOutputFormat;
+import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.TransportOutDescription;
+import org.apache.axis2.description.WSDL2Constants;
+import org.apache.axis2.description.OutInAxisOperation;
 import org.apache.axis2.transport.MessageFormatter;
 import org.apache.axis2.transport.OutTransportInfo;
 import org.apache.axis2.transport.TransportUtils;
 import org.apache.axis2.transport.base.AbstractTransportSender;
 import org.apache.axis2.transport.base.BaseUtils;
+import org.apache.axis2.transport.base.datagram.DatagramOutTransportInfo;
 import org.apache.commons.logging.LogFactory;
+
+import javax.xml.stream.XMLStreamException;
 
 /**
  * Transport sender for the UDP protocol.
@@ -52,22 +63,72 @@ public class UDPSender extends AbstractTransportSender {
     
     @Override
     public void sendMessage(MessageContext msgContext, String targetEPR, OutTransportInfo outTransportInfo) throws AxisFault {
-        UDPOutTransportInfo udpOutInfo = new UDPOutTransportInfo(targetEPR);
-        MessageFormatter messageFormatter = TransportUtils.getMessageFormatter(msgContext);
-        OMOutputFormat format = BaseUtils.getOMOutputFormat(msgContext);
-        format.setContentType(udpOutInfo.getContentType());
-        byte[] payload = messageFormatter.getBytes(msgContext, format);
-        try {
-            DatagramSocket socket = new DatagramSocket();
+        if ((targetEPR == null) && (outTransportInfo != null)) {
+            // this can happen only at the server side and send the message using back chanel
+            DatagramOutTransportInfo datagramOutTransportInfo = (DatagramOutTransportInfo) outTransportInfo;
+            MessageFormatter messageFormatter = TransportUtils.getMessageFormatter(msgContext);
+            OMOutputFormat format = BaseUtils.getOMOutputFormat(msgContext);
+            format.setContentType(datagramOutTransportInfo.getContentType());
+            byte[] payload = messageFormatter.getBytes(msgContext, format);
+
+            ByteBuffer byteBuffer = ByteBuffer.allocate(payload.length);
+            byteBuffer.put(payload);
+
+            DatagramSocket socket = null;
             try {
-                socket.send(new DatagramPacket(payload, payload.length, InetAddress.getByName(udpOutInfo.getHost()), udpOutInfo.getPort()));
-            }
-            finally {
+                socket = new DatagramSocket();
+                socket.send(new DatagramPacket(payload, payload.length, datagramOutTransportInfo.getSourceAddress()));
+            } catch (IOException e) {
+                throw new AxisFault("Unable to send packet", e);
+            } finally {
                 socket.close();
             }
+
+        } else {
+            UDPOutTransportInfo udpOutInfo = new UDPOutTransportInfo(targetEPR);
+            MessageFormatter messageFormatter = TransportUtils.getMessageFormatter(msgContext);
+            OMOutputFormat format = BaseUtils.getOMOutputFormat(msgContext);
+            format.setContentType(udpOutInfo.getContentType());
+            byte[] payload = messageFormatter.getBytes(msgContext, format);
+            try {
+                DatagramSocket socket = new DatagramSocket();
+                try {
+                    socket.send(new DatagramPacket(payload, payload.length, InetAddress.getByName(udpOutInfo.getHost()), udpOutInfo.getPort()));
+                    if (!msgContext.getOptions().isUseSeparateListener() && !msgContext.isServerSide()){
+                        waitForReply(msgContext, socket, udpOutInfo.getContentType());
+                    }
+                }
+                finally {
+                    socket.close();
+                }
+            }
+            catch (IOException ex) {
+                throw new AxisFault("Unable to send packet", ex);
+            }
         }
-        catch (IOException ex) {
-            throw new AxisFault("Unable to send packet", ex);
+    }
+
+    private void waitForReply(MessageContext messageContext, DatagramSocket datagramSocket, String contentType) throws IOException {
+
+        // piggy back message constant is used to pass a piggy back
+        // message context in asnych model
+        if (!(messageContext.getAxisOperation() instanceof OutInAxisOperation) &&
+                (messageContext.getProperty(org.apache.axis2.Constants.PIGGYBACK_MESSAGE) == null)) {
+            return;
+        }
+
+        byte[] inputBuffer = new byte[4096]; //TODO set the maximum size parameter
+        DatagramPacket packet = new DatagramPacket(inputBuffer, inputBuffer.length);
+        datagramSocket.receive(packet);
+
+        // create the soap envelope
+        try {
+            MessageContext respMessageContext = messageContext.getOperationContext().getMessageContext(WSDL2Constants.MESSAGE_LABEL_IN);
+            InputStream inputStream = new ByteArrayInputStream(inputBuffer, 0, inputBuffer.length);
+            SOAPEnvelope envelope = TransportUtils.createSOAPMessage(respMessageContext, inputStream, contentType);
+            respMessageContext.setEnvelope(envelope);
+        } catch (XMLStreamException e) {
+            throw new AxisFault("Can not build the soap message ", e);
         }
     }
 }

@@ -23,15 +23,15 @@ import java.net.URISyntaxException;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.transport.OutTransportInfo;
+import org.apache.axis2.transport.base.datagram.DatagramOutTransportInfo;
 
 /**
  * Holder of information to send an outgoing message to a UDP destination.
  */
-public class UDPOutTransportInfo implements OutTransportInfo {
+public class UDPOutTransportInfo extends DatagramOutTransportInfo {
     private String host;
     private int port;
-    private String contentType;
-    
+
     public UDPOutTransportInfo(String eprString) throws AxisFault {
         URI epr;
         try {
@@ -64,13 +64,5 @@ public class UDPOutTransportInfo implements OutTransportInfo {
 
     public void setPort(int port) {
         this.port = port;
-    }
-
-    public String getContentType() {
-        return contentType;
-    }
-
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
     }
 }

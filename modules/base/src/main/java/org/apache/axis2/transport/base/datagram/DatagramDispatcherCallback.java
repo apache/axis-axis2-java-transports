@@ -18,6 +18,12 @@
  */
 package org.apache.axis2.transport.base.datagram;
 
+import java.nio.channels.DatagramChannel;
+import java.net.SocketAddress;
+
 public interface DatagramDispatcherCallback {
-    void receive(DatagramEndpoint endpoint, byte[] data, int length);
+    void receive(SocketAddress address,
+                 DatagramEndpoint endpoint,
+                 byte[] data,
+                 int length);
 }

@@ -20,6 +20,8 @@ package org.apache.axis2.transport.base.datagram;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.channels.DatagramChannel;
+import java.net.SocketAddress;
 
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.context.MessageContext;
@@ -28,6 +30,7 @@ import org.apache.axis2.transport.TransportUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.axis2.transport.base.MetricsCollector;
+import org.apache.axis2.Constants;
 
 /**
  * Task encapsulating the processing of a datagram.
@@ -40,11 +43,21 @@ public class ProcessPacketTask implements Runnable {
     private final DatagramEndpoint endpoint;
     private final byte[] data;
     private final int length;
+
+    //back channel data
+    private DatagramChannel datagramChannel;
+    private SocketAddress address;
     
-    public ProcessPacketTask(DatagramEndpoint endpoint, byte[] data, int length) {
+    public ProcessPacketTask(SocketAddress address,
+                             DatagramEndpoint endpoint,
+                             byte[] data,
+                             int length) {
         this.endpoint = endpoint;
         this.data = data;
         this.length = length;
+
+        this.datagramChannel = datagramChannel;
+        this.address = address;
     }
     
     public void run() {
@@ -54,6 +67,14 @@ public class ProcessPacketTask implements Runnable {
             MessageContext msgContext = endpoint.createMessageContext();
             SOAPEnvelope envelope = TransportUtils.createSOAPMessage(msgContext, inputStream, endpoint.getContentType());
             msgContext.setEnvelope(envelope);
+
+            //create and out transport info object
+            DatagramOutTransportInfo datagramOutTransportInfo = new DatagramOutTransportInfo();
+            datagramOutTransportInfo.setContentType(endpoint.getContentType());
+            datagramOutTransportInfo.setSourceAddress(address);
+
+            msgContext.setProperty(Constants.OUT_TRANSPORT_INFO, datagramOutTransportInfo);
+
             AxisEngine.receive(msgContext);
             metrics.incrementMessagesReceived();
             metrics.incrementBytesReceived(length);
