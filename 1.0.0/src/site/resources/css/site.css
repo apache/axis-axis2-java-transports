@@ -90,6 +90,17 @@ p {
   color: #000;
 }
 
+#navcolumn li {
+  list-style-type: none;
+  background-image: none;
+  background-repeat: no-repeat;
+  background-position: 0 0.6em;
+  padding-left: 16px;
+  list-style-position: outside;
+  line-height: 1.6em;
+  font-size: small;
+}
+
 table.bodyTable th {
   color: white;
   background-color: #C1C1C1;
