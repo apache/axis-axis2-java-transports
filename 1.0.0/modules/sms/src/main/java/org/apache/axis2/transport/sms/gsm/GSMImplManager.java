@@ -55,11 +55,16 @@ public class GSMImplManager implements SMSImplManager {
     private GSMDispatcher dispatcher;
     private Service service = null;
     private SerialModemGateway gateway;
-
+    private GSMServiceRepository serviceRepo = GSMServiceRepository.getInstence();
     private SMSManager smsInManeger;
     public void start() {
-       
+
+        if(serviceRepo.gatewayInUse(gsmTransportInDetails.getGatewayId())) {
+            service = serviceRepo.getService(gsmTransportInDetails.getGatewayId());
+            return;
+        }
         service = new Service();
+
         gateway= new SerialModemGateway(gsmTransportInDetails.getGatewayId(), gsmTransportInDetails.getComPort(),
                 gsmTransportInDetails.getBaudRate(),gsmTransportInDetails.getManufacturer(),
                 gsmTransportInDetails.getModel());
@@ -84,6 +89,7 @@ public class GSMImplManager implements SMSImplManager {
 
             // Start! (i.e. connect to all defined Gateways)
             this.service.startService();
+            serviceRepo.addService(gsmTransportInDetails.getGatewayId(), service);
             dispatcher = new GSMDispatcher(service , smsInManeger);
             dispatcher.setPollInterval(gsmTransportInDetails.getModemPollInterval());
             Thread thread = new Thread(dispatcher);
@@ -99,6 +105,14 @@ public class GSMImplManager implements SMSImplManager {
         try {
             dispatcher.stopPolling();
             service.stopService();
+            if(serviceRepo.gatewayInUse(gsmTransportInDetails.getGatewayId())) {
+                serviceRepo.removeService(gsmTransportInDetails.getGatewayId());
+            }
+
+            if(serviceRepo.gatewayInUse(gsmTransportOutDetails.getGatewayId())) {
+                serviceRepo.removeService(gsmTransportOutDetails.getGatewayId());
+            }
+
         } catch (Exception e) {
             log.error(e);
         }
@@ -186,7 +200,7 @@ public class GSMImplManager implements SMSImplManager {
     }
 
     public void sendSMS(SMSMessage sm) {
-        if (service == null) {
+        if (service == null && !serviceRepo.gatewayInUse(gsmTransportOutDetails.getGatewayId())) {
             //Operating in the Out Only mode
             service = new Service();
             gateway = new SerialModemGateway(gsmTransportOutDetails.getGatewayId(), gsmTransportOutDetails.getComPort(),
@@ -216,6 +230,8 @@ public class GSMImplManager implements SMSImplManager {
                 log.error(e);
             }
 
+        } else if(serviceRepo.gatewayInUse(gsmTransportOutDetails.getGatewayId())) {
+            service = serviceRepo.getService(gsmTransportOutDetails.getGatewayId());    
         }
 
         OutboundMessage msg =  new OutboundMessage(sm.getReceiver(), sm.getContent());
