@@ -56,7 +56,7 @@ mvn clean install -o
 </section>
 <section name="Skipping tests">
 <p>
-If you don't want to have all the Synapse test cases run during the build you can add the parameter &quot;-Dmaven.test.skip=true&quot;, eg:
+If you don't want to have all the Axis2 Transports test cases run during the build you can add the parameter &quot;-Dmaven.test.skip=true&quot;, eg:
 <pre>
 mvn clean install -o -Dmaven.test.skip=true
 </pre>
@@ -73,19 +73,19 @@ mvn clean install -U
 By default the Maven local repository is in your home directory, you can change this so the build
 uses use a different local repository with the parameter &quot;-Dmaven.repo.local=&quot;, eg:
 <pre>
-mvn clean install -Dmaven.repo.local=\Synapse\MyRepo
+mvn clean install -Dmaven.repo.local=\Transports\MyRepo
 </pre></p>
 </section>
 <section name="Eclipse_Projects">
 <p>
-You can create Eclipse project definitions for Synapse (that can be imported directly into Eclipse).
-At the top level Synapse folder run:
+You can create Eclipse project definitions for Axis2 Transports (that can be imported directly into Eclipse).
+At the top level Transports source folder run:
 <pre>
 mvn eclipse:eclipse
 </pre>
-Now within eclipse you can import those Synapse projects into an Eclipse workspace.
+Now within eclipse you can import those Axis2 Transports projects into an Eclipse workspace.
 From Eclipse do File -&gt; Import, expand the &quot;General&quot; toggle and choose &quot;Existing Projects into  Workspace&quot;,
-click Next, click Browse and navigate to your Synapse SVN folder, click OK and it should find the six Synapse projects,
+click Next, click Browse and navigate to your Axis2 Transports SVN folder, click OK and it should find ten Axis2 Transports projects,
 click Finish. That should set up the projects and show them in the Package Explorer.
 There will be lots of compile errors about missing classpath entries,
 to fix this select Window -&gt; Preferences, expend the Java toggle, then expand the Build Path toggle and
