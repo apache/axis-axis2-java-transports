@@ -53,11 +53,12 @@
                 <item name="Source Code" href="source-repository.html"/>
             </item>
             <item name="Documentation" href="docs_index.html">
-                <item name="JMS" href="jms.html"/>
-                <item name="Mail" href="mail.html"/>
-                <item name="TCP" href="tcp-transport.html"/>
+                <item name="JMS Transport" href="jms.html"/>
+                <item name="Mail Transport" href="mail.html"/>
+                <item name="TCP Transport" href="tcp-transport.html"/>
                 <!--<item name="XMPP" href="xmpp.html"/>-->
-                <item name="SMS" href="sms.html"/>
+                <item name="SMS Transport" href="sms.html"/>
+                <item name="Java Doc" href="apidocs/index.html"/>
             </item>
             <item name="Project Information" href="project-info.html">
                 <item name="Mailing Lists" href="mail-lists.html"/>
