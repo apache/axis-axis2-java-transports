@@ -19,7 +19,7 @@
               <pre class="download-header-pre">  Distribution Name  </pre>
             </th>
             <th scope="col">
-              <pre class="download-header-pre">                                             Description</pre>
+              <pre class="download-header-pre">                  Description</pre>
             </th>
             <th scope="col">
               <pre class="download-header-pre">        Download        </pre>
@@ -65,6 +65,279 @@
               href="http://www.apache.org/dist/ws/commons/1.0/axis2-transports-1.0-sources.jar.asc"
               class="externalLink"
               title="http://www.apache.org/dist/ws/commons/1.0/axis2-transports-1.0-sources.jar.asc">PGP</a>)</pre>
+            </td>
+          </tr>
+
+          <tr class="a">
+            <td>
+              <a name="std-bin" id="std-bin"/><strong>JMS Transport</strong>
+            </td>
+            <td>
+              The Axis2 JMS transport implementation
+            </td>
+            <td>
+              <pre class="download-pre"><a
+              href="[preferred]/ws/commons/1.0/axis2-transport-jms-1.0.jar"
+              class="downloadLink"
+              title="[preferred]/ws/commons/1.0/axis2-transport-jms-1.0.jar"><strong>axis2-transport-jms-1.0.jar</strong></a>
+ (<a href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-jms-1.0.jar.md5"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-jms-1.0.jar.md5">MD5</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-jms-1.0.jar.sha"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-jms-1.0.jar.sha">SHA1</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-jms-1.0.jar.asc"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-jms-1.0.jar.asc">PGP</a>)</pre>
+            </td>
+            <td>
+              <pre class="download-pre"><a
+              href="[preferred]/ws/commons/1.0/axis2-transport-jms-1.0-sources.jar"
+              class="downloadLink"
+              title="[preferred]/ws/commons/1.0/axis2-transport-jms-1.0-sources.jar"><strong>axis2-transport-jms-1.0-sources.jar</strong></a>
+ (<a href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-jms-1.0-sources.jar.md5"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-jms-1.0-sources.jar.md5">MD5</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-jms-1.0-sources.jar.sha"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-jms-1.0-sources.jar.sha">SHA1</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-jms-1.0-sources.jar.asc"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-jms-1.0-sources.jar.asc">PGP</a>)</pre>
+            </td>
+          </tr>
+
+          <tr class="a">
+            <td>
+              <a name="std-bin" id="std-bin"/><strong>Mail Transport</strong>
+            </td>
+            <td>
+              The Axis2 Mail transport implementation
+            </td>
+            <td>
+              <pre class="download-pre"><a
+              href="[preferred]/ws/commons/1.0/axis2-transport-mail-1.0.jar"
+              class="downloadLink"
+              title="[preferred]/ws/commons/1.0/axis2-transport-mail-1.0.jar"><strong>axis2-transport-mail-1.0.jar</strong></a>
+ (<a href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-mail-1.0.jar.md5"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-mail-1.0.jar.md5">MD5</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-mail-1.0.jar.sha"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-mail-1.0.jar.sha">SHA1</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-mail-1.0.jar.asc"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-mail-1.0.jar.asc">PGP</a>)</pre>
+            </td>
+            <td>
+              <pre class="download-pre"><a
+              href="[preferred]/ws/commons/1.0/axis2-transport-mail-1.0-sources.jar"
+              class="downloadLink"
+              title="[preferred]/ws/commons/1.0/axis2-transport-mail-1.0-sources.jar"><strong>axis2-transport-mail-1.0-sources.jar</strong></a>
+ (<a href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-mail-1.0-sources.jar.md5"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-mail-1.0-sources.jar.md5">MD5</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-mail-1.0-sources.jar.sha"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-mail-1.0-sources.jar.sha">SHA1</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-mail-1.0-sources.jar.asc"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-mail-1.0-sources.jar.asc">PGP</a>)</pre>
+            </td>
+          </tr>
+
+          <tr class="a">
+            <td>
+              <a name="std-bin" id="std-bin"/><strong>TCP Transport</strong>
+            </td>
+            <td>
+              The Axis2 TCP transport implementation
+            </td>
+            <td>
+              <pre class="download-pre"><a
+              href="[preferred]/ws/commons/1.0/axis2-transport-tcp-1.0.jar"
+              class="downloadLink"
+              title="[preferred]/ws/commons/1.0/axis2-transport-tcp-1.0.jar"><strong>axis2-transport-tcp-1.0.jar</strong></a>
+ (<a href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-tcp-1.0.jar.md5"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-tcp-1.0.jar.md5">MD5</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-tcp-1.0.jar.sha"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-tcp-1.0.jar.sha">SHA1</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-tcp-1.0.jar.asc"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-tcp-1.0.jar.asc">PGP</a>)</pre>
+            </td>
+            <td>
+              <pre class="download-pre"><a
+              href="[preferred]/ws/commons/1.0/axis2-transport-tcp-1.0-sources.jar"
+              class="downloadLink"
+              title="[preferred]/ws/commons/1.0/axis2-transport-tcp-1.0-sources.jar"><strong>axis2-transport-tcp-1.0-sources.jar</strong></a>
+ (<a href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-tcp-1.0-sources.jar.md5"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-tcp-1.0-sources.jar.md5">MD5</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-tcp-1.0-sources.jar.sha"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-tcp-1.0-sources.jar.sha">SHA1</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-tcp-1.0-sources.jar.asc"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-tcp-1.0-sources.jar.asc">PGP</a>)</pre>
+            </td>
+          </tr>
+
+          <tr class="a">
+            <td>
+              <a name="std-bin" id="std-bin"/><strong>SMS Transport</strong>
+            </td>
+            <td>
+              The Axis2 SMS transport implementation
+            </td>
+            <td>
+              <pre class="download-pre"><a
+              href="[preferred]/ws/commons/1.0/axis2-transport-sms-1.0.jar"
+              class="downloadLink"
+              title="[preferred]/ws/commons/1.0/axis2-transport-sms-1.0.jar"><strong>axis2-transport-sms-1.0.jar</strong></a>
+ (<a href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-sms-1.0.jar.md5"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-sms-1.0.jar.md5">MD5</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-sms-1.0.jar.sha"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-sms-1.0.jar.sha">SHA1</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-sms-1.0.jar.asc"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-sms-1.0.jar.asc">PGP</a>)</pre>
+            </td>
+            <td>
+              <pre class="download-pre"><a
+              href="[preferred]/ws/commons/1.0/axis2-transport-sms-1.0-sources.jar"
+              class="downloadLink"
+              title="[preferred]/ws/commons/1.0/axis2-transport-sms-1.0-sources.jar"><strong>axis2-transport-sms-1.0-sources.jar</strong></a>
+ (<a href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-sms-1.0-sources.jar.md5"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-sms-1.0-sources.jar.md5">MD5</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-sms-1.0-sources.jar.sha"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-sms-1.0-sources.jar.sha">SHA1</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-sms-1.0-sources.jar.asc"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-sms-1.0-sources.jar.asc">PGP</a>)</pre>
+            </td>
+          </tr>
+
+          <tr class="a">
+            <td>
+              <a name="std-bin" id="std-bin"/><strong>UDP Transport</strong>
+            </td>
+            <td>
+              The Axis2 UDP transport implementation
+            </td>
+            <td>
+              <pre class="download-pre"><a
+              href="[preferred]/ws/commons/1.0/axis2-transport-udp-1.0.jar"
+              class="downloadLink"
+              title="[preferred]/ws/commons/1.0/axis2-transport-udp-1.0.jar"><strong>axis2-transport-udp-1.0.jar</strong></a>
+ (<a href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-udp-1.0.jar.md5"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-udp-1.0.jar.md5">MD5</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-udp-1.0.jar.sha"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-udp-1.0.jar.sha">SHA1</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-udp-1.0.jar.asc"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-udp-1.0.jar.asc">PGP</a>)</pre>
+            </td>
+            <td>
+              <pre class="download-pre"><a
+              href="[preferred]/ws/commons/1.0/axis2-transport-udp-1.0-sources.jar"
+              class="downloadLink"
+              title="[preferred]/ws/commons/1.0/axis2-transport-udp-1.0-sources.jar"><strong>axis2-transport-udp-1.0-sources.jar</strong></a>
+ (<a href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-udp-1.0-sources.jar.md5"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-udp-1.0-sources.jar.md5">MD5</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-udp-1.0-sources.jar.sha"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-udp-1.0-sources.jar.sha">SHA1</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-udp-1.0-sources.jar.asc"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-udp-1.0-sources.jar.asc">PGP</a>)</pre>
+            </td>
+          </tr>
+
+          <tr class="a">
+            <td>
+              <a name="std-bin" id="std-bin"/><strong>XMPP Transport</strong>
+            </td>
+            <td>
+              The Axis2 XMPP transport implementation
+            </td>
+            <td>
+              <pre class="download-pre"><a
+              href="[preferred]/ws/commons/1.0/axis2-transport-xmpp-1.0.jar"
+              class="downloadLink"
+              title="[preferred]/ws/commons/1.0/axis2-transport-xmpp-1.0.jar"><strong>axis2-transport-xmpp-1.0.jar</strong></a>
+ (<a href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-xmpp-1.0.jar.md5"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-xmpp-1.0.jar.md5">MD5</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-xmpp-1.0.jar.sha"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-xmpp-1.0.jar.sha">SHA1</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-xmpp-1.0.jar.asc"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-xmpp-1.0.jar.asc">PGP</a>)</pre>
+            </td>
+            <td>
+              <pre class="download-pre"><a
+              href="[preferred]/ws/commons/1.0/axis2-transport-xmpp-1.0-sources.jar"
+              class="downloadLink"
+              title="[preferred]/ws/commons/1.0/axis2-transport-xmpp-1.0-sources.jar"><strong>axis2-transport-xmpp-1.0-sources.jar</strong></a>
+ (<a href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-xmpp-1.0-sources.jar.md5"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-xmpp-1.0-sources.jar.md5">MD5</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-xmpp-1.0-sources.jar.sha"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-xmpp-1.0-sources.jar.sha">SHA1</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-xmpp-1.0-sources.jar.asc"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-xmpp-1.0-sources.jar.asc">PGP</a>)</pre>
+            </td>
+          </tr>
+
+          <tr class="a">
+            <td>
+              <a name="std-bin" id="std-bin"/><strong>Axis2 Asynchronous Transport - Base</strong>
+            </td>
+            <td>
+              The Base Axis2 asynchronous transport framework implementation
+            </td>
+            <td>
+              <pre class="download-pre"><a
+              href="[preferred]/ws/commons/1.0/axis2-transport-base-1.0.jar"
+              class="downloadLink"
+              title="[preferred]/ws/commons/1.0/axis2-transport-base-1.0.jar"><strong>axis2-transport-base-1.0.jar</strong></a>
+ (<a href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-base-1.0.jar.md5"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-base-1.0.jar.md5">MD5</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-base-1.0.jar.sha"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-base-1.0.jar.sha">SHA1</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-base-1.0.jar.asc"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-base-1.0.jar.asc">PGP</a>)</pre>
+            </td>
+            <td>
+              <pre class="download-pre"><a
+              href="[preferred]/ws/commons/1.0/axis2-transport-base-1.0-sources.jar"
+              class="downloadLink"
+              title="[preferred]/ws/commons/1.0/axis2-transport-base-1.0-sources.jar"><strong>axis2-transport-base-1.0-sources.jar</strong></a>
+ (<a href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-base-1.0-sources.jar.md5"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-base-1.0-sources.jar.md5">MD5</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-base-1.0-sources.jar.sha"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-base-1.0-sources.jar.sha">SHA1</a> <a
+              href="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-base-1.0-sources.jar.asc"
+              class="externalLink"
+              title="http://www.apache.org/dist/ws/commons/1.0/axis2-transport-base-1.0-sources.jar.asc">PGP</a>)</pre>
             </td>
           </tr>
         </tbody>
