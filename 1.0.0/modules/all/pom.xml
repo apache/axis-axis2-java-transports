@@ -30,84 +30,10 @@
     <groupId>org.apache.axis2</groupId>
     <artifactId>axis2-transport-all</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <packaging>bundle</packaging>
     <description>Axis2 Transport</description>
     <name>Apache Axis2 - Transport - All</name>
     <profiles>
-        <profile>
-            <id>java15</id>
-            <activation>
-                <jdk>1.5</jdk>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>transport-jar</id>
-                                <phase>package</phase>
-                                <configuration>
-                                    <tasks>
-                                        <mkdir dir="target"/>
-                                        <jar destfile="target/axis2-transport-all-${pom.version}.jar">
-                                            <fileset dir="../jms/target/classes"/>
-                                            <fileset dir="../tcp/target/classes"/>
-                                            <fileset dir="../xmpp/target/classes"/>
-                                            <fileset dir="../base/target/classes"/>
-                                            <fileset dir="../mail/target/classes"/>
-                                            <fileset dir="../udp/target/classes"/>
-                                            <fileset dir="../sms/target/classes"/>
-                                        </jar>
-                                    </tasks>
-                                </configuration>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>java16</id>
-            <activation>
-                <jdk>1.6</jdk>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>transport-jar</id>
-                                <phase>package</phase>
-                                <configuration>
-                                    <tasks>
-                                        <mkdir dir="target"/>                                        
-                                        <jar destfile="target/axis2-transport-all-${pom.version}.jar">
-                                            <fileset dir="../jms/target/classes"/>
-                                            <fileset dir="../tcp/target/classes"/>
-                                            <fileset dir="../xmpp/target/classes"/>
-                                            <fileset dir="../base/target/classes"/>
-                                            <fileset dir="../mail/target/classes"/>
-                                            <fileset dir="../udp/target/classes"/>
-                                            <fileset dir="../sms/target/classes"/>
-                                        </jar>
-                                    </tasks>
-                                </configuration>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
         <profile>
             <id>release</id>
             <activation>
@@ -178,6 +104,45 @@
             </build>
         </profile>
     </profiles>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-transport-base</artifactId>
+            <version>${pom.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-transport-jms</artifactId>
+            <version>${pom.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-transport-mail</artifactId>
+            <version>${pom.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-transport-tcp</artifactId>
+            <version>${pom.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-transport-sms</artifactId>
+            <version>${pom.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-transport-xmpp</artifactId>
+            <version>${pom.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-transport-udp</artifactId>
+            <version>${pom.version}</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <!--<plugin>-->
@@ -191,46 +156,34 @@
                 <!--</configuration>-->
             <!--</plugin>-->
             <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <inherited>true</inherited>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>1.4.0</version>
+                <extensions>true</extensions>
                 <configuration>
-                    <source>1.5</source>
-                    <target>1.5</target>
+                    <instructions>
+                        <Bundle-Version>1.0</Bundle-Version>
+                        <Bundle-Name>${pom.artifactId}</Bundle-Name>
+                        <Bundle-Vendor>Apache Software Foundation</Bundle-Vendor>
+                        <Bundle-Description>${pom.description}</Bundle-Description>
+                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+                        <Export-Package>
+                            org.apache.axis2.transport.base.*;-split-package:=merge-last,
+                            org.apache.axis2.transport.jms.*;-split-package:=merge-last,
+                            org.apache.axis2.transport.mail.*;-split-package:=merge-last,
+                            org.apache.axis2.transport.tcp.*;-split-package:=merge-last,
+                            org.apache.axis2.transport.sms.*;-split-package:=merge-last,
+                            org.apache.axis2.transport.xmpp.*;-split-package:=merge-last,
+                            org.apache.axis2.transport.udp.*;-split-package:=merge-last,
+                            org.apache.axis2.format.*;-split-package:=merge-last,
+                        </Export-Package>
+                        <Import-Package>
+                            !javax.xml.namespace,
+                            javax.xml.namespace; version=0.0.0,
+                            *; resolution:=optional
+                        </Import-Package>
+                    </instructions>
                 </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-source-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <attach>true</attach>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>axis2-jar-package</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>attach-artifact</goal>
-                        </goals>
-                        <configuration>
-                            <artifacts>
-                                <artifact>
-                                    <file>target/axis2-transport-all-${pom.version}.jar</file>
-                                    <type>jar</type>
-                                </artifact>
-                            </artifacts>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
