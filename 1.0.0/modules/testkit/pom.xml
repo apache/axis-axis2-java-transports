@@ -125,6 +125,13 @@
             <resource>
                 <directory>target/generated-resources</directory>
             </resource>
+            <resource>
+                <directory>../..</directory>
+                <includes>
+                    <include>LICENSE</include>
+                    <include>NOTICE</include>
+                </includes>
+            </resource>
         </resources>
         <plugins>
             <plugin>
