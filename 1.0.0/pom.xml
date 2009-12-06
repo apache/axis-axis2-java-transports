@@ -160,7 +160,7 @@
         <module>modules/jms</module>
         <module>modules/sms</module>
         <module>modules/testkit</module>
-        <module>modules/parent</module>
+        <module>modules/all</module>
     </modules>
 
     <profiles>
