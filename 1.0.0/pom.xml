@@ -34,10 +34,17 @@
     <packaging>pom</packaging>
     <name>Apache Axis2 - Transport - Root</name>
     <url>http://ws.apache.org/commons/transport/</url>
+    <description>
+        Axis2 Transports are a set of transport adaptors for the Apache Axis2 project 
+        as well as for the Apache Synapse project. These transports consists of a set of
+        synchronous as well as completely asynchronous transport adaprots.
+    </description>
+
     <issueManagement>
         <system>JIRA</system>
         <url>http://issues.apache.org/jira/browse/WSCOMMONS</url>
     </issueManagement>
+    
     <mailingLists>
         <mailingList>
             <name>WS Commons Developers</name>
@@ -48,6 +55,7 @@
         </mailingList>
     </mailingLists>
     <inceptionYear>2004</inceptionYear>
+    
     <developers>
         <developer>
             <name>Saminda Abeyruwan</name>
@@ -120,6 +128,7 @@
             <organization>WSO2</organization>
         </developer>
     </developers>
+    
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -127,6 +136,7 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+    
     <scm>
         <connection>scm:svn:http://svn.apache.org/repos/asf/webservices/commons/trunk/modules/transport</connection>
         <developerConnection>
@@ -134,13 +144,13 @@
         </developerConnection>
         <url>http://svn.apache.org/viewcvs.cgi/webservices/commons/trunk/modules/transport</url>
     </scm>
+    
     <organization>
         <name>The Apache Software Foundation</name>
         <url>http://www.apache.org/</url>
     </organization>
 
     <modules>
-        <module>modules/parent</module>
         <module>modules/base</module>
         <module>modules/http</module>
         <module>modules/tcp</module>
@@ -150,79 +160,10 @@
         <module>modules/jms</module>
         <module>modules/sms</module>
         <module>modules/testkit</module>
+        <module>modules/parent</module>
     </modules>
 
     <profiles>
-        <profile>
-            <id>java15</id>
-            <activation>
-                <jdk>1.5</jdk>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>transport-jar</id>
-                                <phase>package</phase>
-                                <configuration>
-                                    <tasks>
-                                        <mkdir dir="target/lib"/>
-                                        <jar destfile="target/lib/axis2-transports-${pom.version}.jar">
-                                            <fileset dir="modules/jms/target/classes"/>
-                                            <fileset dir="modules/tcp/target/classes"/>
-                                            <fileset dir="modules/xmpp/target/classes"/>
-                                            <fileset dir="modules/base/target/classes"/>
-                                            <fileset dir="modules/mail/target/classes"/>
-                                        </jar>
-                                    </tasks>
-                                </configuration>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>java16</id>
-            <activation>
-                <jdk>1.6</jdk>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>transport-jar</id>
-                                <phase>package</phase>
-                                <configuration>
-                                    <tasks>
-                                        <mkdir dir="target/lib"/>
-                                        <jar destfile="target/lib/axis2-transports-${pom.version}.jar">
-                                            <fileset dir="modules/jms/target/classes"/>
-                                            <fileset dir="modules/tcp/target/classes"/>
-                                            <fileset dir="modules/xmpp/target/classes"/>
-                                            <fileset dir="modules/base/target/classes"/>
-                                            <fileset dir="modules/mail/target/classes"/>
-                                        </jar>
-                                    </tasks>
-                                </configuration>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
         <profile>
             <id>cobertura</id>
             <dependencies>
@@ -335,6 +276,133 @@
             </build>
         </profile>
     </profiles>
+    
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>axis2-kernel</artifactId>
+                <version>${axis2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-api</artifactId>
+                <version>${axiom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-impl</artifactId>
+                <version>${axiom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-dom</artifactId>
+                <version>${axiom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-ws-metadata_2.0_spec</artifactId>
+                <version>1.1.2</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>servlet-api</artifactId>
+                <version>2.3</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-httpclient</groupId>
+                <artifactId>commons-httpclient</artifactId>
+                <version>3.1</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-fileupload</groupId>
+                <artifactId>commons-fileupload</artifactId>
+                <version>1.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpcore</artifactId>
+                <version>4.0-beta1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.woodstox</groupId>
+                <artifactId>wstx-asl</artifactId>
+                <version>3.2.4</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>1.1.1</version>
+            </dependency>
+
+            <!-- Smack Jabber client libraries to be included -->
+            <dependency>
+                <groupId>org.igniterealtime</groupId>
+                <artifactId>smack</artifactId>
+                <version>3.0.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.igniterealtime</groupId>
+                <artifactId>smackx</artifactId>
+                <version>3.0.4</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>2.3</version>
+            </dependency>
+
+            <!-- Dependencies used in the unit tests -->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>3.8.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.aspectj</groupId>
+                <artifactId>aspectjrt</artifactId>
+                <version>1.6.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.aspectj</groupId>
+                <artifactId>aspectjweaver</artifactId>
+                <version>1.6.1</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-kernel</artifactId>
+        </dependency>
+    </dependencies>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>snapshot</id>
+            <name>Snapshot repository</name>
+            <url>http://snapshots.maven.codehaus.org/maven2/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </pluginRepository>
+        <pluginRepository>
+            <id>snapshot-apache</id>
+            <name>Apache Snapshot repository</name>
+            <url>http://people.apache.org/repo/m2-snapshot-repository</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </pluginRepository>
+    </pluginRepositories>
+    
     <distributionManagement>
         <repository>
             <id>apache-repo</id>
@@ -349,7 +417,12 @@
             <url>scpexe://people.apache.org//www/people.apache.org/repo/m2-snapshot-repository</url>
             <uniqueVersion>false</uniqueVersion>
         </snapshotRepository>
+        <site>
+            <id>website</id>
+            <url>scpexe://people.apache.org/www/ws.apache.org/commons/transport</url>
+        </site>
     </distributionManagement>
+    
     <build>
         <plugins>
             <plugin>
@@ -366,29 +439,9 @@
                     <target>1.5</target>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>axis2-jar-package</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>attach-artifact</goal>
-                        </goals>
-                        <configuration>
-                            <artifacts>
-                                <artifact>
-                                    <file>target/lib/axis2-transports-${pom.version}.jar</file>
-                                    <type>jar</type>
-                                </artifact>
-                            </artifacts>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
+    
     <reporting>
         <plugins>
             <plugin>
@@ -426,4 +479,11 @@
             </plugin>
         </plugins>
     </reporting>
+    
+    <properties>
+        <axiom.version>1.2.8</axiom.version>
+        <axis2.version>1.5</axis2.version>
+        <failIfNoTests>false</failIfNoTests>
+    </properties>
+    
 </project>
