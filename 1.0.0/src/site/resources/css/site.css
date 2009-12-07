@@ -159,3 +159,7 @@ dt {
     right:0px;
     top:0px;
 }
+#bodyColumn {
+  margin-right: 13px;
+  margin-left: 185px;
+}
