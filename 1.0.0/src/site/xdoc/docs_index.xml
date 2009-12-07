@@ -31,7 +31,7 @@
       Axis2 Transports are a set of transport implementation written as adaptors to the Apache
       Axis2. The list of available transports and the respective documentation is as follows.
   </p>
-  <p>Documentation for the Axis2 Transports 1.0 release:</p>
+  <p>Documentation for the Axis2 Transports 1.0.0 release:</p>
 
   <ul>
   <li><a href="./jms.html">JMS Transport</a></li>
