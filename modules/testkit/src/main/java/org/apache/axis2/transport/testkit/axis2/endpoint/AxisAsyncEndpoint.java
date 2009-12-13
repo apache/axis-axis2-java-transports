@@ -35,8 +35,12 @@ import org.apache.axis2.transport.testkit.message.AxisMessage;
 import org.apache.axis2.transport.testkit.message.IncomingMessage;
 import org.apache.axis2.transport.testkit.tests.Setup;
 import org.apache.axis2.transport.testkit.tests.Transient;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class AxisAsyncEndpoint extends AxisTestEndpoint implements AsyncEndpoint<AxisMessage> {
+    private static Log log = LogFactory.getLog(AxisAsyncEndpoint.class);
+    
     private @Transient AxisTestEndpointContext context;
     private @Transient MessageContextValidator[] validators;
     private @Transient InOnlyEndpointSupport<AxisMessage> support;
@@ -60,6 +64,7 @@ public class AxisAsyncEndpoint extends AxisTestEndpoint implements AsyncEndpoint
     }
 
     void receive(MessageContext messageCtx) throws AxisFault {
+        log.debug("MessageReceiver has been invoked");
         final AxisMessage messageData;
         try {
             Assert.assertTrue(messageCtx.isServerSide());
