@@ -53,17 +53,16 @@ public class UtilsTransportServer {
 
         // create listener manager
         listnMgr = new ListenerManager();
-        listnMgr.init(cfgCtx);
         cfgCtx.setTransportManager(listnMgr);
     }
     
     public void addTransport(TransportInDescription trpInDesc,
                              TransportOutDescription trpDescOut) throws AxisFault {
+        cfgCtx.getAxisConfiguration().addTransportIn(trpInDesc);
         if (trpDescOut != null) {
             trpDescOut.getSender().init(cfgCtx, trpDescOut);
             cfgCtx.getAxisConfiguration().addTransportOut(trpDescOut);
         }
-        listnMgr.addListener(trpInDesc, false);
     }
 
     public void addTransport(TransportInDescription trpInDesc) throws AxisFault {
@@ -71,6 +70,7 @@ public class UtilsTransportServer {
     }
 
     public void start() throws Exception {
+        listnMgr.init(cfgCtx);
         listnMgr.start();
     }
     
