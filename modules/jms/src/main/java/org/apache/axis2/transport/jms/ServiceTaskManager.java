@@ -531,9 +531,6 @@ public class ServiceTaskManager {
                     }
                 }
 
-                // close the consumer
-                closeConsumer(false);
-
                 // if session was transacted, commit it or rollback
                 try {
                     if (session.getTransacted()) {
@@ -573,6 +570,9 @@ public class ServiceTaskManager {
                     logError("Error " + (commitOrAck ? "committing" : "rolling back") +
                         " JTA txn for message : " + messageId + " from the session", e);
                 }
+
+                // close the consumer
+                closeConsumer(false);
 
                 closeSession(false);
                 closeConnection();
