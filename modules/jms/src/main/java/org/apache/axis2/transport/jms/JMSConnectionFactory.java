@@ -252,7 +252,7 @@ public class JMSConnectionFactory {
      * @return session transaction required by the clients of this?
      */
     private boolean isSessionTransacted() {
-        return parameters.get(JMSConstants.PARAM_SESSION_TRANSACTED) == null ||
+        return parameters.get(JMSConstants.PARAM_SESSION_TRANSACTED) != null &&
             Boolean.valueOf(parameters.get(JMSConstants.PARAM_SESSION_TRANSACTED));
     }
 
