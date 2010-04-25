@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import javax.activation.DataSource;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.util.ElementHelper;
 import org.apache.axis2.transport.base.streams.ReaderInputStream;
 
 /**

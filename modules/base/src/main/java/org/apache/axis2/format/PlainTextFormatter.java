@@ -24,6 +24,7 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.AxisFault;
 import org.apache.axiom.om.OMOutputFormat;
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.util.ElementHelper;
 import org.apache.axis2.transport.base.BaseConstants;
 
 import java.io.ByteArrayOutputStream;

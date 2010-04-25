@@ -45,6 +45,8 @@ import org.apache.axiom.om.OMSourcedElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.impl.llom.OMSourcedElementImpl;
 import org.apache.axiom.om.impl.llom.util.AXIOMUtil;
+import org.apache.axiom.om.util.ElementHelper;
+import org.apache.axiom.util.stax.TextFromElementReader;
 import org.apache.commons.io.IOUtils;
 
 public class ElementHelperTest extends TestCase {
