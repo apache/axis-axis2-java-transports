@@ -30,8 +30,8 @@ import javax.xml.stream.Location;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import org.apache.axiom.om.impl.EmptyOMLocation;
 import org.apache.axiom.om.impl.llom.util.NamespaceContextImpl;
+import org.apache.axiom.util.stax.DummyLocation;
 import org.apache.commons.io.IOUtils;
 
 /**
@@ -69,12 +69,6 @@ import org.apache.commons.io.IOUtils;
 // TODO: This class has been copied from Synapse (package org.apache.synapse.util).
 //       Once it has been moved to Axis2 or Axiom, remove the duplicate from Synapse.
 public class WrappedTextNodeStreamReader implements XMLStreamReader {
-    /**
-     * Location object returned by {@link #getLocation()}.
-     * It always returns -1 for the location and null for the publicId and systemId. 
-     */
-    private final static Location EMPTY_LOCATION = new EmptyOMLocation();
-    
     /**
      * The qualified name of the wrapper element.
      */
@@ -210,7 +204,7 @@ public class WrappedTextNodeStreamReader implements XMLStreamReader {
     
     public Location getLocation() {
         // We do not support location information
-        return EMPTY_LOCATION;
+        return DummyLocation.INSTANCE;
     }
     
     public void close() throws XMLStreamException {
