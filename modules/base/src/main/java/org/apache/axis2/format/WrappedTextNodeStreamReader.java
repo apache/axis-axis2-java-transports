@@ -30,7 +30,7 @@ import javax.xml.stream.Location;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import org.apache.axiom.om.impl.llom.util.NamespaceContextImpl;
+import org.apache.axiom.util.namespace.MapBasedNamespaceContext;
 import org.apache.axiom.util.stax.DummyLocation;
 import org.apache.commons.io.IOUtils;
 
@@ -251,7 +251,7 @@ public class WrappedTextNodeStreamReader implements XMLStreamReader {
     
     public NamespaceContext getNamespaceContext() {
         if (namespaceContext == null) {
-            namespaceContext = new NamespaceContextImpl(Collections.singletonMap(wrapperElementName.getPrefix(), wrapperElementName.getNamespaceURI()));
+            namespaceContext = new MapBasedNamespaceContext(Collections.singletonMap(wrapperElementName.getPrefix(), wrapperElementName.getNamespaceURI()));
         }
         return namespaceContext;
     }

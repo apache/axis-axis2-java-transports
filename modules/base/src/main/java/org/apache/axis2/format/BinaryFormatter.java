@@ -61,7 +61,7 @@ public class BinaryFormatter implements MessageFormatterEx {
         DataHandler dh = getDataHandler(messageContext);
         if (dh != null) {
             try {
-                ((DataHandler)dh).writeTo(outputStream);
+                dh.writeTo(outputStream);
             } catch (IOException e) {
                 throw new AxisFault("Error serializing binary content of element : " +
                                 BaseConstants.DEFAULT_BINARY_WRAPPER, e);
