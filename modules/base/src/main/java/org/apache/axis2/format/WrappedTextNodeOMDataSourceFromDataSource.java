@@ -39,6 +39,7 @@ import org.apache.axiom.om.ds.OMDataSourceExtBase;
 import org.apache.axiom.om.impl.MTOMXMLStreamWriter;
 import org.apache.axiom.om.impl.serialize.StreamingOMSerializer;
 import org.apache.axiom.om.util.StAXUtils;
+import org.apache.axiom.util.stax.WrappedTextNodeStreamReader;
 
 /**
  * {@link org.apache.axiom.om.OMDataSource} implementation that represents a text node wrapped
