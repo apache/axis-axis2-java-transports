@@ -19,6 +19,7 @@
 
 package org.apache.axis2.transport.testkit.http;
 
+import java.net.InetSocketAddress;
 import java.util.UUID;
 
 import org.apache.axis2.addressing.EndpointReference;
@@ -27,23 +28,22 @@ import org.apache.axis2.transport.testkit.channel.RequestResponseChannel;
 import org.apache.axis2.transport.testkit.tests.Setup;
 import org.apache.axis2.transport.testkit.tests.TearDown;
 import org.apache.axis2.transport.testkit.tests.Transient;
+import org.apache.axis2.transport.testkit.util.tcpmon.Tunnel;
 
 public class HttpChannel implements AsyncChannel, RequestResponseChannel {
-    private int serverPort;
     private @Transient String serviceName;
-//    private @Transient Tunnel tunnel;
+    private @Transient Tunnel tunnel;
     
     @Setup @SuppressWarnings("unused")
     private void setUp(HttpTestEnvironment env) throws Exception {
-        serverPort = env.getServerPort();
         serviceName = "TestService-" + UUID.randomUUID();
-//        tunnel = new Tunnel(new InetSocketAddress("127.0.0.1", 8280));
-//        tunnel.start();
+        tunnel = new Tunnel(new InetSocketAddress("127.0.0.1", env.getServerPort()));
+        tunnel.start();
     }
     
     @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
-//        tunnel.stop();
+        tunnel.stop();
     }
 
     public String getServiceName() {
@@ -51,6 +51,6 @@ public class HttpChannel implements AsyncChannel, RequestResponseChannel {
     }
 
     public EndpointReference getEndpointReference() throws Exception {
-        return new EndpointReference("http://localhost:" + /* tunnel.getPort() */ serverPort + CONTEXT_PATH + "/" + serviceName);
+        return new EndpointReference("http://localhost:" + tunnel.getPort() + CONTEXT_PATH + "/" + serviceName);
     }
 }
