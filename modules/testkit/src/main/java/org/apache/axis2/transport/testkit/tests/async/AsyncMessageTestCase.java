@@ -26,8 +26,12 @@ import org.apache.axis2.transport.testkit.client.AsyncTestClient;
 import org.apache.axis2.transport.testkit.endpoint.AsyncEndpoint;
 import org.apache.axis2.transport.testkit.message.IncomingMessage;
 import org.apache.axis2.transport.testkit.tests.MessageTestCase;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public abstract class AsyncMessageTestCase<M> extends MessageTestCase {
+    private static final Log log = LogFactory.getLog(AsyncMessageTestCase.class);
+    
     private final AsyncTestClient<M> client;
     private final AsyncEndpoint<M> endpoint;
     
@@ -43,17 +47,23 @@ public abstract class AsyncMessageTestCase<M> extends MessageTestCase {
     @Override
     protected void doRunTest() throws Throwable {
         endpoint.clear();
+        log.debug("Preparing message");
         M expected = prepareMessage();
         
         // Run the test.
 //                    contentTypeMode == ContentTypeMode.TRANSPORT ? contentType : null);
+        log.debug("Sending message");
         client.sendMessage(options, contentType, expected);
+        log.debug("Message sent; waiting for response");
         IncomingMessage<M> actual = endpoint.waitForMessage(8000);
         if (actual == null) {
+            log.debug("No response received");
             fail("Failed to get message");
         }
         
+        log.debug("Response received; checking message data");
         checkMessageData(expected, actual.getData());
+        log.debug("Response has expected content");
     }
     
     protected abstract M prepareMessage() throws Exception;

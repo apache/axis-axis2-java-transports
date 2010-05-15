@@ -25,8 +25,12 @@ import org.apache.axis2.transport.testkit.Adapter;
 import org.apache.axis2.transport.testkit.MessageExchangeValidator;
 import org.apache.axis2.transport.testkit.client.ClientOptions;
 import org.apache.axis2.transport.testkit.client.TestClient;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public abstract class MessageTestCase extends ManagedTestCase {
+    private static final Log log = LogFactory.getLog(MessageTestCase.class);
+    
     protected final ContentType contentType;
     protected final ClientOptions options;
     private @Transient MessageExchangeValidator[] validators;
@@ -61,6 +65,7 @@ public abstract class MessageTestCase extends ManagedTestCase {
         }
         doRunTest();
         for (MessageExchangeValidator validator : validators) {
+            log.debug("Invoking message exchange validator " + validator.getClass().getName());
             validator.afterReceive();
         }
     }

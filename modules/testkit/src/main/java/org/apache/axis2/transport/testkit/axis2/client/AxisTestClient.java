@@ -152,6 +152,7 @@ public class AxisTestClient implements TestClient, MessageExchangeValidator {
                     }
                 }
             }
+            log.debug("Message level metrics check OK");
         }
     }
 }
