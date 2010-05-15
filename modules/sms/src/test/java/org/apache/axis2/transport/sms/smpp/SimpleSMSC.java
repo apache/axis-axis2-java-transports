@@ -91,6 +91,12 @@ public class SimpleSMSC  extends ServerResponseDeliveryAdapter implements Runnab
                 serverSession = sessionListener.accept();
                 serverSession.setMessageReceiverListener(this);
                 serverSession.setResponseDeliveryListener(this);
+                
+                // TODO: quick fix for build instability; if not set, the Hudson build
+                //       may fail with a message such as "No response after waiting for 2000 millis
+                //       when executing deliver_sm with sessionId 8cc2b5f5 and sequenceNumber 1"
+                serverSession.setTransactionTimer(10000);
+                
                 execService.execute(new WaitBindTask(serverSession));
                 Thread.sleep(1000);
 
