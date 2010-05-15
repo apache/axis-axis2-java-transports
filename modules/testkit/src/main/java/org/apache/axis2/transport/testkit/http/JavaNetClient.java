@@ -22,6 +22,7 @@ package org.apache.axis2.transport.testkit.http;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -62,6 +63,22 @@ public class JavaNetClient implements AsyncTestClient<byte[]> {
             OutputStream out = connection.getOutputStream();
             out.write(message);
             out.close();
+            if (connection instanceof HttpURLConnection) {
+                HttpURLConnection httpConnection = (HttpURLConnection)connection;
+                log.debug("Response code: " + httpConnection.getResponseCode());
+                log.debug("Response message: " + httpConnection.getResponseMessage());
+                int i = 0;
+                String headerValue;
+                while ((headerValue = httpConnection.getHeaderField(i)) != null) {
+                    String headerName = httpConnection.getHeaderFieldKey(i);
+                    if (headerName != null) {
+                        log.debug(headerName + ": " + headerValue);
+                    } else {
+                        log.debug(headerValue);
+                    }
+                    i++;
+                }
+            }
             InputStream in = connection.getInputStream();
             IOUtils.copy(in, System.out);
             in.close();
