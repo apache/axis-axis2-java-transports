@@ -19,6 +19,7 @@
 
 package org.apache.axis2.transport.testkit.http;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
@@ -32,9 +33,13 @@ import org.apache.axis2.transport.testkit.name.Name;
 import org.apache.axis2.transport.testkit.tests.Setup;
 import org.apache.axis2.transport.testkit.tests.Transient;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 @Name("java.net")
 public class JavaNetClient implements AsyncTestClient<byte[]> {
+    private static final Log log = LogFactory.getLog(JavaNetClient.class);
+    
     private @Transient HttpChannel channel;
     
     @Setup @SuppressWarnings("unused")
@@ -47,15 +52,22 @@ public class JavaNetClient implements AsyncTestClient<byte[]> {
     }
 
     public void sendMessage(ClientOptions options, ContentType contentType, byte[] message) throws Exception {
-        URLConnection connection = new URL(channel.getEndpointReference().getAddress()).openConnection();
-        connection.setDoOutput(true);
-        connection.setDoInput(true);
-        connection.setRequestProperty("Content-Type", contentType.toString());
-        OutputStream out = connection.getOutputStream();
-        out.write(message);
-        out.close();
-        InputStream in = connection.getInputStream();
-        IOUtils.copy(in, System.out);
-        in.close();
+        URL url = new URL(channel.getEndpointReference().getAddress());
+        log.debug("Opening connection to " + url + " using " + URLConnection.class.getName());
+        try {
+            URLConnection connection = url.openConnection();
+            connection.setDoOutput(true);
+            connection.setDoInput(true);
+            connection.setRequestProperty("Content-Type", contentType.toString());
+            OutputStream out = connection.getOutputStream();
+            out.write(message);
+            out.close();
+            InputStream in = connection.getInputStream();
+            IOUtils.copy(in, System.out);
+            in.close();
+        } catch (IOException ex) {
+            log.debug("Got exception", ex);
+            throw ex;
+        }
     }
 }
