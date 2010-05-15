@@ -20,6 +20,8 @@
 package org.apache.axis2.transport.testkit.axis2.util;
 
 import org.apache.axis2.transport.base.MessageLevelMetricsCollector;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Message level metrics collector implementation used during the tests to check that
@@ -28,6 +30,8 @@ import org.apache.axis2.transport.base.MessageLevelMetricsCollector;
  * On any update, all threads waiting for an instance of this class are notified.
  */
 public class MessageLevelMetricsCollectorImpl implements MessageLevelMetricsCollector {
+    private static final Log log = LogFactory.getLog(MessageLevelMetricsCollectorImpl.class);
+    
     private long messagesSent;
     private long bytesSent;
     
@@ -35,6 +39,7 @@ public class MessageLevelMetricsCollectorImpl implements MessageLevelMetricsColl
     }
 
     public synchronized void incrementBytesSent(long size) {
+        log.debug("incrementBytesSent called with size = " + size);
         bytesSent += size;
         notifyAll();
     }
@@ -49,6 +54,7 @@ public class MessageLevelMetricsCollectorImpl implements MessageLevelMetricsColl
     }
 
     public synchronized void incrementMessagesSent() {
+        log.debug("incrementMessagesSent called");
         messagesSent++;
         notifyAll();
     }
