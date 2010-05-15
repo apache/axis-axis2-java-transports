@@ -34,6 +34,7 @@ import javax.transaction.NotSupportedException;
 import javax.transaction.SystemException;
 import javax.transaction.Status;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Each service will have one ServiceTaskManager instance that will create, manage and also destroy
@@ -135,6 +136,8 @@ public class ServiceTaskManager {
     private volatile int serviceTaskManagerState = STATE_STOPPED;
     /** Number of invoker tasks active */
     private volatile int activeTaskCount = 0;
+    /** The number of existing JMS message consumers. */
+    private final AtomicInteger consumerCount = new AtomicInteger();
     /** The shared thread pool from the Listener */
     private WorkerPool workerPool = null;
 
@@ -763,6 +766,7 @@ public class ServiceTaskManager {
                     if (log.isDebugEnabled()) {
                         log.debug("Closing non-shared JMS consumer for service : " + serviceName);
                     }
+                    consumerCount.decrementAndGet();
                     consumer.close();
                 } catch (JMSException e) {
                     logError("Error closing JMS consumer", e);
@@ -836,11 +840,13 @@ public class ServiceTaskManager {
                     log.debug("Creating a new JMS MessageConsumer for service : " + serviceName);
                 }
 
-                return JMSUtils.createConsumer(
+                MessageConsumer consumer = JMSUtils.createConsumer(
                     session, getDestination(session), isQueue(),
                     (isSubscriptionDurable() && getDurableSubscriberName() == null ?
                         getDurableSubscriberName() : serviceName),
                     getMessageSelector(), isPubSubNoLocal(), isSubscriptionDurable(), isJmsSpec11());
+                consumerCount.incrementAndGet();
+                return consumer;
 
             } catch (JMSException e) {
                 handleException("Error creating JMS consumer for service : " + serviceName,e);
@@ -1207,7 +1213,16 @@ public class ServiceTaskManager {
     public int getActiveTaskCount() {
         return activeTaskCount;
     }
-
+    
+    /**
+     * Get the number of existing JMS message consumers.
+     * 
+     * @return the number of consumers
+     */
+    public int getConsumerCount() {
+        return consumerCount.get();
+    }
+    
     public void setServiceTaskManagerState(int serviceTaskManagerState) {
         this.serviceTaskManagerState = serviceTaskManagerState;
     }

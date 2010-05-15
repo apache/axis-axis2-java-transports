@@ -87,7 +87,11 @@ public class JMSListener extends AbstractTransportListenerEx<JMSEndpoint> implem
         stm.start();
 
         for (int i=0; i<3; i++) {
-            if (stm.getActiveTaskCount() > 0) {
+            // Check the consumer count rather than the active task count. Reason: if the
+            // destination is of type topic, then the transport is only ready to receive
+            // messages if at least one consumer exists. This is of not much importance,
+            // except for automated tests.
+            if (stm.getConsumerCount() > 0) {
                 log.info("Started to listen on destination : " + stm.getDestinationJNDIName() +
                     " of type " + JMSUtils.getDestinationTypeAsString(stm.getDestinationType()) +
                     " for service " + stm.getServiceName());
