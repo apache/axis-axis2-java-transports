@@ -107,6 +107,12 @@ public class MetricsCollector {
         return bytesReceived;
     }
 
+    /**
+     * Get the number of messages sent. This metrics is incremented after a
+     * message has been completely and successfully put on the wire.
+     * 
+     * @return the number of messages sent
+     */
     public long getMessagesSent() {
         return messagesSent;
     }
