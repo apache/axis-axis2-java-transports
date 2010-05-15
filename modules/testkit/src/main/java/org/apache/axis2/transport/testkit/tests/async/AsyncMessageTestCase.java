@@ -54,16 +54,16 @@ public abstract class AsyncMessageTestCase<M> extends MessageTestCase {
 //                    contentTypeMode == ContentTypeMode.TRANSPORT ? contentType : null);
         log.debug("Sending message");
         client.sendMessage(options, contentType, expected);
-        log.debug("Message sent; waiting for response");
+        log.debug("Message sent; waiting for endpoint to receive message");
         IncomingMessage<M> actual = endpoint.waitForMessage(8000);
         if (actual == null) {
-            log.debug("No response received");
+            log.debug("Message NOT received by endpoint; failing test");
             fail("Failed to get message");
         }
         
-        log.debug("Response received; checking message data");
+        log.debug("Message received by endpoint; checking message data");
         checkMessageData(expected, actual.getData());
-        log.debug("Response has expected content");
+        log.debug("Message received by endpoint has expected content");
     }
     
     protected abstract M prepareMessage() throws Exception;
