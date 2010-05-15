@@ -23,13 +23,16 @@ import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.transport.testkit.axis2.TransportDescriptionFactory;
+import org.apache.axis2.transport.testkit.http.HttpTestEnvironment;
+import org.apache.axis2.transport.testkit.tests.Setup;
 import org.apache.axis2.transport.testkit.util.LifecycleFixTransportListenerProxy;
 
 public class HttpTransportDescriptionFactory implements TransportDescriptionFactory {
-    private final int port;
+    private int port;
     
-    public HttpTransportDescriptionFactory(int port) {
-        this.port = port;
+    @Setup @SuppressWarnings("unused")
+    private void setUp(HttpTestEnvironment env) {
+        port = env.getServerPort();
     }
 
     public TransportInDescription createTransportInDescription() throws Exception {

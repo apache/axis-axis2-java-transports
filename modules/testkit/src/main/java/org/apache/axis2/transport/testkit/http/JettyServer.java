@@ -36,10 +36,10 @@ public class JettyServer {
     private JettyServer() {}
     
     @Setup @SuppressWarnings("unused")
-    private void setUp() throws Exception {
+    private void setUp(HttpTestEnvironment env) throws Exception {
         server = new Server();
         SocketListener listener = new SocketListener();
-        listener.setPort(8280);
+        listener.setPort(env.getServerPort());
         server.addListener(listener);
         context = new HttpContext(server, Channel.CONTEXT_PATH + "/*");
         server.start();

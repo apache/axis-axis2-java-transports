@@ -30,7 +30,7 @@ public class SimpleHTTPServerTest extends TestCase {
     public static TestSuite suite() throws Exception {
         ManagedTestSuite suite = new ManagedTestSuite(SimpleHTTPServerTest.class);
         
-        TransportDescriptionFactory tdf = new HttpTransportDescriptionFactory(8280);
+        TransportDescriptionFactory tdf = new HttpTransportDescriptionFactory();
         
         new HttpTransportTestSuiteBuilder(suite, tdf).build();
         
