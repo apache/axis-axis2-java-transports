@@ -142,7 +142,7 @@ public class AxisTestClient implements TestClient, MessageExchangeValidator {
                         // SYNAPSE-491: Maybe the transport sender didn't finish updating the
                         // metrics yet. We give it a couple of seconds to do so.
                         long remaining = start + 5000 - System.currentTimeMillis();
-                        if (remaining < 0) {
+                        if (remaining <= 0) {
                             throw ex;
                         } else {
                             log.debug("The transport sender didn't update the metrics yet ("
