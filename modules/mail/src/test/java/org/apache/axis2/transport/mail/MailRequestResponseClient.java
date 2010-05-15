@@ -30,6 +30,7 @@ import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.ContentType;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 import junit.framework.Assert;
 
@@ -103,29 +104,31 @@ public class MailRequestResponseClient extends MailClient implements RequestResp
         return reply;
     }
 
-    private Message getMessage(String requestMsgId) {
-        try {
-            Folder folder = store.getFolder(MailConstants.DEFAULT_FOLDER);
-            folder.open(Folder.READ_WRITE);
-            Message[] msgs = folder.getMessages();
-            log.debug(msgs.length + " replies in reply mailbox");
-            for (Message m:msgs) {
-                String[] inReplyTo = m.getHeader(MailConstants.MAIL_HEADER_IN_REPLY_TO);
-                log.debug("Got reply to : " + Arrays.toString(inReplyTo));
-                if (inReplyTo != null && inReplyTo.length > 0) {
-                    for (int j=0; j<inReplyTo.length; j++) {
-                        if (requestMsgId.equals(inReplyTo[j])) {
-                            m.setFlag(Flags.Flag.DELETED, true);
-                            return m;
-                        }
+    private Message getMessage(String requestMsgId) throws Exception {
+        MimeMessage response = null;
+        Folder folder = store.getFolder(MailConstants.DEFAULT_FOLDER);
+        folder.open(Folder.READ_WRITE);
+        Message[] msgs = folder.getMessages();
+        log.debug(msgs.length + " messages in mailbox");
+        loop: for (Message m : msgs) {
+            MimeMessage mimeMessage = (MimeMessage)m;
+            String[] inReplyTo = mimeMessage.getHeader(MailConstants.MAIL_HEADER_IN_REPLY_TO);
+            log.debug("Found message " + mimeMessage.getMessageID() + " in reply to " + Arrays.toString(inReplyTo));
+            if (inReplyTo != null && inReplyTo.length > 0) {
+                for (int j=0; j<inReplyTo.length; j++) {
+                    if (requestMsgId.equals(inReplyTo[j])) {
+                        log.debug("Identified message " + mimeMessage.getMessageID() + " as the response to " + requestMsgId + "; retrieving it from the store");
+                        // We need to create a copy so that we can delete the original and close the folder
+                        response = new MimeMessage(mimeMessage);
+                        log.debug("Flagging message " + mimeMessage.getMessageID() + " for deletion");
+                        mimeMessage.setFlag(Flags.Flag.DELETED, true);
+                        break loop;
                     }
                 }
-                m.setFlag(Flags.Flag.DELETED, true);
             }
-            folder.close(true);
-        } catch (Exception e) {
-            e.printStackTrace();
+            log.warn("Don't know what to do with message " + mimeMessage.getMessageID() + "; skipping");
         }
-        return null;
+        folder.close(true);
+        return response;
     }
 }
