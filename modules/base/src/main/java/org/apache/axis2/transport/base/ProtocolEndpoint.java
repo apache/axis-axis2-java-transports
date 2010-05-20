@@ -63,8 +63,8 @@ public abstract class ProtocolEndpoint {
      * return <code>false</code>. An exception should only be thrown if there is an
      * error or inconsistency in the parameters.
      * 
-     * @param params The source of the parameters to construct the
-     *               poll table entry. If the parameters are defined on
+     * @param params The source of the parameters to configure the
+     *               endpoint. If the parameters are defined on
      *               a service, this will be an {@link AxisService}
      *               instance.
      * @return <code>true</code> if the parameters contained the required configuration
