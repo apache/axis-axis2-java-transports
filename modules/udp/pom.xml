@@ -34,7 +34,6 @@
     <packaging>bundle</packaging>
 
     <build>
-        <testSourceDirectory>test</testSourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
