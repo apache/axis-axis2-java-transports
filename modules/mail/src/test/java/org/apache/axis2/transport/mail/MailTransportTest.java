@@ -39,7 +39,7 @@ public class MailTransportTest extends TestCase {
         suite.addExclude("(&(test=AsyncSwA)(client=javamail))");
         // There seems to be a problem with Sun's IMAP client or GreenMail's IMAP server
         // in this particular case:
-        suite.addExclude("(&(protocol=imap)(|(test=AsyncSwA)(&(test=EchoXML)(messageType=SOAP12))))");
+        suite.addExclude("(&(protocol=imap)(test=AsyncSwA))");
         // SYNAPSE-434
         suite.addExclude("(test=MinConcurrency)");
         
