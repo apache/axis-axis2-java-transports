@@ -21,7 +21,6 @@ package org.apache.axis2.transport.base.datagram;
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.SocketAddress;
-import java.nio.channels.DatagramChannel;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
