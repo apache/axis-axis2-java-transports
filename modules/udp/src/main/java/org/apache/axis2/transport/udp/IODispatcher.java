@@ -50,7 +50,7 @@ import org.apache.commons.logging.LogFactory;
  * packet received, a {@link ProcessPacketTask} instance is created
  * and dispatched to a worker thread from the configured pool.
  * <p>
- * The methods {@link #addEndpoint(Endpoint)}, {@link #removeEndpoint(String)}
+ * The methods {@link #addEndpoint(Endpoint)}, {@link #removeEndpoint(Endpoint)}
  * and {@link #stop()} are thread safe and may be called from any thread.
  * However, to avoid concurrency issues, the operation on the underlying
  * {@link Selector} will always be executed by the thread executing the
@@ -88,7 +88,8 @@ public class IODispatcher implements DatagramDispatcher<Endpoint>, Runnable {
     
     private final DatagramDispatcherCallback callback;
     private final Selector selector;
-    private final Queue<SelectorOperation> selectorOperationQueue = new ConcurrentLinkedQueue<SelectorOperation>();
+    private final Queue<SelectorOperation> selectorOperationQueue =
+            new ConcurrentLinkedQueue<SelectorOperation>();
     
     /**
      * Constructor.
@@ -120,6 +121,7 @@ public class IODispatcher implements DatagramDispatcher<Endpoint>, Runnable {
                 channel.register(selector, SelectionKey.OP_READ, endpoint);
             }
         });
+        log.info("UDP endpoint started on port : " + endpoint.getPort());
     }
     
     /**

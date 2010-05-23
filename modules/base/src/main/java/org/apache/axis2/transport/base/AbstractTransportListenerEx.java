@@ -45,6 +45,8 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
     /** A Map of service name to the protocol endpoints */
     private List<E> endpoints = new ArrayList<E>();
 
+    protected boolean useGlobalListener = false;
+
     @Override
     public void init(ConfigurationContext cfgCtx,
             TransportInDescription transportIn) throws AxisFault {
@@ -112,6 +114,8 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
         if (endpoint.loadConfiguration(service)) {
             startEndpoint(endpoint);
             endpoints.add(endpoint);
+        } else if (useGlobalListener) {
+            return;
         } else {
             throw new AxisFault("Service doesn't have configuration information for transport " +
                     getTransportName());

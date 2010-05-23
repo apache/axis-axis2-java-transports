@@ -39,11 +39,18 @@ import org.apache.axis2.transport.base.datagram.DatagramDispatcherCallback;
  *       than the specified length will be truncated.</dd>
  * </dl>
  * 
- * @see org.apache.synapse.transport.udp
+ * @see org.apache.axis2.transport.udp
  */
-public class UDPListener extends AbstractDatagramTransportListener<Endpoint> implements ManagementSupport {
+public class UDPListener extends AbstractDatagramTransportListener<Endpoint>
+        implements ManagementSupport {
+
+    public UDPListener() {
+        this.useGlobalListener = true;
+    }
+
     @Override
-    protected IODispatcher createDispatcher(DatagramDispatcherCallback callback) throws IOException {
+    protected IODispatcher createDispatcher(DatagramDispatcherCallback callback)
+            throws IOException {
     	IODispatcher dispatcher = new IODispatcher(callback);
     	new Thread(dispatcher, getTransportName() + "-dispatcher").start();
         // Start a new thread for the I/O dispatcher

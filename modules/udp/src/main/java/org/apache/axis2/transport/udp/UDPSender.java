@@ -24,8 +24,6 @@ import java.io.ByteArrayInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketAddress;
-import java.nio.channels.DatagramChannel;
 import java.nio.ByteBuffer;
 
 import org.apache.axiom.om.OMOutputFormat;
@@ -49,7 +47,7 @@ import javax.xml.stream.XMLStreamException;
 /**
  * Transport sender for the UDP protocol.
  * 
- * @see org.apache.synapse.transport.udp
+ * @see org.apache.axis2.transport.udp
  */
 public class UDPSender extends AbstractTransportSender {
     public UDPSender() {
@@ -57,15 +55,18 @@ public class UDPSender extends AbstractTransportSender {
     }
     
     @Override
-    public void init(ConfigurationContext cfgCtx, TransportOutDescription transportOut) throws AxisFault {
+    public void init(ConfigurationContext cfgCtx, TransportOutDescription transportOut)
+            throws AxisFault {
         super.init(cfgCtx, transportOut);
     }
     
     @Override
-    public void sendMessage(MessageContext msgContext, String targetEPR, OutTransportInfo outTransportInfo) throws AxisFault {
+    public void sendMessage(MessageContext msgContext, String targetEPR,
+                            OutTransportInfo outTransportInfo) throws AxisFault {
         if ((targetEPR == null) && (outTransportInfo != null)) {
             // this can happen only at the server side and send the message using back chanel
-            DatagramOutTransportInfo datagramOutTransportInfo = (DatagramOutTransportInfo) outTransportInfo;
+            DatagramOutTransportInfo datagramOutTransportInfo =
+                    (DatagramOutTransportInfo) outTransportInfo;
             MessageFormatter messageFormatter = TransportUtils.getMessageFormatter(msgContext);
             OMOutputFormat format = BaseUtils.getOMOutputFormat(msgContext);
             format.setContentType(datagramOutTransportInfo.getContentType());
@@ -74,14 +75,17 @@ public class UDPSender extends AbstractTransportSender {
             ByteBuffer byteBuffer = ByteBuffer.allocate(payload.length);
             byteBuffer.put(payload);
 
-            DatagramSocket socket = null;
+            DatagramSocket socket;
             try {
                 socket = new DatagramSocket();
-                socket.send(new DatagramPacket(payload, payload.length, datagramOutTransportInfo.getSourceAddress()));
+                try {
+                    socket.send(new DatagramPacket(payload, payload.length,
+                            datagramOutTransportInfo.getSourceAddress()));
+                } finally {
+                    socket.close();
+                }
             } catch (IOException e) {
                 throw new AxisFault("Unable to send packet", e);
-            } finally {
-                socket.close();
             }
 
         } else {
@@ -93,8 +97,10 @@ public class UDPSender extends AbstractTransportSender {
             try {
                 DatagramSocket socket = new DatagramSocket();
                 try {
-                    socket.send(new DatagramPacket(payload, payload.length, InetAddress.getByName(udpOutInfo.getHost()), udpOutInfo.getPort()));
-                    if (!msgContext.getOptions().isUseSeparateListener() && !msgContext.isServerSide()){
+                    socket.send(new DatagramPacket(payload, payload.length,
+                            InetAddress.getByName(udpOutInfo.getHost()), udpOutInfo.getPort()));
+                    if (!msgContext.getOptions().isUseSeparateListener() &&
+                            !msgContext.isServerSide()){
                         waitForReply(msgContext, socket, udpOutInfo.getContentType());
                     }
                 }
@@ -108,12 +114,13 @@ public class UDPSender extends AbstractTransportSender {
         }
     }
 
-    private void waitForReply(MessageContext messageContext, DatagramSocket datagramSocket, String contentType) throws IOException {
+    private void waitForReply(MessageContext messageContext, DatagramSocket datagramSocket,
+                              String contentType) throws IOException {
 
         // piggy back message constant is used to pass a piggy back
         // message context in asnych model
         if (!(messageContext.getAxisOperation() instanceof OutInAxisOperation) &&
-                (messageContext.getProperty(org.apache.axis2.Constants.PIGGYBACK_MESSAGE) == null)) {
+                messageContext.getProperty(org.apache.axis2.Constants.PIGGYBACK_MESSAGE) == null) {
             return;
         }
 

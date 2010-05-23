@@ -38,6 +38,14 @@ public abstract class AbstractDatagramTransportListener<E extends DatagramEndpoi
             throws AxisFault {
         
         super.init(cfgCtx, transportIn);
+        initDispatcher();
+    }
+
+    private void initDispatcher() throws AxisFault {
+        if (dispatcher != null) {
+            return;
+        }
+
         DatagramDispatcherCallback callback = new DatagramDispatcherCallback() {
 
             public void receive(SocketAddress address,
@@ -47,11 +55,13 @@ public abstract class AbstractDatagramTransportListener<E extends DatagramEndpoi
                 workerPool.execute(new ProcessPacketTask(address, endpoint, data, length));
             }
         };
+
         try {
             dispatcher = createDispatcher(callback);
         } catch (IOException ex) {
             throw new AxisFault("Unable to create selector", ex);
         }
+        
         try {
             defaultIp = org.apache.axis2.util.Utils.getIpAddress(cfgCtx.getAxisConfiguration());
         } catch (SocketException ex) {
@@ -70,6 +80,8 @@ public abstract class AbstractDatagramTransportListener<E extends DatagramEndpoi
 
     @Override
     protected void startEndpoint(E endpoint) throws AxisFault {
+        initDispatcher();
+
         try {
             dispatcher.addEndpoint(endpoint);
         } catch (IOException ex) {
@@ -77,9 +89,10 @@ public abstract class AbstractDatagramTransportListener<E extends DatagramEndpoi
                     + endpoint.getEndpointReferences(defaultIp)[0], ex);
         }
         if (log.isDebugEnabled()) {
-            log.debug("Started listening on endpoint " + endpoint.getEndpointReferences(defaultIp)[0]
-                    + " [contentType=" + endpoint.getContentType()
-                    + "; service=" + endpoint.getServiceName() + "]");
+            log.debug("Started listening on endpoint " +
+                    endpoint.getEndpointReferences(defaultIp)[0] +
+                    " [contentType=" + endpoint.getContentType() +
+                    "; service=" + endpoint.getServiceName() + "]");
         }
     }
     
@@ -88,7 +101,8 @@ public abstract class AbstractDatagramTransportListener<E extends DatagramEndpoi
         try {
             dispatcher.removeEndpoint(endpoint);
         } catch (IOException ex) {
-            log.error("I/O exception while stopping listener for service " + endpoint.getServiceName(), ex);
+            log.error("I/O exception while stopping listener for service " +
+                    endpoint.getServiceName(), ex);
         }
     }
 

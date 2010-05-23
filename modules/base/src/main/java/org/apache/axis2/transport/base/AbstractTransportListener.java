@@ -173,7 +173,7 @@ public abstract class AbstractTransportListener implements TransportListener {
             state = BaseConstants.STARTED;
             // register to receive updates on services for lifetime management
             // cfgCtx.getAxisConfiguration().addObservers(axisObserver);
-            log.info(getTransportName().toUpperCase() + " Listener started");
+            log.info(getTransportName().toUpperCase() + " listener started");
             // iterate through deployed services and start
             serviceTracker.start();
         }
