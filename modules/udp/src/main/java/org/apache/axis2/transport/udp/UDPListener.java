@@ -44,10 +44,6 @@ import org.apache.axis2.transport.base.datagram.DatagramDispatcherCallback;
 public class UDPListener extends AbstractDatagramTransportListener<Endpoint>
         implements ManagementSupport {
 
-    public UDPListener() {
-        this.useGlobalListener = true;
-    }
-
     @Override
     protected IODispatcher createDispatcher(DatagramDispatcherCallback callback)
             throws IOException {

@@ -45,7 +45,7 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
     /** A Map of service name to the protocol endpoints */
     private List<E> endpoints = new ArrayList<E>();
 
-    protected boolean useGlobalListener = false;
+    private boolean useGlobalListener;
 
     @Override
     public final void init(ConfigurationContext cfgCtx,
@@ -61,6 +61,7 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
         if (endpoint.loadConfiguration(transportIn)) {
             startEndpoint(endpoint);
             endpoints.add(endpoint);
+            useGlobalListener = true;
         }
     }
     
@@ -144,8 +145,10 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
                 return;
             }
         }
-        log.error("Unable to stop service : " + service.getName() +
-                " - unable to find the corresponding protocol endpoint");
+        if (!useGlobalListener) {
+            log.error("Unable to stop service : " + service.getName() +
+                    " - unable to find the corresponding protocol endpoint");
+        }
     }
     
     protected abstract void stopEndpoint(E endpoint);
