@@ -124,7 +124,7 @@ public class UDPSender extends AbstractTransportSender {
         // create the soap envelope
         try {
             MessageContext respMessageContext = messageContext.getOperationContext().getMessageContext(WSDL2Constants.MESSAGE_LABEL_IN);
-            InputStream inputStream = new ByteArrayInputStream(inputBuffer, 0, inputBuffer.length);
+            InputStream inputStream = new ByteArrayInputStream(inputBuffer, 0, packet.getLength());
             SOAPEnvelope envelope = TransportUtils.createSOAPMessage(respMessageContext, inputStream, contentType);
             respMessageContext.setEnvelope(envelope);
         } catch (XMLStreamException e) {
