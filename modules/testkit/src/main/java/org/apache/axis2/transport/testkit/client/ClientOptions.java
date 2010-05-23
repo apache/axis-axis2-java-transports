@@ -21,7 +21,7 @@ package org.apache.axis2.transport.testkit.client;
 
 import javax.mail.internet.ContentType;
 
-import org.apache.axiom.om.util.UUIDGenerator;
+import org.apache.axiom.util.UIDGenerator;
 
 public class ClientOptions {
     private final ContentType transportContentType;
@@ -45,20 +45,14 @@ public class ClientOptions {
     
     public String getMimeBoundary() {
         if (mimeBoundary == null) {
-            mimeBoundary =
-                    "MIMEBoundary"
-                            + UUIDGenerator.getUUID().replace(':', '_');
-
+            mimeBoundary = UIDGenerator.generateMimeBoundary();
         }
         return mimeBoundary;
     }
 
     public String getRootContentId() {
         if (rootContentId == null) {
-            rootContentId =
-                    "0."
-                            + UUIDGenerator.getUUID()
-                            + "@apache.org";
+            rootContentId = UIDGenerator.generateContentId();
         }
         return rootContentId;
     }

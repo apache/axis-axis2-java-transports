@@ -32,6 +32,7 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.util.UUIDGenerator;
+import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.transport.testkit.channel.AsyncChannel;
 import org.apache.axis2.transport.testkit.client.AsyncTestClient;
 import org.apache.axis2.transport.testkit.endpoint.AsyncEndpoint;
@@ -54,7 +55,7 @@ public class SwATestCase extends AsyncMessageTestCase<XMLMessage> {
         super.setUp();
         attachmentContent = new byte[8192];
         random.nextBytes(attachmentContent);
-        contentID = UUIDGenerator.getUUID();
+        contentID = UIDGenerator.generateContentId();
     }
 
     @Override
