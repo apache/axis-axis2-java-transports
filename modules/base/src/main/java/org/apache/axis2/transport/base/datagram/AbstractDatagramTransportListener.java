@@ -23,8 +23,6 @@ import java.net.SocketException;
 import java.net.SocketAddress;
 
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.transport.base.AbstractTransportListenerEx;
 
 public abstract class AbstractDatagramTransportListener<E extends DatagramEndpoint>
@@ -33,19 +31,8 @@ public abstract class AbstractDatagramTransportListener<E extends DatagramEndpoi
 	private DatagramDispatcher<E> dispatcher;
     private String defaultIp;
 	
-	@Override
-    public void init(ConfigurationContext cfgCtx, TransportInDescription transportIn)
-            throws AxisFault {
-        
-        super.init(cfgCtx, transportIn);
-        initDispatcher();
-    }
-
-    private void initDispatcher() throws AxisFault {
-        if (dispatcher != null) {
-            return;
-        }
-
+    @Override
+    protected void doInit() throws AxisFault {
         DatagramDispatcherCallback callback = new DatagramDispatcherCallback() {
 
             public void receive(SocketAddress address,
@@ -80,8 +67,6 @@ public abstract class AbstractDatagramTransportListener<E extends DatagramEndpoi
 
     @Override
     protected void startEndpoint(E endpoint) throws AxisFault {
-        initDispatcher();
-
         try {
             dispatcher.addEndpoint(endpoint);
         } catch (IOException ex) {

@@ -347,6 +347,10 @@ public abstract class AbstractTransportListener implements TransportListener {
         log.error(msg, e);
     }
 
+    public TransportInDescription getTransportInDescription() {
+        return transportIn;
+    }
+
     public String getTransportName() {
         return transportIn.getName();
     }

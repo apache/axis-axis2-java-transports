@@ -18,8 +18,6 @@
 */
 package org.apache.axis2.transport.base;
 
-import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.AxisFault;
 
 import java.util.ArrayList;
@@ -36,11 +34,8 @@ public abstract class AbstractPollingTransportListener<T extends AbstractPollTab
     private final List<T> endpoints = new ArrayList<T>();
 
     @Override
-    public void init(ConfigurationContext cfgCtx,
-            TransportInDescription transportIn) throws AxisFault {
-
+    protected void doInit() throws AxisFault {
         timer = new Timer("PollTimer");
-        super.init(cfgCtx, transportIn);
     }
 
     @Override

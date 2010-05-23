@@ -17,10 +17,8 @@ package org.apache.axis2.transport.jms;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
-import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
-import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.transport.base.AbstractTransportListenerEx;
 import org.apache.axis2.transport.base.BaseConstants;
 import org.apache.axis2.transport.base.ManagementSupport;
@@ -55,18 +53,9 @@ public class JMSListener extends AbstractTransportListenerEx<JMSEndpoint> implem
 
     private final TransportErrorSourceSupport tess = new TransportErrorSourceSupport(this);
     
-    /**
-     * TransportListener initialization
-     *
-     * @param cfgCtx the Axis configuration context
-     * @param trpInDesc the TransportIn description
-     */
     @Override
-    public void init(ConfigurationContext cfgCtx,
-        TransportInDescription trpInDesc) throws AxisFault {
-
-        super.init(cfgCtx, trpInDesc);
-        connFacManager = new JMSConnectionFactoryManager(trpInDesc);
+    protected void doInit() throws AxisFault {
+        connFacManager = new JMSConnectionFactoryManager(getTransportInDescription());
         log.info("JMS Transport Receiver/Listener initialized...");
     }
 

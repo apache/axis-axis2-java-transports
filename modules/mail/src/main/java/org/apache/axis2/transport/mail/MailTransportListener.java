@@ -22,9 +22,7 @@ package org.apache.axis2.transport.mail;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.EndpointReference;
-import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.TransportUtils;
 import org.apache.axis2.transport.RequestResponseTransport;
@@ -68,18 +66,9 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
     
     private final TransportErrorSourceSupport tess = new TransportErrorSourceSupport(this);
 
-    /**
-     * Initializes the Mail transport
-     *
-     * @param cfgCtx    the Axsi2 configuration context
-     * @param trpInDesc the POP3 transport in description from the axis2.xml
-     * @throws AxisFault on error
-     */
     @Override
-    public void init(ConfigurationContext cfgCtx, TransportInDescription trpInDesc)
-        throws AxisFault {
-        super.init(cfgCtx, trpInDesc);
-
+    protected void doInit() throws AxisFault {
+        super.doInit();
         // set the synchronise callback table
         if (cfgCtx.getProperty(BaseConstants.CALLBACK_TABLE) == null){
             cfgCtx.setProperty(BaseConstants.CALLBACK_TABLE, new ConcurrentHashMap());

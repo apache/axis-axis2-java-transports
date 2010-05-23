@@ -48,10 +48,12 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
     protected boolean useGlobalListener = false;
 
     @Override
-    public void init(ConfigurationContext cfgCtx,
+    public final void init(ConfigurationContext cfgCtx,
             TransportInDescription transportIn) throws AxisFault {
 
         super.init(cfgCtx, transportIn);
+        
+        doInit();
         
         // Create endpoint configured at transport level (if available)
         E endpoint = createEndpoint();
@@ -61,6 +63,15 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
             endpoints.add(endpoint);
         }
     }
+    
+    /**
+     * Initialize the transport. This method will be called after the initialization work in
+     * {@link AbstractTransportListener} and before the first endpoint is created, i.e. before the
+     * first call to {@link #createEndpoint()}.
+     * 
+     * @throws AxisFault
+     */
+    protected abstract void doInit() throws AxisFault;
     
     @Override
     public void destroy() {
