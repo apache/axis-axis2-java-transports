@@ -20,6 +20,7 @@
 package org.apache.axis2.transport.testkit.message;
 
 import org.apache.axiom.attachments.Attachments;
+import org.apache.axiom.om.OMDocument;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMSourcedElement;
 import org.apache.axiom.soap.SOAPEnvelope;
@@ -41,7 +42,15 @@ public class AxisMessage {
     
     public AxisMessage(MessageContext msgContext) throws Exception {
         envelope = msgContext.getEnvelope();
-        envelope.build();
+        // If possible, build the parent (i.e. the OMDocument) to make sure that the entire message is read.
+        // If the transport doesn't handle the end of the message properly, then this problem
+        // will show up here.
+        OMDocument document = (OMDocument)envelope.getParent();
+        if (document != null) {
+            document.build();
+        } else {
+            envelope.build();
+        }
         
         // TODO: quick & dirty hack to force expansion of OMSourceElement payloads
         OMElement content = envelope.getBody().getFirstElement();
