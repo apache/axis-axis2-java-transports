@@ -20,8 +20,6 @@ package org.apache.axis2.transport.base;
 
 import org.apache.axis2.AxisFault;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.TimerTask;
 import java.util.Timer;
 
@@ -30,8 +28,6 @@ public abstract class AbstractPollingTransportListener<T extends AbstractPollTab
 
     /** The main timer. */
     private Timer timer;
-    /** Keep the list of endpoints and poll durations */
-    private final List<T> endpoints = new ArrayList<T>();
 
     @Override
     protected void doInit() throws AxisFault {
