@@ -42,7 +42,9 @@ import org.apache.axis2.description.TransportInDescription;
 public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
         extends AbstractTransportListener {
     
-    /** A Map of service name to the protocol endpoints */
+    /**
+     * The collection of protocol specific endpoints managed by this transport.
+     */
     private List<E> endpoints = new ArrayList<E>();
 
     private boolean useGlobalListener;
