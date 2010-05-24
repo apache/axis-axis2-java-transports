@@ -77,7 +77,10 @@ public abstract class ProtocolEndpoint {
     
     /**
      * Get the endpoint references for this protocol endpoint.
-     * 
+     *
+     * @param service The service to build the EPR for. If {@link #getService()} returns
+     *                a non null value, then it has the same value as this parameter, which
+     *                is never null.
      * @param ip The host name or IP address of the local host. The implementation should use
      *           this information instead of {@link java.net.InetAddress#getLocalHost()}.
      *           The value of this parameter may be <code>null</code>, in which case the
@@ -88,7 +91,7 @@ public abstract class ProtocolEndpoint {
      * 
      * @see org.apache.axis2.transport.TransportListener#getEPRsForService(String, String)
      */
-    public abstract EndpointReference[] getEndpointReferences(String ip) throws AxisFault;
+    public abstract EndpointReference[] getEndpointReferences(AxisService service, String ip) throws AxisFault;
 
     public MessageContext createMessageContext() throws AxisFault {
         MessageContext msgContext = listener.createMessageContext();

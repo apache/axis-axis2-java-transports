@@ -31,6 +31,7 @@ import javax.mail.internet.InternetAddress;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
+import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.ParameterInclude;
 import org.apache.axis2.transport.base.AbstractPollTableEntry;
@@ -98,7 +99,7 @@ public class PollTableEntry extends AbstractPollTableEntry {
     }
 
     @Override
-    public EndpointReference[] getEndpointReferences(String ip) {
+    public EndpointReference[] getEndpointReferences(AxisService service, String ip) {
         return new EndpointReference[] { new EndpointReference(MailConstants.TRANSPORT_PREFIX
                 + emailAddress) };
     }

@@ -44,10 +44,15 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
     
     /**
      * The collection of protocol specific endpoints managed by this transport.
+     * This includes endpoints configured at the transport level.
      */
     private List<E> endpoints = new ArrayList<E>();
 
-    private boolean useGlobalListener;
+    /**
+     * The endpoint configured at the transport level. <code>null</code> if no
+     * such endpoint is configured.
+     */
+    private E globalEndpoint;
 
     @Override
     public final void init(ConfigurationContext cfgCtx,
@@ -63,7 +68,7 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
         if (endpoint.loadConfiguration(transportIn)) {
             startEndpoint(endpoint);
             endpoints.add(endpoint);
-            useGlobalListener = true;
+            globalEndpoint = endpoint;
         }
     }
     
@@ -106,13 +111,25 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
         }
         for (E endpoint : endpoints) {
             AxisService service = endpoint.getService();
-            if (service != null) {
-                if (service.getName().equals(serviceName)) {
-                    return endpoint.getEndpointReferences(ip);
-                }
+            if (service != null && service.getName().equals(serviceName)) {
+                return endpoint.getEndpointReferences(service, ip);
             }
         }
-        return null;
+        // If we get here, this means that the service is not explicitly configured
+        // with a specific protocol endpoint. However, it is still exposed over the
+        // transport. In this case, we build the EPR using the endpoint configured
+        // at the transport level, if there is one.
+        if (globalEndpoint != null) {
+            AxisService service = cfgCtx.getAxisConfiguration().getService(serviceName);
+            if (service == null) {
+                // Oops, something strange is happening here
+                return null;
+            } else {
+                return globalEndpoint.getEndpointReferences(service, ip);
+            }
+        } else {
+            return null;
+        }
     }
 
     public final Collection<E> getEndpoints() {
@@ -128,7 +145,7 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
         if (endpoint.loadConfiguration(service)) {
             startEndpoint(endpoint);
             endpoints.add(endpoint);
-        } else if (useGlobalListener) {
+        } else if (globalEndpoint != null) {
             return;
         } else {
             throw new AxisFault("Service doesn't have configuration information for transport " +
@@ -147,7 +164,7 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
                 return;
             }
         }
-        if (!useGlobalListener) {
+        if (globalEndpoint == null) {
             log.error("Unable to stop service : " + service.getName() +
                     " - unable to find the corresponding protocol endpoint");
         }

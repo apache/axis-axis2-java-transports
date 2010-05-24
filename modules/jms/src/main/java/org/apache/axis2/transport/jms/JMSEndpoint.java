@@ -99,7 +99,7 @@ public class JMSEndpoint extends ProtocolEndpoint {
     }
 
     @Override
-    public EndpointReference[] getEndpointReferences(String ip) {
+    public EndpointReference[] getEndpointReferences(AxisService service, String ip) {
         return endpointReferences.toArray(new EndpointReference[endpointReferences.size()]);
     }
 
