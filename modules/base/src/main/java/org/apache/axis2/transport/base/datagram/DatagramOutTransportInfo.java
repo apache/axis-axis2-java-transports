@@ -18,21 +18,8 @@ package org.apache.axis2.transport.base.datagram;
 
 import org.apache.axis2.transport.OutTransportInfo;
 
-import java.nio.channels.DatagramChannel;
-import java.net.SocketAddress;
-
 public class DatagramOutTransportInfo implements OutTransportInfo {
-    //out transport for back chanel
-    protected SocketAddress sourceAddress;
-    protected String contentType;
-
-    public SocketAddress getSourceAddress() {
-        return sourceAddress;
-    }
-
-    public void setSourceAddress(SocketAddress sourceAddress) {
-        this.sourceAddress = sourceAddress;
-    }
+    private String contentType;
 
     public String getContentType() {
         return contentType;

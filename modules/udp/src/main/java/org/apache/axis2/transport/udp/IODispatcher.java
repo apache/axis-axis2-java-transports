@@ -20,7 +20,6 @@ package org.apache.axis2.transport.udp;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
@@ -249,12 +248,12 @@ public class IODispatcher implements DatagramDispatcher<Endpoint>, Runnable {
         try {
             byte[] data = new byte[endpoint.getMaxPacketSize()];
             ByteBuffer buffer = ByteBuffer.wrap(data);
-            SocketAddress address = channel.receive(buffer);
+            InetSocketAddress address = (InetSocketAddress)channel.receive(buffer);
             int length = buffer.position();
             if (log.isDebugEnabled()) {
                 log.debug("Received packet from " + address + " with length " + length);
             }
-            callback.receive(address, endpoint, data, length);
+            callback.receive(endpoint, data, length, new UDPOutTransportInfo(address));
         } catch (IOException ex) {
             endpoint.getMetrics().incrementFaultsReceiving();
             log.error("Error receiving UDP packet", ex);

@@ -20,7 +20,6 @@ package org.apache.axis2.transport.base.datagram;
 
 import java.io.IOException;
 import java.net.SocketException;
-import java.net.SocketAddress;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.transport.base.AbstractTransportListenerEx;
@@ -35,11 +34,11 @@ public abstract class AbstractDatagramTransportListener<E extends DatagramEndpoi
     protected void doInit() throws AxisFault {
         DatagramDispatcherCallback callback = new DatagramDispatcherCallback() {
 
-            public void receive(SocketAddress address,
-                                DatagramEndpoint endpoint,
+            public void receive(DatagramEndpoint endpoint,
                                 byte[] data,
-                                int length) {
-                workerPool.execute(new ProcessPacketTask(address, endpoint, data, length));
+                                int length,
+                                DatagramOutTransportInfo outInfo) {
+                workerPool.execute(new ProcessPacketTask(endpoint, data, length, outInfo));
             }
         };
 

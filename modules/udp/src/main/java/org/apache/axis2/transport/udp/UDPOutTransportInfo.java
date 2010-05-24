@@ -18,19 +18,18 @@
  */
 package org.apache.axis2.transport.udp;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.transport.OutTransportInfo;
 import org.apache.axis2.transport.base.datagram.DatagramOutTransportInfo;
 
 /**
  * Holder of information to send an outgoing message to a UDP destination.
  */
 public class UDPOutTransportInfo extends DatagramOutTransportInfo {
-    private String host;
-    private int port;
+    private InetSocketAddress address;
 
     public UDPOutTransportInfo(String eprString) throws AxisFault {
         URI epr;
@@ -45,24 +44,19 @@ public class UDPOutTransportInfo extends DatagramOutTransportInfo {
         if (!params.startsWith("contentType=")) {
             throw new AxisFault("Invalid endpoint reference: no content type");
         }
-        host = epr.getHost();
-        port = epr.getPort();
-        contentType = params.substring(12);
+        address = new InetSocketAddress(epr.getHost(), epr.getPort());
+        setContentType(params.substring(12));
+    }
+    
+    public UDPOutTransportInfo(InetSocketAddress address) {
+        this.address = address;
     }
 
-    public String getHost() {
-        return host;
+    public InetSocketAddress getAddress() {
+        return address;
     }
 
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
+    public void setAddress(InetSocketAddress address) {
+        this.address = address;
     }
 }

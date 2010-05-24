@@ -20,8 +20,6 @@ package org.apache.axis2.transport.base.datagram;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.nio.channels.DatagramChannel;
-import java.net.SocketAddress;
 
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.context.MessageContext;
@@ -45,19 +43,16 @@ public class ProcessPacketTask implements Runnable {
     private final int length;
 
     //back channel data
-    private DatagramChannel datagramChannel;
-    private SocketAddress address;
+    private DatagramOutTransportInfo outInfo;
     
-    public ProcessPacketTask(SocketAddress address,
-                             DatagramEndpoint endpoint,
+    public ProcessPacketTask(DatagramEndpoint endpoint,
                              byte[] data,
-                             int length) {
+                             int length,
+                             DatagramOutTransportInfo outInfo) {
         this.endpoint = endpoint;
         this.data = data;
         this.length = length;
-
-        this.datagramChannel = datagramChannel;
-        this.address = address;
+        this.outInfo = outInfo;
     }
     
     public void run() {
@@ -68,12 +63,12 @@ public class ProcessPacketTask implements Runnable {
             SOAPEnvelope envelope = TransportUtils.createSOAPMessage(msgContext, inputStream, endpoint.getContentType());
             msgContext.setEnvelope(envelope);
 
-            //create and out transport info object
-            DatagramOutTransportInfo datagramOutTransportInfo = new DatagramOutTransportInfo();
-            datagramOutTransportInfo.setContentType(endpoint.getContentType());
-            datagramOutTransportInfo.setSourceAddress(address);
-
-            msgContext.setProperty(Constants.OUT_TRANSPORT_INFO, datagramOutTransportInfo);
+            if (outInfo != null) {
+                if (outInfo.getContentType() == null) {
+                    outInfo.setContentType(endpoint.getContentType());
+                }
+                msgContext.setProperty(Constants.OUT_TRANSPORT_INFO, outInfo);
+            }
 
             AxisEngine.receive(msgContext);
             metrics.incrementMessagesReceived();

@@ -18,12 +18,22 @@
  */
 package org.apache.axis2.transport.base.datagram;
 
-import java.nio.channels.DatagramChannel;
-import java.net.SocketAddress;
-
 public interface DatagramDispatcherCallback {
-    void receive(SocketAddress address,
-                 DatagramEndpoint endpoint,
+    /**
+     * Receive a message and inject it into the Axis2 engine.
+     * 
+     * @param endpoint
+     *            the endpoint that received the message
+     * @param data
+     *            the data of the message
+     * @param length
+     *            the length of the message
+     * @param outInfo
+     *            The out transport information that should be used to send back a response. This
+     *            should only be set by transports that support an explicit back channel.
+     */
+    void receive(DatagramEndpoint endpoint,
                  byte[] data,
-                 int length);
+                 int length,
+                 DatagramOutTransportInfo outInfo);
 }
