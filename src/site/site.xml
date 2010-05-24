@@ -19,9 +19,8 @@
 <project name="Axis2 Transports">
 
     <bannerLeft>
-        <name>Axis2 Transport</name>
-        <src>http://ws.apache.org/images/project-logo.jpg</src>
-        <href>http://ws.apache.org/</href>
+        <name></name>
+        <href>http://ws.apache.org/commons/transports</href>
     </bannerLeft>
 
     <bannerRight>

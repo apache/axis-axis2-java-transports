@@ -67,19 +67,91 @@ JMS Transport
   The parameters that may appear in a connection factory configuration are defined as follows:
   
     [<<<java.naming.factory.initial>>>]
-    TODO
+    REQUIRED - JNDI initial context factory class. The class must implement the java.naming.spi.InitialContextFactory interface. 
     
     [<<<java.naming.provider.url>>>]
-    TODO
+    REQUIRED - URL of the JNDI provider
     
     [<<<transport.jms.ConnectionFactoryJNDIName>>>]
-    TODO
+    REQUIRED - The JNDI name of the connection factory
+
+    [<<<java.naming.security.principal>>>]
+    JNDI Username
+
+    [<<<java.naming.security.credentials>>>]
+    JNDI password
+
+    [<<<transport.Transactionality>>>]
+    Desired mode of transactionality. possible values are 'none', 'local' or 'jta', while it defaults to 'none'
+
+    [<<<transport.UserTxnJNDIName>>>]
+    JNDI name to be used to require user transaction
+
+    [<<<transport.CacheUserTxn>>>]
+    Whether caching for user transactions should be enabled or not. Possible values are 'true' or 'false', while the value defaults to 'true'
+
+    [<<<transport.jms.SessionTransacted>>>]
+    Whether the JMS session be transacted or not. Possible values are 'true' or 'false', while the value defaults to 'true' if the transactionality is 'local'
+
+    [<<<transport.jms.SessionAcknowledgement>>>]
+    JMS session acknowledgement mode. Possible values are AUTO_ACKNOWLEDGE, CLIENT_ACKNOWLEDGE, DUPS_OK_ACKNOWLEDGE, SESSION_TRANSACTED. Default value is AUTO_ACKNOWLEDGE
+
+    [<<<transport.jms.ConnectionFactoryType>>>]
+    Type of the connection factory. Possible values are 'queue' or 'topic' while the default value of 'queue'
     
     [<<<transport.jms.JMSSpecVersion>>>]
-    TODO
+    JMS API version. Possible values are 1.1 or 1.0.2b, and the default API version is 1.1
+
+    [<<<transport.jms.UserName>>>]
+    The JMS connection username
+
+    [<<<transport.jms.Password>>>]
+    The JMS connection password
+
+    [<<<transport.jms.DefaultReplyDestination>>>]
+    JNDI name of the default reply destination
     
+    [<<<transport.jms.DefaultReplyDestinationType>>>]
+    Default type of the reply destination, if not provided the destination type will be taken as the reply destination type as well
+
+    [<<<transport.jms.MessageSelector>>>]
+    Message selector implementation
+
+    [<<<transport.jms.SubscriptionDurable>>>]
+    Whether the connection factory is subscription durable or not. Possible values are 'true' or 'false', while the value defaults to 'false'
+
+    [<<<transport.jms.DurableSubscriberName>>>]
+    Name of the durable subscriber. This is required if the above parameter is set to 'true'
+
+    [<<<transport.jms.PubSubNoLocal>>>]
+    Whether the messages should be published by the same connection they were received. Possible values are 'true' or 'false', while the value defaults to 'false'
+
     [<<<transport.jms.CacheLevel>>>]
-    TODO
+    JMS resource cache level. Possible values are 'none', 'connection', 'session', 'consumer', 'producer', 'auto' and defaults to 'auto'
+    
+    [<<<transport.jms.ReceiveTimeout>>>]
+    Time to wait for a JMS message during polling. Set this parameter value to a negative integer to wait indefinitely. Set to zero to prevent waiting and the default value is 1000ms
+
+    [<<<transport.jms.ConcurrentConsumers>>>]
+    Number of concurrent threads to be started to consume messages when polling. Defaults to 1, and the value should be a positive integer. For topics it has to be always 1
+
+    [<<<transport.jms.MaxConcurrentConsumers>>>]
+    Maximum number of concurrent threads to use during polling. Defaults to 1, and the value should be a positive integer. For topics it has to be always 1
+
+    [<<<transport.jms.IdleTaskLimit>>>]
+    The number of idle runs per thread before it dies out, which defaults to 10
+
+    [<<<transport.jms.MaxMessagesPerTask>>>]
+    The maximum number of successful message receipts per thread. Defaults to -1 meaning the infinity
+
+    [<<<transport.jms.InitialReconnectDuration>>>]
+    Initial reconnection attempts duration in milliseconds, which defaults to 1000ms
+
+    [<<<transport.jms.ReconnectProgressFactor>>>]
+    Factor by which the reconnection duration will be increased, which defaults to 2.
+
+    [<<<transport.jms.MaxReconnectDuration>>>]
+    Maximum reconnection duration in milliseconds, which defaults to 3600000ms (1 hr)
 
 * {Transport listener}
 
@@ -116,6 +188,8 @@ JMS Transport
   is interpreted as the SOAP action.
 
 ** {Service configuration}
+
+  Apart from the following list most of the parameters defined in the global connection factory can be overriden at the service level as well
 
   [<<<transport.jms.ConnectionFactory>>> (Optional)]
   The JMS connection factory definition (from <<<axis2.xml>>>) to be used to
@@ -222,33 +296,11 @@ param = param-name "=" param-value
     [<<<transport.jms.ConnectionFactory>>> (Optional)]
     The JMS connection factory definition (from <<<axis2.xml>>>) to be used to send messages to
     the endpoint.
-    
-    [<<<transport.jms.ConnectionFactoryJNDIName>>>]
-    TODO
-  
-    [<<<transport.jms.DestinationType>>>]
-    TODO
-  
-    [<<<transport.jms.ReplyDestination>>>]
-    TODO
-  
-    [<<<transport.jms.ReplyDestinationType>>>]
-    TODO
   
     [<<<transport.jms.ContentTypeProperty>>>]
     The name of the message property to store the content type of messages sent to the endpoint.
   
-    [<<<java.naming.factory.initial>>>]
-    TODO
-
-    [<<<java.naming.provider.url>>>]
-    TODO
-  
-    [<<<java.naming.security.principal>>>]
-    TODO
-  
-    [java.naming.security.credentials]
-    TODO
+ All the above listed parameters under the connection factory configuration are applied to the JMS EPR as well, apart from these.
   
   If no connection factory definition is explicitly specified using the
   <<<transport.jms.ConnectionFactory>>> parameter, the JMS sender will check if the transport
