@@ -22,6 +22,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
@@ -53,8 +54,23 @@ public abstract class ProtocolEndpoint {
         return service;
     }
 
+    /**
+     * Get the name of the service to which messages received by this endpoint are pre-dispatched.
+     * 
+     * @return the name of the service, or <code>null</code> if message are not pre-dispatched
+     */
     public final String getServiceName() {
-        return service.getName();
+        return service == null ? null : service.getName();
+    }
+    
+    /**
+     * Get the Axis2 configuration context. This is a convenience method that can be used by
+     * subclasses to get the {@link ConfigurationContext} object from the listener.
+     * 
+     * @return the configuration context
+     */
+    protected final ConfigurationContext getConfigurationContext() {
+        return listener.getConfigurationContext();
     }
 
     /**
@@ -93,6 +109,16 @@ public abstract class ProtocolEndpoint {
      */
     public abstract EndpointReference[] getEndpointReferences(AxisService service, String ip) throws AxisFault;
 
+    /**
+     * Get a short description of this endpoint suitable for inclusion in log messages.
+     * 
+     * @return a short description of the endpoint
+     */
+    // TODO: we should implement this method in all derived transports and make it abstract here
+    public String getDescription() {
+        return toString();
+    }
+    
     public MessageContext createMessageContext() throws AxisFault {
         MessageContext msgContext = listener.createMessageContext();
         

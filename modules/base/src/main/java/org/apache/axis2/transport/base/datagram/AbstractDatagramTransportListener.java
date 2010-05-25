@@ -70,12 +70,10 @@ public abstract class AbstractDatagramTransportListener<E extends DatagramEndpoi
             dispatcher.addEndpoint(endpoint);
         } catch (IOException ex) {
             // TODO: passing endpoint.getService() is not correct because it may be null
-            throw new AxisFault("Unable to listen on endpoint "
-                    + endpoint.getEndpointReferences(endpoint.getService(), defaultIp)[0], ex);
+            throw new AxisFault("Unable to listen on endpoint " + endpoint.getDescription(), ex);
         }
         if (log.isDebugEnabled()) {
-            log.debug("Started listening on endpoint " +
-                    endpoint.getEndpointReferences(endpoint.getService(), defaultIp)[0] +
+            log.debug("Started listening on endpoint " + endpoint.getDescription() +
                     " [contentType=" + endpoint.getContentType() +
                     "; service=" + endpoint.getServiceName() + "]");
         }

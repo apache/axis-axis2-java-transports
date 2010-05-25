@@ -44,6 +44,11 @@ public class Endpoint extends DatagramEndpoint {
     }
 
     @Override
+    public String getDescription() {
+        return "*:" + port;
+    }
+
+    @Override
     public boolean loadConfiguration(ParameterInclude params) throws AxisFault {
         port = ParamUtils.getOptionalParamInt(params, UDPConstants.PORT_KEY, -1);
         if (port == -1) {
@@ -63,7 +68,20 @@ public class Endpoint extends DatagramEndpoint {
 	            throw new AxisFault("Unable to determine the host's IP address", ex);
 	        }
 	    }
-        return new EndpointReference[] { new EndpointReference("udp://" + ip + ":" + getPort()
-                + "?contentType=" + getContentType()) };
+	    StringBuilder epr = new StringBuilder("udp://");
+	    epr.append(ip);
+	    epr.append(':');
+	    epr.append(getPort());
+	    // If messages are predispatched to a service, then WS-Addressing will be used and we
+	    // need to include the service path in the EPR.
+	    if (getService() == null) {
+	        epr.append('/');
+	        epr.append(getConfigurationContext().getServiceContextPath());
+            epr.append('/');
+	        epr.append(service.getName());
+	    }
+	    epr.append("?contentType=");
+	    epr.append(getContentType());
+        return new EndpointReference[] { new EndpointReference(epr.toString()) };
     }
 }

@@ -57,9 +57,17 @@ JMS Transport
   [<<<transport.udp.maxPacketSize>>> (optional, defaults to 1024)]
   The maximum UDP packet size.
 
-** {Examples}
+* {Transport sender}
 
-*** {Enabling SOAP over UDP at the transport level}
+  The UDP transport sender can be enabled in <<<axis2.xml>>> using the following declaration:
+
++----------------------------+
+<transportSender name="udp" class="org.apache.axis2.transport.udp.UDPSender"/>
++----------------------------+
+
+* {Examples}
+
+** {Enabling SOAP over UDP at the transport level}
 
   The following declaration in <<<axis2.xml>>> enables SOAP over UDP on port 3333 and
   allows all services (for which UDP is in the list of exposed transports) to receive
@@ -78,4 +86,34 @@ JMS Transport
   
 +----------------------------+
 <module ref="addressing"/>
++----------------------------+
+
+  With the configuration shown above, the UDP transport would generate bindings with the
+  following EPR:
+
++----------------------------+
+udp://localhost:3333/axis2/services/Version?contentType=text/xml
++----------------------------+
+
+  The following example shows a message that can be sent to the Version service over UDP:
+
++----------------------------+
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+                   xmlns:wsa="http://www.w3.org/2005/08/addressing">
+    <SOAP-ENV:Header>
+        <wsa:MessageID>1234</wsa:MessageID>
+        <wsa:To>udp://localhost:3333/axis2/services/Version?contentType=text/xml</wsa:To>
+        <wsa:Action>urn:getVersion</wsa:Action>
+    </SOAP-ENV:Header>
+    <SOAP-ENV:Body>
+    </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
++----------------------------+
+
+  On most Linux/Unix systems (including Mac OS X), the <<<nc>>> utility is available to send
+  UDP messages and can be used to test the transport. To do this, save the message into
+  <<<test-message.xml>>> and execute the following command:
+
++----------------------------+
+nc -u 127.0.0.1 3333 < test-message.xml
 +----------------------------+

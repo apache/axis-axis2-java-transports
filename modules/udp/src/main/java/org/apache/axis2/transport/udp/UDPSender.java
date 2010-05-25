@@ -73,6 +73,9 @@ public class UDPSender extends AbstractTransportSender {
         byte[] payload = messageFormatter.getBytes(msgContext, format);
         try {
             DatagramSocket socket = new DatagramSocket();
+            if (log.isDebugEnabled()) {
+                log.debug("Sending " + payload.length + " bytes to " + udpOutInfo.getAddress());
+            }
             try {
                 socket.send(new DatagramPacket(payload, payload.length, udpOutInfo.getAddress()));
                 if (!msgContext.getOptions().isUseSeparateListener() &&
