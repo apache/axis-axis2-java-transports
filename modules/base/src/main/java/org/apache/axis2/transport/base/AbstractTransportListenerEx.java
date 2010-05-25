@@ -43,10 +43,9 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
         extends AbstractTransportListener {
     
     /**
-     * The collection of protocol specific endpoints managed by this transport.
-     * This includes endpoints configured at the transport level.
+     * The collection of protocol specific endpoints configured at the service level.
      */
-    private List<E> endpoints = new ArrayList<E>();
+    private List<E> serviceEndpoints = new ArrayList<E>();
 
     /**
      * The endpoint configured at the transport level. <code>null</code> if no
@@ -66,8 +65,6 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
         E endpoint = createEndpoint();
         endpoint.init(this, null);
         if (endpoint.loadConfiguration(transportIn)) {
-            startEndpoint(endpoint);
-            endpoints.add(endpoint);
             globalEndpoint = endpoint;
         }
     }
@@ -82,21 +79,23 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
     protected abstract void doInit() throws AxisFault;
     
     @Override
-    public void destroy() {
-        // Explicitly stop all endpoints not predispatched to services. All other endpoints will
+    public void start() throws AxisFault {
+        super.start();
+        // Explicitly start the endpoint configured at the transport level. All other endpoints will
+        // be started by startListeningForService.
+        if (globalEndpoint != null) {
+            startEndpoint(globalEndpoint);
+        }
+    }
+
+    @Override
+    public void stop() throws AxisFault {
+        super.stop();
+        // Explicitly stop the endpoint configured at the transport level. All other endpoints will
         // be stopped by stopListeningForService.
-        List<E> endpointsToStop = new ArrayList<E>();
-        for (E endpoint : endpoints) {
-            if (endpoint.getService() == null) {
-                endpointsToStop.add(endpoint);
-            }
+        if (globalEndpoint != null) {
+            stopEndpoint(globalEndpoint);
         }
-        for (E endpoint : endpointsToStop) {
-            stopEndpoint(endpoint);
-            endpoints.remove(endpoint);
-        }
-        
-        super.destroy();
     }
 
     @Override
@@ -109,9 +108,9 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
         if (serviceName.indexOf('.') != -1) {
             serviceName = serviceName.substring(0, serviceName.indexOf('.'));
         }
-        for (E endpoint : endpoints) {
+        for (E endpoint : serviceEndpoints) {
             AxisService service = endpoint.getService();
-            if (service != null && service.getName().equals(serviceName)) {
+            if (service.getName().equals(serviceName)) {
                 return endpoint.getEndpointReferences(service, ip);
             }
         }
@@ -132,8 +131,21 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
         }
     }
 
+    /**
+     * Get the collection of all protocol endpoints managed by this transport, including the
+     * endpoint configured at the transport level.
+     * 
+     * @return the collection of all protocol endpoints
+     */
     public final Collection<E> getEndpoints() {
-        return Collections.unmodifiableCollection(endpoints);
+        if (globalEndpoint == null) {
+            return Collections.unmodifiableCollection(serviceEndpoints);
+        } else {
+            List<E> endpoints = new ArrayList<E>(serviceEndpoints.size() + 1);
+            endpoints.add(globalEndpoint);
+            endpoints.addAll(serviceEndpoints);
+            return endpoints;
+        }
     }
 
     protected abstract E createEndpoint();
@@ -144,7 +156,7 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
         endpoint.init(this, service);
         if (endpoint.loadConfiguration(service)) {
             startEndpoint(endpoint);
-            endpoints.add(endpoint);
+            serviceEndpoints.add(endpoint);
         } else if (globalEndpoint != null) {
             return;
         } else {
@@ -157,10 +169,10 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
 
     @Override
     protected final void stopListeningForService(AxisService service) {
-        for (E endpoint : endpoints) {
+        for (E endpoint : serviceEndpoints) {
             if (service == endpoint.getService()) {
                 stopEndpoint(endpoint);
-                endpoints.remove(endpoint);
+                serviceEndpoints.remove(endpoint);
                 return;
             }
         }
