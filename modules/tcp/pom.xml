@@ -67,6 +67,8 @@
     	                              tofile="target/test-resources/samples/modules/addressing.mar"/>
                                 <copy file="conf/axis2.xml"
     	                              tofile="target/test-resources/samples/conf/axis2.xml"/>
+                                <copy file="conf/client_axis2.xml"
+    	                              tofile="target/test-resources/samples/conf/client_axis2.xml"/>
                             </tasks>
                         </configuration>
                        <goals>

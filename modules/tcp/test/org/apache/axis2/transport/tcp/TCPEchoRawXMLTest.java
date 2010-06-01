@@ -42,6 +42,7 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.OutInAxisOperation;
+import org.apache.axis2.description.Parameter;
 import org.apache.axis2.util.Utils;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
@@ -90,6 +91,7 @@ public class TCPEchoRawXMLTest extends TestCase {
 
     protected void tearDown() throws Exception {
         UtilsTCPServer.stop();
+        configContext.getListenerManager().destroy();
     }
 
     private OMElement createPayload() {
@@ -188,10 +190,7 @@ public class TCPEchoRawXMLTest extends TestCase {
 
     }
 
-    public void testEchoXMLSyncMC() throws Exception {
-        ConfigurationContext configContext =
-                ConfigurationContextFactory.createConfigurationContextFromFileSystem(Constants.TESTING_REPOSITORY, Constants.TESTING_REPOSITORY + "/conf/axis2.xml");
-
+    public void testEchoXMLSyncMC() throws Exception {        
         AxisOperation opdesc = new OutInAxisOperation(new QName("echoOMElement"));
         Options options = new Options();
         options.setTo(targetEPR);

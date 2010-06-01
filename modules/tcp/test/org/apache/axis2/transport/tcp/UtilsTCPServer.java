@@ -24,7 +24,6 @@ import org.apache.axis2.Constants;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.description.AxisService;
-import org.apache.axis2.transport.tcp.TCPServer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -35,7 +34,7 @@ import java.io.File;
 public class UtilsTCPServer {
     private static int count = 0;
 
-    private static TCPServer receiver;
+    private static TCPTransportListener receiver;
 
     public static final int TESTING_PORT = 5555;
 
@@ -66,16 +65,16 @@ public class UtilsTCPServer {
                 throw new Exception("Repository directory does not exist");
             }
             ConfigurationContext er =
-                ConfigurationContextFactory.createConfigurationContextFromFileSystem(file.getAbsolutePath(), 
-                                                                                     file.getAbsolutePath() + "/conf/axis2.xml");
+                ConfigurationContextFactory.createConfigurationContextFromFileSystem(
+                        file.getAbsolutePath(), file.getAbsolutePath() + "/conf/axis2.xml");
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e1) {
                 throw new AxisFault("Thread interuptted", e1);
             }
-            receiver = new TCPServer(TESTING_PORT, er);
+            receiver = new TCPTransportListener();
+            receiver.init(er, er.getAxisConfiguration().getTransportIn(Constants.TRANSPORT_TCP));
             receiver.start();
-
         }
         count++;
     }
@@ -84,6 +83,7 @@ public class UtilsTCPServer {
         try {
             if (count == 1) {
                 receiver.stop();
+                receiver.destroy();
                 count = 0;
                 System.out.print("Server stopped .....");
             } else {
@@ -98,8 +98,8 @@ public class UtilsTCPServer {
     public static ConfigurationContext createClientConfigurationContext() throws Exception {
         File file = new File(prefixBaseDirectory(Constants.TESTING_REPOSITORY));
         ConfigurationContext configContext = 
-            ConfigurationContextFactory.createConfigurationContextFromFileSystem(file.getAbsolutePath(), 
-                                                                                 file.getAbsolutePath() + "/conf/axis2.xml");
+            ConfigurationContextFactory.createConfigurationContextFromFileSystem(
+                    file.getAbsolutePath(), file.getAbsolutePath() + "/conf/client_axis2.xml");
         return configContext;
     }
 

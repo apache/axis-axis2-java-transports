@@ -21,113 +21,128 @@
 package org.apache.axis2.transport.tcp;
 
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.addressing.EndpointReference;
-import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.description.OutInAxisOperation;
+import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.description.TransportOutDescription;
-import org.apache.axis2.handlers.AbstractHandler;
-import org.apache.axis2.i18n.Messages;
-import org.apache.axis2.transport.TransportSender;
+import org.apache.axis2.transport.OutTransportInfo;
 import org.apache.axis2.transport.TransportUtils;
-import org.apache.axis2.util.URL;
+import org.apache.axis2.transport.base.AbstractTransportSender;
+import org.apache.axiom.soap.SOAPEnvelope;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
-import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
-import java.net.Socket;
-import java.net.SocketAddress;
+import java.net.*;
+import java.util.Map;
+import java.util.HashMap;
 
-public class TCPTransportSender extends AbstractHandler implements TransportSender {
-    protected Writer out;
-    private Socket socket;
+public class TCPTransportSender extends AbstractTransportSender {
 
-    public void init(ConfigurationContext confContext, TransportOutDescription transportOut)
-            throws AxisFault {
-    }
+    public void sendMessage(MessageContext msgContext, String targetEPR,
+                            OutTransportInfo outTransportInfo) throws AxisFault {
 
-    public void stop() {
-    }
-
-    public void cleanup(MessageContext msgContext) throws AxisFault {
-        try {
-            if (socket != null) {
-                socket.close();
-                socket = null;
+        if (targetEPR != null) {
+            Map<String,String> params = getURLParameters(targetEPR);
+            int timeout = -1;
+            if (params.containsKey("timeout")) {
+                timeout = Integer.parseInt(params.get("timeout"));
             }
-        } catch (IOException e) {
-            // TODO: Log this?
+            Socket socket = openTCPConnection(targetEPR, timeout);
+            msgContext.setProperty(TCPConstants.TCP_OUTPUT_SOCKET, socket);
+
+            try {
+                TransportUtils.writeMessage(msgContext, socket.getOutputStream());
+                if (!msgContext.getOptions().isUseSeparateListener() && !msgContext.isServerSide()){
+                    waitForReply(msgContext, socket, params.get("contentType"));
+                }
+            } catch (IOException e) {
+                handleException("Error while sending a TCP request", e);
+            }
+
+        } else if (outTransportInfo != null && (outTransportInfo instanceof TCPOutTransportInfo)) {
+            TCPOutTransportInfo outInfo = (TCPOutTransportInfo) outTransportInfo;
+            try {
+                TransportUtils.writeMessage(msgContext, outInfo.getSocket().getOutputStream());
+            } catch (IOException e) {
+                handleException("Error while sending a TCP response", e);
+            } finally {
+                closeConnection(outInfo.getSocket());
+            }
         }
     }
 
-    /**
-     * Method invoke
-     *
-     * @param msgContext
-     * @throws AxisFault
-     */
-    public InvocationResponse invoke(MessageContext msgContext) throws AxisFault {
+    @Override
+    public void cleanup(MessageContext msgContext) throws AxisFault {
+        Object socketObj = msgContext.getProperty(TCPConstants.TCP_OUTPUT_SOCKET);
+        if (socketObj != null) {
+            closeConnection((Socket) socketObj);
+        }
+    }
 
-        // Check for the REST behaviour, if you desire rest beahaviour
-        // put a <parameter name="doREST" value="true"/> at the axis2.xml
-        msgContext.setDoingMTOM(TransportUtils.doWriteMTOM(msgContext));
-        msgContext.setDoingSwA(TransportUtils.doWriteSwA(msgContext));
+    private void waitForReply(MessageContext msgContext, Socket socket,
+                              String contentType) throws AxisFault {
 
-        OutputStream out;
-        EndpointReference epr = null;
-
-        if (msgContext.getTo() != null && !msgContext.getTo().hasAnonymousAddress()) {
-            epr = msgContext.getTo();
+        if (!(msgContext.getAxisOperation() instanceof OutInAxisOperation) &&
+                msgContext.getProperty(org.apache.axis2.Constants.PIGGYBACK_MESSAGE) == null) {
+            return;
         }
 
-        if (epr != null) {
-            if (!epr.hasNoneAddress()) {
-                out = openTheConnection(epr, msgContext);
-                TransportUtils.writeMessage(msgContext, out);
-                try {
-                    socket.shutdownOutput();
-                    msgContext.setProperty(MessageContext.TRANSPORT_IN, socket.getInputStream());
-                } catch (IOException e) {
-                    throw AxisFault.makeFault(e);
+        if (contentType == null) {
+            contentType = TCPConstants.TCP_DEFAULT_CONTENT_TYPE;
+        }
+
+        try {
+            MessageContext responseMsgCtx = createResponseMessageContext(msgContext);
+            SOAPEnvelope envelope = TransportUtils.createSOAPMessage(msgContext,
+                        socket.getInputStream(), contentType);
+            responseMsgCtx.setEnvelope(envelope);
+            AxisEngine.receive(responseMsgCtx);
+        } catch (Exception e) {
+            handleException("Error while processing response", e);
+        }
+    }
+
+    private Map<String,String> getURLParameters(String url) throws AxisFault {
+        try {
+            Map<String,String> params = new HashMap<String,String>();
+            URI tcpUrl = new URI(url);
+            String query = tcpUrl.getQuery();
+            if (query != null) {
+                String[] paramStrings = query.split("&");
+                for (String p : paramStrings) {
+                    int index = p.indexOf('=');
+                    params.put(p.substring(0, index), p.substring(index+1));
                 }
             }
-        } else {
-            out = (OutputStream) msgContext.getProperty(MessageContext.TRANSPORT_OUT);
-
-            if (out != null) {
-                TransportUtils.writeMessage(msgContext, out);
-            } else {
-                throw new AxisFault(
-                        "Both the TO and Property MessageContext.TRANSPORT_OUT is Null, No where to send");
-            }
+            return params;
+        } catch (URISyntaxException e) {
+            handleException("Malformed tcp url", e);
         }
-
-        TransportUtils.setResponseWritten(msgContext, true);
-        
-        return InvocationResponse.CONTINUE;
+        return null;
     }
 
-    protected OutputStream openTheConnection(EndpointReference toURL, MessageContext msgContext)
-            throws AxisFault {
-        if (toURL != null) {
-            try {
-                URL url = new URL(toURL.getAddress());
-                SocketAddress add = new InetSocketAddress(url.getHost(), (url.getPort() == -1)
-                        ? 80
-                        : url.getPort());
-
-                socket = new Socket();
-                socket.connect(add);
-
-                return socket.getOutputStream();
-            } catch (MalformedURLException e) {
-                throw AxisFault.makeFault(e);
-            } catch (IOException e) {
-                throw AxisFault.makeFault(e);
+    private Socket openTCPConnection(String url, int timeout) throws AxisFault {
+        try {
+            URI tcpUrl = new URI(url);
+            if (!tcpUrl.getScheme().equals("tcp")) {
+                throw new Exception("Invalid protocol prefix : " + tcpUrl.getScheme());
             }
-        } else {
-            throw new AxisFault(Messages.getMessage("canNotBeNull", "End point reference"));
+            SocketAddress address = new InetSocketAddress(tcpUrl.getHost(), tcpUrl.getPort());
+            Socket socket = new Socket();
+            if (timeout != -1) {
+                socket.setSoTimeout(timeout);
+            }
+            socket.connect(address);
+            return socket;
+        } catch (Exception e) {
+            handleException("Error while opening TCP connection to : " + url, e);
+        }
+        return null;
+    }
+
+    private void closeConnection(Socket socket) {
+        try {
+            socket.close();
+        } catch (IOException e) {
+            log.error("Error while closing a TCP socket", e);
         }
     }
 }

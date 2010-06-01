@@ -17,101 +17,81 @@
  * under the License.
  */
 
-
 package org.apache.axis2.transport.tcp;
 
-import org.apache.axiom.om.OMXMLParserWrapper;
 import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
-import org.apache.axis2.builder.BuilderUtil;
-import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.transport.TransportUtils;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.description.TransportInDescription;
-import org.apache.axis2.description.TransportOutDescription;
-import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.AxisEngine;
-import org.apache.axis2.i18n.Messages;
 import org.apache.axis2.util.MessageContextBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.Reader;
 import java.net.Socket;
 
 /**
  * This Class is the work hoarse of the TCP request, this process the incomming SOAP Message.
  */
 public class TCPWorker implements Runnable {
+
     private static final Log log = LogFactory.getLog(TCPWorker.class);
-    private ConfigurationContext configurationContext;
+
+    private TCPEndpoint endpoint;
     private Socket socket;
 
-    public TCPWorker(ConfigurationContext configurationContext, Socket socket) {
-        this.configurationContext = configurationContext;
+    public TCPWorker(TCPEndpoint endpoint, Socket socket) {
+        this.endpoint = endpoint;
         this.socket = socket;
     }
 
     public void run() {
+
         MessageContext msgContext = null;
 
         try {
-            AxisConfiguration axisConf = configurationContext.getAxisConfiguration();
-            TransportOutDescription transportOut =
-                    axisConf.getTransportOut(Constants.TRANSPORT_TCP);
-            TransportInDescription transportIn =
-                    axisConf.getTransportIn(Constants.TRANSPORT_TCP);
+            msgContext = endpoint.createMessageContext();
+            msgContext.setIncomingTransportName(Constants.TRANSPORT_TCP);
+            //msgContext.setTransportIn(endpoint.getListener().getTransportInDescription());
 
-            if ((transportOut != null) && (transportIn != null)) {
+            TCPOutTransportInfo outInfo = new TCPOutTransportInfo();
+            outInfo.setSocket(socket);
+            outInfo.setContentType(endpoint.getContentType());
+            msgContext.setProperty(Constants.OUT_TRANSPORT_INFO, outInfo);
 
-                // create the Message Context and fill in the values
-                msgContext = configurationContext.createMessageContext();
-                msgContext.setIncomingTransportName(Constants.TRANSPORT_TCP);
-                msgContext.setTransportIn(transportIn);
-                msgContext.setTransportOut(transportOut);
-                msgContext.setServerSide(true);
+            // create the SOAP Envelope
+            SOAPEnvelope envelope = TransportUtils.createSOAPMessage(msgContext,
+                    socket.getInputStream(), endpoint.getContentType());
+            msgContext.setEnvelope(envelope);
 
-                OutputStream out = socket.getOutputStream();
+            AxisEngine.receive(msgContext);
 
-                msgContext.setProperty(MessageContext.TRANSPORT_OUT, out);
+        } catch (Exception e) {
+            sendFault(msgContext, e);
 
-                // create the SOAP Envelope
-                Reader in = new InputStreamReader(socket.getInputStream());
-                OMXMLParserWrapper builder = BuilderUtil.getBuilder(in);
-                SOAPEnvelope envelope = (SOAPEnvelope) builder.getDocumentElement();
-
-                msgContext.setEnvelope(envelope);
-                AxisEngine.receive(msgContext);
-            } else {
-                throw new AxisFault(Messages.getMessage("unknownTransport",
-                                                        Constants.TRANSPORT_TCP));
-            }
-        } catch (Throwable e) {
-            log.error(e.getMessage(), e);
-            try {
-
-                if (msgContext != null) {
-                    msgContext.setProperty(MessageContext.TRANSPORT_OUT, socket.getOutputStream());
-
-                    MessageContext faultContext =
-                            MessageContextBuilder.createFaultMessageContext(msgContext, e);
-
-                    AxisEngine.sendFault(faultContext);
-                }
-            } catch (Exception e1) {
-                log.error(e1.getMessage(), e1);
-            }
         } finally {
-            if (socket != null) {
-                try {
-                    this.socket.close();
-                } catch (IOException e1) {
-                    // Do nothing
-                }
+            try {
+                socket.close();
+            } catch (IOException e) {
+                log.error("Error while closing a TCP socket", e);
             }
+        }
+    }
+
+    private void sendFault(MessageContext msgContext, Exception fault) {
+        log.error("Error while processing TCP request through the Axis2 engine", fault);
+        try {
+            if (msgContext != null) {
+                msgContext.setProperty(MessageContext.TRANSPORT_OUT, socket.getOutputStream());
+
+                MessageContext faultContext =
+                        MessageContextBuilder.createFaultMessageContext(msgContext, fault);
+
+                AxisEngine.sendFault(faultContext);
+            }
+        } catch (Exception e) {
+            log.error("Error while sending the fault response", e);
         }
     }
 }

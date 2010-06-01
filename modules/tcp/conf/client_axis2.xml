@@ -138,12 +138,7 @@
 
     <transportReceiver name="tcp"
                        class="org.apache.axis2.transport.tcp.TCPTransportListener">
-        <parameter name="transport.tcp.port">5555</parameter>
-        <!--If you want to give your own host address for EPR generation-->
-        <!--uncommet following paramter , and set as you required.-->
-        <!--<parameter name="transport.tcp.hostname">tcp://myApp.com/ws</parameter>-->
-        <!--parameter name="transport.tcp.contentType">text/xml</parameter-->
-        <!--<parameter name="transport.tcp.backlog">50</parameter>-->
+        <parameter name="transport.tcp.port">5556</parameter>
     </transportReceiver>
 
     <transportSender name="tcp"
@@ -155,7 +150,7 @@
     <!-- ================================================= -->
     <!-- Use the following pattern to configure this axis2
          instance to act in particular roles. Note that in
-         the absence of any configuration, Axis2 will act 
+         the absence of any configuration, Axis2 will act
          only in the ultimate receiver role -->
     <!--
     <SOAPRoleConfiguration isUltimateReceiver="true">

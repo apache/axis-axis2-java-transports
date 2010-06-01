@@ -79,6 +79,7 @@ public class TCPTwoChannelEchoRawXMLTest extends TestCase {
 
     protected void tearDown() throws Exception {
         UtilsTCPServer.stop();
+        configContext.getListenerManager().destroy();
     }
 
     public void testEchoXMLCompleteASync() throws Exception {
