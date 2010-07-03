@@ -163,7 +163,7 @@ public class ServiceTaskManager {
         }
 
         if (cacheLevel == JMSConstants.CACHE_AUTO) {
-			cacheLevel = 
+            cacheLevel = 
                 transactionality == BaseConstants.TRANSACTION_NONE ?
                     JMSConstants.CACHE_CONSUMER : JMSConstants.CACHE_NONE;
         }
@@ -397,10 +397,10 @@ public class ServiceTaskManager {
                     try {
                         if (transactionality == BaseConstants.TRANSACTION_JTA) {
                             ut = getUserTransaction();
-			    // We will only create a new tx if there is no tx alive 
-			    if (ut.getStatus() == Status.STATUS_NO_TRANSACTION) {
-                            	ut.begin();
-			    }	
+                            // We will only create a new tx if there is no tx alive 
+                            if (ut.getStatus() == Status.STATUS_NO_TRANSACTION) {
+                                ut.begin();
+                            }
                         }
                     } catch (NotSupportedException e) {
                         handleException("Listener Task is already associated with a transaction", e);
@@ -439,7 +439,7 @@ public class ServiceTaskManager {
                 }
 
             } finally {
-            	
+                
                 if (log.isTraceEnabled()) {
                     log.trace("Listener task with Thread ID : " + Thread.currentThread().getId() +
                         " is stopping after processing : " + messageCount + " messages :: " +
@@ -451,7 +451,7 @@ public class ServiceTaskManager {
                     log.debug("Listener task with Thread ID : " + Thread.currentThread().getId() +
                         " is stopping after processing : " + messageCount + " messages");
                 }
-            	
+                
                 // Close the consumer and session before decrementing activeTaskCount.
                 // (If we have a shared connection, Qpid deadlocks if the shared connection
                 //  is closed on another thread while closing the session)
