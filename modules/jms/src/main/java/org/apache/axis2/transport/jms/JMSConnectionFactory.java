@@ -125,6 +125,19 @@ public class JMSConnectionFactory {
             throw new AxisJMSException("Invalid cache level : " + val + " for JMS CF : " + name);
         }
     }
+    
+    /**
+     * Close all connections, sessions etc.. and stop this connection factory
+     */
+    public synchronized void stop() {
+        if (sharedConnection != null) {
+            try {
+            	sharedConnection.close();
+            } catch (JMSException e) {
+                log.warn("Error shutting down connection factory : " + name, e);
+            }
+        }
+    }
 
     /**
      * Return the name assigned to this JMS CF definition
@@ -366,7 +379,7 @@ public class JMSConnectionFactory {
      * Get a new Connection or shared Connection from this JMS CF
      * @return new or shared Connection from this JMS CF
      */
-    private Connection getSharedConnection() {
+    private synchronized Connection getSharedConnection() {
         if  (sharedConnection == null) {
             sharedConnection = createConnection();
             if (log.isDebugEnabled()) {
@@ -380,7 +393,7 @@ public class JMSConnectionFactory {
      * Get a shared Session from this JMS CF
      * @return shared Session from this JMS CF
      */
-    private Session getSharedSession() {
+    private synchronized Session getSharedSession() {
         if (sharedSession == null) {
             sharedSession = createSession(getSharedConnection());
             if (log.isDebugEnabled()) {
@@ -394,7 +407,7 @@ public class JMSConnectionFactory {
      * Get a shared MessageProducer from this JMS CF
      * @return shared MessageProducer from this JMS CF
      */
-    private MessageProducer getSharedProducer() {
+    private synchronized MessageProducer getSharedProducer() {
         if (sharedProducer == null) {
             sharedProducer = createProducer(getSharedSession(), sharedDestination);
             if (log.isDebugEnabled()) {

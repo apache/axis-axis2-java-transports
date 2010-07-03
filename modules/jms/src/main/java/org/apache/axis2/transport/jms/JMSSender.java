@@ -64,6 +64,15 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
         connFacManager = new JMSConnectionFactoryManager(transportOut);
         log.info("JMS Transport Sender initialized...");
     }
+    
+    @Override
+    public void stop() {
+        
+        // clean up any shared JMS resources in this sender's connection factories
+        connFacManager.stop();
+        
+        super.stop();
+    }
 
     /**
      * Get corresponding JMS connection factory defined within the transport sender for the

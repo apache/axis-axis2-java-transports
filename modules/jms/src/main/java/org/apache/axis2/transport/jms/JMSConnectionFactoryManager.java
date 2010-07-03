@@ -113,6 +113,15 @@ public class JMSConnectionFactoryManager {
     private static boolean equals(Object s1, Object s2) {
         return s1 == s2 || s1 != null && s1.equals(s2);
     }
+    
+    /**
+     * Stop all connection factories.
+     */
+    public void stop() {
+        for (JMSConnectionFactory conFac : connectionFactories.values()) {
+            conFac.stop();
+        }
+    }
 
     protected void handleException(String msg, Exception e) throws AxisFault {
         log.error(msg, e);
