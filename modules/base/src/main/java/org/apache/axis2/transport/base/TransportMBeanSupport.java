@@ -71,11 +71,11 @@ public class TransportMBeanSupport {
     }
     
     public TransportMBeanSupport(TransportListener listener, String name) {
-        this(name + "-listener", new TransportView(listener, null));
+        this(name + "-listener-" + listener.hashCode(), new TransportView(listener, null));
     }
     
     public TransportMBeanSupport(TransportSender sender, String name) {
-        this(name + "-sender", new TransportView(null, sender));
+        this(name + "-sender-" + sender.hashCode(), new TransportView(null, sender));
     }
     
     public ObjectName getMBeanName() {
