@@ -81,11 +81,11 @@
 
         <!-- Smack Jabber client libraries to be included -->
         <dependency>
-            <groupId>org.igniterealtime</groupId>
+            <groupId>jivesoftware</groupId>
             <artifactId>smack</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.igniterealtime</groupId>
+            <groupId>jivesoftware</groupId>
             <artifactId>smackx</artifactId>
         </dependency>        
         <dependency>
@@ -93,19 +93,4 @@
             <artifactId>commons-lang</artifactId>
         </dependency>
     </dependencies>
-    <repositories>
-        <repository>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </snapshots>
-            <id>apache-ws-snapshots2</id>
-            <name>Apache ws.zones - 2</name>
-            <url>http://ws.zones.apache.org/repository2</url>
-        </repository>
-    </repositories>
 </project>

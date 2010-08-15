@@ -317,12 +317,12 @@
 
             <!-- Smack Jabber client libraries to be included -->
             <dependency>
-                <groupId>org.igniterealtime</groupId>
+                <groupId>jivesoftware</groupId>
                 <artifactId>smack</artifactId>
                 <version>3.0.4</version>
             </dependency>
             <dependency>
-                <groupId>org.igniterealtime</groupId>
+                <groupId>jivesoftware</groupId>
                 <artifactId>smackx</artifactId>
                 <version>3.0.4</version>
             </dependency>
