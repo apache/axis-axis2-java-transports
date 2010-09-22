@@ -171,7 +171,7 @@ public class JMSOutTransportInfo implements OutTransportInfo {
             return JMSUtils.lookupDestination(context, destinationName, destinationType);
         } catch (NamingException e) {
             handleException("Couldn't locate the JMS destination " + destinationName
-                    + " of type " + destinationType + " extracted from the URL " + url);
+                    + " of type " + destinationType + " extracted from the URL " + url, e);
         }
 
         // never executes but keeps the compiler happy
@@ -196,7 +196,7 @@ public class JMSOutTransportInfo implements OutTransportInfo {
             return JMSUtils.lookupDestination(context, replyDestinationName, replyDestinationType);
         } catch (NamingException e) {
             handleException("Couldn't locate the JMS destination " + replyDestinationName
-                    + " of type " + replyDestinationType + " extracted from the URL " + url);
+                    + " of type " + replyDestinationType + " extracted from the URL " + url, e);
         }
 
         // never executes but keeps the compiler happy
@@ -219,7 +219,7 @@ public class JMSOutTransportInfo implements OutTransportInfo {
                     jmsConnectionFactory.getContext(), replyDest, replyDestinationType);
         } catch (NamingException e) {
             handleException("Couldn't locate the JMS destination " + replyDest
-                    + " of type " + replyDestinationType);
+                    + " of type " + replyDestinationType, e);
         }
 
         // never executes but keeps the compiler happy

@@ -194,7 +194,7 @@ public class JMSUtils extends BaseUtils {
                // create temporary queue to receive the reply
                replyDestination = createTemporaryDestination(session);
            } catch (JMSException e) {
-               handleException("Error creating temporary queue for response");
+               handleException("Error creating temporary queue for response", e);
            }
         }
 
