@@ -1,0 +1,53 @@
+~~ Licensed to the Apache Software Foundation (ASF) under one
+~~ or more contributor license agreements. See the NOTICE file
+~~ distributed with this work for additional information
+~~ regarding copyright ownership. The ASF licenses this file
+~~ to you under the Apache License, Version 2.0 (the
+~~ "License"); you may not use this file except in compliance
+~~ with the License. You may obtain a copy of the License at
+~~
+~~ http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing,
+~~ software distributed under the License is distributed on an
+~~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+~~ KIND, either express or implied. See the License for the
+~~ specific language governing permissions and limitations
+~~ under the License.
+
+Transport debugging tools
+
+  The <<<axis2-transport-debug>>> module contains tools to debug transport related problems.
+
+* Locating missing calls to <<<TransportSender#cleanup(MessageContext)>>>
+
+  The Axis2 transport API requires that <<<TransportSender#cleanup(MessageContext)>>> be called for
+  for every call to <<<TransportSender#invoke(MessageContext)>>>. This is necessary to allow the transport
+  sender to clean up resources after the response message has been processed. When using the <<<ServiceClient>>>
+  API, this is done explicitly by a call to <<<ServiceClient#cleanupTransport()>>> or implicitly
+  when sending another request.
+  
+  Failure to call <<<TransportSender#cleanup(MessageContext)>>> will cause resource leaks.
+  However, this type of problem is difficult to debug because the error that is triggered by
+  the resource leak usually can't be correlated directly with the <<<TransportSender#invoke(MessageContext)>>>
+  invocation(s) for which the cleanup has not been done.
+  
+  In these situations, <<<DebugTransportSender>>> comes to the rescue. It acts as a wrapper
+  around an existing <<<TransportSender>>> implementation and keeps track of the calls to
+  <<<TransportSender#invoke(MessageContext)>>> and <<<TransportSender#cleanup(MessageContext)>>>.
+  If it detects that <<<TransportSender#cleanup(MessageContext)>>> has not been called after a
+  given timeout, it will output a report containing the stack trace of the invocation of
+  <<<TransportSender#invoke(MessageContext)>>>.
+  
+  In order to enable this feature for a given transport, simply replace the configured
+  class by <<<org.apache.axis2.transport.debug.DebugTransportSender>>> and add a
+  <<<targetClass>>> parameter with the real (original) transport sender implementation.
+  Here is an example for the HTTP transport:
+  
++------------------------+
+<transportSender name="http" class="org.apache.axis2.transport.debug.DebugTransportSender">
+  <parameter name="targetClass">org.apache.axis2.transport.http.CommonsHTTPTransportSender</parameter>
+  <parameter name="PROTOCOL">HTTP/1.1</parameter>
+  <parameter name="Transfer-Encoding">chunked</parameter>
+</transportSender>
++------------------------+
