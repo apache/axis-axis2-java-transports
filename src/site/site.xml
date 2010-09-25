@@ -59,7 +59,6 @@
                 <item name="UDP" href="udp.html"/>
                 <item name="XMPP" href="xmpp.html"/>
                 <item name="SMS" href="sms.html"/>
-                <item name="Debug" href="debug.html"/>
             </item>
             <item name="Project Information" href="project-info.html">
                 <item name="Mailing Lists" href="mail-lists.html"/>
