@@ -28,9 +28,9 @@ import org.apache.axis2.transport.TransportUtils;
 import org.apache.axis2.transport.MessageFormatter;
 import org.apache.axis2.transport.OutTransportInfo;
 import org.apache.axis2.transport.base.*;
-import org.apache.axis2.transport.base.streams.WriterOutputStream;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.transport.jms.iowrappers.BytesMessageOutputStream;
+import org.apache.commons.io.output.WriterOutputStream;
 
 import javax.jms.*;
 import javax.activation.DataHandler;

@@ -26,7 +26,7 @@ import javax.activation.DataSource;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.ElementHelper;
-import org.apache.axis2.transport.base.streams.ReaderInputStream;
+import org.apache.commons.io.input.ReaderInputStream;
 
 /**
  * Data source that represents the text of a given {@link OMElement}.
