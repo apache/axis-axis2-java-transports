@@ -106,19 +106,11 @@
     </plugins>
   </build>
 
-  <repositories>
-    <repository>
-        <id>java.net</id>
-        <name>Java.net Maven 2 Repository</name>
-        <url>http://download.java.net/maven/2</url>
-    </repository>
-  </repositories>
-
   <dependencies>
     <dependency>
       <groupId>javax.mail</groupId>
       <artifactId>mail</artifactId>
-      <version>1.4.2</version>
+      <version>1.4.1</version>
     </dependency>
 
     <dependency>
