@@ -31,7 +31,7 @@
     <artifactId>axis2-transport-http-tests</artifactId>
     <name>Apache Axis2 - Transport - HTTP Tests</name>
     <description>This inclues all the available transports in Axis2</description>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
 
     <scm>
         <connection>scm:svn:http://svn.apache.org/repos/asf/axis/axis2/java/transports/trunk/modules/http</connection>
@@ -56,24 +56,6 @@
                   </systemProperties>
               </configuration>
           </plugin>
-
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <version>1.4.0</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Bundle-Name>${pom.artifactId}</Bundle-Name>
-                        <Bundle-Vendor>Apache Software Foundation</Bundle-Vendor>
-                        <Bundle-Description>${pom.description}</Bundle-Description>
-                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-                        <Export-Package>
-                            org.apache.axis2.transport.http.*;-split-package:=merge-last,
-                        </Export-Package>
-                    </instructions>
-                </configuration>
-            </plugin>
         </plugins>
         <resources>
             <resource>
