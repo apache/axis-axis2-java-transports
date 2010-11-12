@@ -33,6 +33,12 @@
     <description>UDP transport for Axis2</description>
     <packaging>bundle</packaging>
 
+    <scm>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/axis/axis2/java/transports/trunk/modules/udp</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/transports/trunk/modules/udp</developerConnection>
+        <url>http://svn.apache.org/viewvc/axis/axis2/java/transports/trunk/modules/udp</url>
+    </scm>
+
     <build>
         <plugins>
             <plugin>

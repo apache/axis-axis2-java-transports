@@ -36,6 +36,12 @@
   <description>Apache Axis2 - Mail Transport</description>
   <packaging>bundle</packaging>
 
+  <scm>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/axis/axis2/java/transports/trunk/modules/mail</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/transports/trunk/modules/mail</developerConnection>
+    <url>http://svn.apache.org/viewvc/axis/axis2/java/transports/trunk/modules/mail</url>
+  </scm>
+
   <build>
     <plugins>
       <plugin>

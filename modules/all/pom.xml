@@ -33,6 +33,13 @@
     <packaging>bundle</packaging>
     <description>Axis2 Transport</description>
     <name>Apache Axis2 - Transport - All</name>
+
+    <scm>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/axis/axis2/java/transports/trunk/modules/all</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/transports/trunk/modules/all</developerConnection>
+        <url>http://svn.apache.org/viewvc/axis/axis2/java/transports/trunk/modules/all</url>
+    </scm>
+
     <profiles>
         <profile>
             <id>release</id>
