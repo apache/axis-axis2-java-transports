@@ -46,8 +46,8 @@
   <li><a href="./mail.html">E-Mail Transport</a></li>
       <li><a href="./tcp-transport.html">TCP Transport</a></li>
       <li><a href="./sms.html">SMS Transport</a></li>
-  <li>UDP Transport</li>
-  <li>XMPP Transport</li>
+  <li><a href="./udp.html">UDP Transport</a></li>
+  <li><a href="./xmpp.html">XMPP Transport</a></li>
   </ul>
   </p>
 </section>
