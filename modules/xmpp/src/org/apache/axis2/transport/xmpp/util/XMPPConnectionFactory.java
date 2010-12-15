@@ -31,13 +31,14 @@ import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.filter.ToContainsFilter;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class XMPPConnectionFactory {
 	private static Log log = LogFactory.getLog(XMPPConnectionFactory.class);
 	private XMPPConnection xmppConnection = null;
 	private PacketFilter packetFilter = null;
-	private HashMap xmppConnections = new HashMap();
-
+	private Map<String,XMPPConnectionDetails> xmppConnections = new HashMap<String,XMPPConnectionDetails>();
+	
 	public XMPPConnectionFactory(){}
 
 	/**
@@ -45,7 +46,7 @@ public class XMPPConnectionFactory {
 	 * @param serverCredentials
 	 * @throws XMPPException 
 	 */
-	public void connect(final XMPPServerCredentials serverCredentials) throws AxisFault {
+	public XMPPConnection connect(final XMPPServerCredentials serverCredentials) throws AxisFault {
 		//XMPPConnection.DEBUG_ENABLED = true;		
 		if(XMPPConstants.XMPP_SERVER_TYPE_JABBER.equals(serverCredentials.getServerType())){
 			xmppConnection = new XMPPConnection(serverCredentials.getServerUrl());
@@ -64,12 +65,12 @@ public class XMPPConnectionFactory {
 			}
 
 			if(xmppConnection.isConnected()){
+				String resource = serverCredentials.getResource()+ new Object().hashCode();
 				if(! xmppConnection.isAuthenticated()){
 					try {
-						xmppConnection.login(serverCredentials.getAccountName()+"@"+
-								serverCredentials.getServerUrl(), 
+                       xmppConnection.login(serverCredentials.getAccountName(), 
 								serverCredentials.getPassword(),
-								serverCredentials.getResource(),
+								resource,
 								true);
 					} catch (XMPPException e) {
 						try {
@@ -78,11 +79,11 @@ public class XMPPConnectionFactory {
 									+"@"+serverCredentials.getServerUrl() 
 									+".Retrying in 2 secs",e); 
 							Thread.sleep(2000);
-							xmppConnection.login(serverCredentials.getAccountName()+"@"+
-									serverCredentials.getServerUrl(), 
-									serverCredentials.getPassword(),
-									serverCredentials.getResource(),
-									true);
+                           xmppConnection.login(serverCredentials.getAccountName(), 
+                                            serverCredentials.getPassword(),
+                                            resource,
+                                            true);
+							
 						} catch (InterruptedException e1) {
 							log.error("Sleep interrupted.",e1);
 						} catch (XMPPException e2) {
@@ -93,12 +94,9 @@ public class XMPPConnectionFactory {
 						}
 					}
 					//Listen for Message type packets from specified server url
-					//packetFilter = new AndFilter(new PacketTypeFilter(Message.class), 
-					//		new FromContainsFilter(serverCredentials.getServerUrl()));
 					packetFilter = new FromContainsFilter(serverCredentials.getServerUrl());					
 				}
-			}		
-			
+			}	
 		}else if(XMPPConstants.XMPP_SERVER_TYPE_GOOGLETALK.equals(serverCredentials.getServerType())){
 			ConnectionConfiguration connectionConfiguration = 
 				new ConnectionConfiguration(XMPPConstants.GOOGLETALK_URL
@@ -111,9 +109,6 @@ public class XMPPConnectionFactory {
 						, serverCredentials.getPassword()
 						,serverCredentials.getResource(),
 						true);
-				//packetFilter = new AndFilter(new PacketTypeFilter(Message.class), 
-				//		new FromContainsFilter(XMPPConstants.GOOGLETALK_FROM));
-				//packetFilter = new FromContainsFilter(XMPPConstants.GOOGLETALK_FROM);
 				packetFilter = new ToContainsFilter("@gmail.com");
 				
 			} catch (XMPPException e1) {
@@ -129,41 +124,44 @@ public class XMPPConnectionFactory {
 			}
 			public void connectionClosedOnError(
 					Exception e1) {
-				log.debug("Connection to "+serverCredentials.getServerUrl()
+				log.error("Connection to "+serverCredentials.getServerUrl()
 						+ " closed with error.",e1);
 			}
 			public void reconnectingIn(int seconds) {
-				log.debug("Connection to "+serverCredentials.getServerUrl() 
+				log.error("Connection to "+serverCredentials.getServerUrl() 
 						+" failed. Reconnecting in "+seconds+"s");
 			}
 			public void reconnectionFailed(Exception e) {
-				log.debug("Reconnection to "+serverCredentials.getServerUrl()+" failed.",e);
+				log.error("Reconnection to "+serverCredentials.getServerUrl()+" failed.",e);
 			}
 			public void reconnectionSuccessful() {
 				log.debug("Reconnection to "+serverCredentials.getServerUrl()+" successful.");
 			}
 		};
-		if(xmppConnection != null){
-			xmppConnection.addConnectionListener(connectionListener);			
+		if(xmppConnection != null && xmppConnection.isConnected()){
+			xmppConnection.addConnectionListener(connectionListener);
+			log.info("Connected to " +serverCredentials.getAccountName()+ "@" 
+					+ serverCredentials.getServerUrl()+ "/"+ serverCredentials.getResource());
+		}else{
+			log.warn(" Not Connected to " +serverCredentials.getAccountName()+ "@" 
+					+ serverCredentials.getServerUrl()+ "/"+ serverCredentials.getResource());
 		}
-	} 
-
-	public XMPPConnection getConnection(String connectionIdentifier){
-		return (XMPPConnection)xmppConnections.get(connectionIdentifier);
-	}
-
-
-	public XMPPConnection getXmppConnection() {
 		return xmppConnection;
+	} 
+	
+	public XMPPConnection getXmppConnection(){
+	    return xmppConnection;
 	}
 
-	public void setXmppConnection(XMPPConnection xmppConnection) {
-		this.xmppConnection = xmppConnection;
-	}
 
 	public void listen(XMPPPacketListener packetListener){
 		xmppConnection.addPacketListener(packetListener,packetFilter);
 	}
 
 	public void stop() {}
+	
+	public class XMPPConnectionDetails{
+	    XMPPConnection connection;
+	    int userCount;
+	}
 }

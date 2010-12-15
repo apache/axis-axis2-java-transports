@@ -29,6 +29,7 @@ public class XMPPConstants {
     public static final String XMPP_SERVER_USERNAME = "transport.xmpp.ServerAccountUserName";
     public static final String XMPP_SERVER_PASSWORD = "transport.xmpp.ServerAccountPassword";    
     public static final String XMPP_SERVER_URL = "transport.xmpp.ServerUrl";
+    public static final String XMPP_DOMAIN_NAME = "transport.xmpp.domain";
     
     //Google talk attributes
     public static final String GOOGLETALK_URL = "talk.google.com";
@@ -46,8 +47,12 @@ public class XMPPConstants {
     public static final String IN_REPLY_TO = "inReplyTo";
     public static final String SERVICE_NAME = "ServiceName";
     public static final String ACTION = "Action";
+    public static final String CONTENT_TYPE = "ContentType";
     //This is set to true, if a request message is sent through XMPPSender
     //Used to distinguish messages coming from chat clients.
     public static final String CONTAINS_SOAP_ENVELOPE = "transport.xmpp.containsSOAPEnvelope";
-    public static final String MESSAGE_FROM_CHAT = "transport.xmpp.message.from.chat";   
+    public static final String MESSAGE_FROM_CHAT = "transport.xmpp.message.from.chat";
+    public static final String SEQUENCE_ID = "transport.xmpp.sequenceID";  
+    
+    public static final String XMPP_CONTENT_TYPE_STRING = "xmpp/text";
 }

@@ -34,6 +34,7 @@ public class XMPPOutTransportInfo implements OutTransportInfo{
 	private String inReplyTo;
 	private EndpointReference from;
 	private XMPPConnectionFactory connectionFactory = null;
+	private String sequenceID; 
 	
 	public XMPPOutTransportInfo(){
 		
@@ -80,5 +81,14 @@ public class XMPPOutTransportInfo implements OutTransportInfo{
 
 	public String getContentType() {
 		return contentType;
-	}	
+	}
+
+    public String getSequenceID() {
+        return sequenceID;
+    }
+
+    public void setSequenceID(String sequenceID) {
+        this.sequenceID = sequenceID;
+    }	
+	
 }

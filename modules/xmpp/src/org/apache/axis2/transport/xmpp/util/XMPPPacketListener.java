@@ -21,7 +21,7 @@ package org.apache.axis2.transport.xmpp.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.Executor;
 
@@ -44,6 +44,7 @@ import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.transport.TransportUtils;
+import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.transport.xmpp.XMPPSender;
 import org.apache.axis2.util.MessageContextBuilder;
 import org.apache.axis2.util.MultipleEntryHashMap;
@@ -72,7 +73,7 @@ public class XMPPPacketListener implements PacketListener {
 	 * This method gets triggered when server side gets a message
 	 */
 	public void processPacket(Packet packet) {
-		log.info("Received : "+packet.toXML());
+		log.debug("Received : "+packet.toXML());
 		if(packet instanceof Message){
 			workerPool.execute(new Worker(packet));			
 		}
@@ -112,7 +113,7 @@ public class XMPPPacketListener implements PacketListener {
 					Constants.Configuration.CHARACTER_SET_ENCODING, "UTF-8");
 			msgContext.setIncomingTransportName("xmpp");
 
-			HashMap services = configurationContext.getAxisConfiguration()
+			Map services = configurationContext.getAxisConfiguration()
 					.getServices();
 
 			AxisService axisService = (AxisService) services.get(serviceName);
@@ -146,6 +147,7 @@ public class XMPPPacketListener implements PacketListener {
 			if (xmppMessageId != null) {
 				xmppOutTransportInfo.setInReplyTo(xmppMessageId);
 			}
+			xmppOutTransportInfo.setSequenceID((String)message.getProperty(XMPPConstants.SEQUENCE_ID));
 			msgContext.setProperty(
 					org.apache.axis2.Constants.OUT_TRANSPORT_INFO,
 					xmppOutTransportInfo);
@@ -169,7 +171,7 @@ public class XMPPPacketListener implements PacketListener {
 			
 		String messageBody = StringEscapeUtils.unescapeXml(message.getBody());
 		if(msgContext.isServerSide()){
-			log.info("Received Envelope : "+messageBody);
+			log.debug("Received Envelope : "+messageBody);
 		}
 		
 		InputStream inputStream = new ByteArrayInputStream(messageBody.getBytes());
@@ -177,7 +179,11 @@ public class XMPPPacketListener implements PacketListener {
 		try {
 			Object obj = message.getProperty(XMPPConstants.CONTAINS_SOAP_ENVELOPE); 
 			if(obj != null && ((Boolean)obj).booleanValue()){
-				envelope = TransportUtils.createSOAPMessage(msgContext, inputStream, "text/xml");
+				String contentType = (String)message.getProperty(XMPPConstants.CONTENT_TYPE);
+				if(contentType == null){
+					throw new AxisFault("Can not Find Content type Property in the XMPP Message");
+				}
+				envelope = TransportUtils.createSOAPMessage(msgContext, inputStream, contentType);
 				msgContext.setProperty(XMPPConstants.CONTAINS_SOAP_ENVELOPE, new Boolean(true));
 			}else{
 				//A text message has been received from a chat client

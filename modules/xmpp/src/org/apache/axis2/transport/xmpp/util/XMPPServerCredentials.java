@@ -29,6 +29,7 @@ public class XMPPServerCredentials {
 	private String password;		
 	private String serverType;
 	private String resource; 
+	private String domainName;
 	
 	public String getAccountName() {
 		return accountName;
@@ -78,6 +79,12 @@ public class XMPPServerCredentials {
 		this.password = password;
 		this.serverType = serverType;
 		this.resource = resource;
+	}
+	public String getDomainName() {
+		return domainName;
+	}
+	public void setDomainName(String domainName) {
+		this.domainName = domainName;
 	}
 	
 

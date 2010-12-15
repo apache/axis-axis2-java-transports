@@ -19,6 +19,14 @@
 
 package org.apache.axis2.transport.xmpp;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
@@ -39,20 +47,18 @@ import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.Roster.SubscriptionMode;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 
 public class XMPPListener implements TransportListener {
+ 
+	/**
+	  Uncomment this enable XMPP logging, this is useful for testing. 	
+    static {
+      XMPPConnection.DEBUG_ENABLED = true;
+    }
+    **/
     private static Log log = LogFactory.getLog(XMPPListener.class);
     private ConfigurationContext configurationContext = null;
-    private String xmppServerUsername = "";
-    private String xmppServerUrl = "";
+    private XMPPServerCredentials serverCredentials;
 
     /**
      * A Map containing the connection factories managed by this, 
@@ -108,21 +114,20 @@ public class XMPPListener implements TransportListener {
             }
 
             Iterator params = pi.getParameters().iterator();
-            XMPPServerCredentials serverCredentials = 
-            	new XMPPServerCredentials();
+            serverCredentials = new XMPPServerCredentials();
             
             while (params.hasNext()) {
                 Parameter param = (Parameter) params.next();
                 if(XMPPConstants.XMPP_SERVER_URL.equals(param.getName())){
-                	xmppServerUrl = (String)param.getValue();
-        			serverCredentials.setServerUrl(xmppServerUrl);                	
+        			serverCredentials.setServerUrl((String)param.getValue());                	
                 }else if(XMPPConstants.XMPP_SERVER_USERNAME.equals(param.getName())){
-                	xmppServerUsername = (String) param.getValue();
-                	serverCredentials.setAccountName(xmppServerUsername);
+                	serverCredentials.setAccountName((String)param.getValue());
                 }else if(XMPPConstants.XMPP_SERVER_PASSWORD.equals(param.getName())){
         			serverCredentials.setPassword((String)param.getValue());                	
                 }else if(XMPPConstants.XMPP_SERVER_TYPE.equals(param.getName())){
-        			serverCredentials.setServerType((String)param.getValue());                	
+        			serverCredentials.setServerType((String)param.getValue());   
+                }else if(XMPPConstants.XMPP_DOMAIN_NAME.equals(param.getName())){    
+                	serverCredentials.setDomainName((String)param.getValue());
                 }
             }
     		XMPPConnectionFactory xmppConnectionFactory = new XMPPConnectionFactory();
@@ -158,8 +163,10 @@ public class XMPPListener implements TransportListener {
      * @param ip
      */    
     public EndpointReference[] getEPRsForService(String serviceName, String ip) throws AxisFault {
+    	String domainName = serverCredentials.getDomainName() == null? serverCredentials.getDomainName()
+    			: serverCredentials.getServerUrl();
         return new EndpointReference[]{new EndpointReference(XMPPConstants.XMPP_PREFIX +
-        		xmppServerUsername +"@"+ xmppServerUrl +"/" + serviceName)};
+        		serverCredentials.getAccountName() +"@"+ domainName +"/services/" + serviceName)};
     }
 
 
