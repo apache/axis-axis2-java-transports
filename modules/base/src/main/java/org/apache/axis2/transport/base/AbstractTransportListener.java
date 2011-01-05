@@ -277,7 +277,7 @@ public abstract class AbstractTransportListener implements TransportListener {
 
         // There is a discrepency in what I thought, Axis2 spawns a nes threads to
         // send a message is this is TRUE - and I want it to be the other way
-        msgCtx.setProperty(MessageContext.TRANSPORT_NON_BLOCKING, Boolean.valueOf(!isNonBlocking));
+        msgCtx.setProperty(MessageContext.CLIENT_API_NON_BLOCKING, Boolean.valueOf(!isNonBlocking));
 
         // are these relevant?
         //msgCtx.setServiceGroupContextId(UUIDGenerator.getUUID());
