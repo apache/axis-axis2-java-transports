@@ -19,6 +19,8 @@
 
 package org.apache.axis2.transport.base.threads;
 
+import java.util.concurrent.BlockingQueue;
+
 /**
  * Worker pool factory.
  * For the moment this always creates {@link NativeWorkerPool} instances since
@@ -27,8 +29,25 @@ package org.apache.axis2.transport.base.threads;
 public class WorkerPoolFactory {
 
     public static WorkerPool getWorkerPool(int core, int max, int keepAlive,
-        int queueLength, String threadGroupName, String threadGroupId) {
+                                           int queueLength, String threadGroupName,
+                                           String threadGroupId) {
             return new NativeWorkerPool(
                 core, max, keepAlive, queueLength, threadGroupName, threadGroupId);
+    }
+
+    public static WorkerPool getWorkerPool(int core, int max, int keepAlive,
+                                           int queueLength, int waterMark, String threadGroupName,
+                                           String threadGroupId) {
+        return new NativeWorkerPool(core, max, keepAlive,
+                queueLength, waterMark, threadGroupName,
+                threadGroupId);
+    }
+
+    public static WorkerPool getWorkerPool(int core, int max, int keepAlive,
+                                           int queueLength, String threadGroupName,
+                                           String threadGroupId, BlockingQueue<Runnable> queue) {
+        return new NativeWorkerPool(core, max, keepAlive,
+                queueLength, threadGroupName,
+                threadGroupId, queue);
     }
 }
