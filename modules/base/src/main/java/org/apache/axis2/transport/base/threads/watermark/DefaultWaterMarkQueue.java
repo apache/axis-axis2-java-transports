@@ -50,7 +50,7 @@ public class DefaultWaterMarkQueue<T> implements WaterMarkQueue<T> {
      * @param waterMark the waterMark of the queue
      */
     public DefaultWaterMarkQueue(int waterMark) {
-        afterWaterMarkQueue = new LinkedBlockingDeque<T>();
+        afterWaterMarkQueue = new LinkedBlockingQueue<T>();
 
         waterMarkQueue = new ArrayBlockingQueue<T>(waterMark);
     }
