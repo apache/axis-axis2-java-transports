@@ -19,8 +19,6 @@
 
 package org.apache.axis2.transport.base;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.axis2.transport.TransportListener;
 import org.apache.axis2.transport.TransportSender;
 
@@ -28,171 +26,143 @@ import java.util.Map;
 
 public class TransportView implements TransportViewMBean {
 
-    private static final Log log = LogFactory.getLog(TransportView.class);
-
-    public static final int STOPPED = 0;
-    public static final int RUNNING = 1;
-    public static final int PAUSED  = 2;
-    public static final int SHUTTING_DOWN = 3;
+    private ManagementSupport managementSupport = null;
 
     private TransportListener listener = null;
+
     private TransportSender sender = null;
 
     public TransportView(TransportListener listener, TransportSender sender) {
-        this.listener = listener;
-        this.sender = sender;
+        if (listener != null) {
+            this.listener = listener;
+            if (listener instanceof  ManagementSupport) {
+                managementSupport = (ManagementSupport) listener;
+            }
+        }
+        if (sender != null) {
+            this.sender = sender;
+            if (sender instanceof ManagementSupport) {
+                managementSupport = (ManagementSupport) sender;
+            }
+        }
     }
 
     // JMX Attributes
     public long getMessagesReceived() {
-        if (listener != null && listener instanceof ManagementSupport) {
-            return ((ManagementSupport) listener).getMessagesReceived();
-        } else if (sender != null && sender instanceof ManagementSupport) {
-            return ((ManagementSupport) sender).getMessagesReceived();
+        if (managementSupport != null) {
+            return managementSupport.getMessagesReceived();
         }
         return -1;
     }
 
     public long getFaultsReceiving() {
-        if (listener != null && listener instanceof ManagementSupport) {
-            return ((ManagementSupport) listener).getFaultsReceiving();
-        } else if (sender != null && sender instanceof ManagementSupport) {
-            return ((ManagementSupport) sender).getFaultsReceiving();
+        if (managementSupport != null) {
+            return managementSupport.getFaultsReceiving();
         }
         return -1;
     }
 
     public long getTimeoutsReceiving() {
-        if (listener != null && listener instanceof ManagementSupport) {
-            return ((ManagementSupport) listener).getTimeoutsReceiving();
-        } else if (sender != null && sender instanceof ManagementSupport) {
-            return ((ManagementSupport) sender).getTimeoutsReceiving();
+        if (managementSupport != null) {
+            return managementSupport.getTimeoutsReceiving();
         }
         return -1;
     }
 
     public long getTimeoutsSending() {
-        if (listener != null && listener instanceof ManagementSupport) {
-            return ((ManagementSupport) listener).getTimeoutsSending();
-        } else if (sender != null && sender instanceof ManagementSupport) {
-            return ((ManagementSupport) sender).getTimeoutsSending();
+        if (managementSupport != null) {
+            managementSupport.getTimeoutsSending();
         }
         return -1;
     }
 
     public long getBytesReceived() {
-        if (listener != null && listener instanceof ManagementSupport) {
-            return ((ManagementSupport) listener).getBytesReceived();
-        } else if (sender != null && sender instanceof ManagementSupport) {
-            return ((ManagementSupport) sender).getBytesReceived();
+        if (managementSupport != null) {
+            return managementSupport.getBytesReceived();
         }
         return -1;
     }
 
     public long getMessagesSent() {
-        if (listener != null && listener instanceof ManagementSupport) {
-            return ((ManagementSupport) listener).getMessagesSent();
-        } else if (sender != null && sender instanceof ManagementSupport) {
-            return ((ManagementSupport) sender).getMessagesSent();
+        if (managementSupport != null) {
+            return managementSupport.getMessagesSent();
         }
         return -1;
     }
 
     public long getFaultsSending() {
-        if (listener != null && listener instanceof ManagementSupport) {
-            return ((ManagementSupport) listener).getFaultsSending();
-        } else if (sender != null && sender instanceof ManagementSupport) {
-            return ((ManagementSupport) sender).getFaultsSending();
+        if (managementSupport != null) {
+            return managementSupport.getFaultsSending();
         }
         return -1;
     }
 
     public long getBytesSent() {
-        if (listener != null && listener instanceof ManagementSupport) {
-            return ((ManagementSupport) listener).getBytesSent();
-        } else if (sender != null && sender instanceof ManagementSupport) {
-            return ((ManagementSupport) sender).getBytesSent();
+        if (managementSupport != null) {
+            return managementSupport.getBytesSent();
         }
         return -1;
     }
 
     public long getMinSizeReceived() {
-        if (listener != null && listener instanceof ManagementSupport) {
-            return ((ManagementSupport) listener).getMinSizeReceived();
-        } else if (sender != null && sender instanceof ManagementSupport) {
-            return ((ManagementSupport) sender).getMinSizeReceived();
+        if (managementSupport != null) {
+            return managementSupport.getMinSizeReceived();
         }
         return -1;
     }
 
     public long getMaxSizeReceived() {
-        if (listener != null && listener instanceof ManagementSupport) {
-            return ((ManagementSupport) listener).getMaxSizeReceived();
-        } else if (sender != null && sender instanceof ManagementSupport) {
-            return ((ManagementSupport) sender).getMaxSizeReceived();
+        if (managementSupport != null) {
+            return managementSupport.getMaxSizeReceived();
         }
         return -1;
     }
 
     public double getAvgSizeReceived() {
-        if (listener != null && listener instanceof ManagementSupport) {
-            return ((ManagementSupport) listener).getAvgSizeReceived();
-        } else if (sender != null && sender instanceof ManagementSupport) {
-            return ((ManagementSupport) sender).getAvgSizeReceived();
+        if (managementSupport != null) {
+            return managementSupport.getAvgSizeReceived();
         }
         return -1;
     }
 
     public long getMinSizeSent() {
-        if (listener != null && listener instanceof ManagementSupport) {
-            return ((ManagementSupport) listener).getMinSizeSent();
-        } else if (sender != null && sender instanceof ManagementSupport) {
-            return ((ManagementSupport) sender).getMinSizeSent();
+        if (managementSupport != null) {
+            return managementSupport.getMinSizeSent();
         }
         return -1;
     }
 
     public long getMaxSizeSent() {
-        if (listener != null && listener instanceof ManagementSupport) {
-            return ((ManagementSupport) listener).getMaxSizeSent();
-        } else if (sender != null && sender instanceof ManagementSupport) {
-            return ((ManagementSupport) sender).getMaxSizeSent();
+        if (managementSupport != null) {
+            return managementSupport.getMaxSizeSent();
         }
         return -1;
     }
 
     public double getAvgSizeSent() {
-        if (listener != null && listener instanceof ManagementSupport) {
-            return ((ManagementSupport) listener).getAvgSizeSent();
-        } else if (sender != null && sender instanceof ManagementSupport) {
-            return ((ManagementSupport) sender).getAvgSizeSent();
+        if (managementSupport != null) {
+            return managementSupport.getAvgSizeSent();
         }
         return -1;
     }
 
     public Map getResponseCodeTable() {
-        if (listener != null && listener instanceof ManagementSupport) {
-            return ((ManagementSupport) listener).getResponseCodeTable();
-        } else if (sender != null && sender instanceof ManagementSupport) {
-            return ((ManagementSupport) sender).getResponseCodeTable();
+        if (managementSupport != null ) {
+            return managementSupport.getResponseCodeTable();
         }
         return null;
     }    
 
     public int getActiveThreadCount() {
-        if (listener != null && listener instanceof ManagementSupport) {
-            return ((ManagementSupport) listener).getActiveThreadCount();
-        } else if (sender != null && sender instanceof ManagementSupport) {
-            return ((ManagementSupport) sender).getActiveThreadCount();
+        if (managementSupport != null) {
+            return managementSupport.getActiveThreadCount();
         }
         return -1;
     }
 
     public int getQueueSize() {
-        if (listener != null && listener instanceof ManagementSupport) {
-            return ((ManagementSupport) listener).getQueueSize();
-        } else if (sender != null && sender instanceof ManagementSupport) {
-            return ((ManagementSupport) sender).getQueueSize();
+        if (managementSupport != null) {
+            return managementSupport.getQueueSize();
         }
         return -1;
     }
@@ -213,51 +183,39 @@ public class TransportView implements TransportViewMBean {
     }
 
     public void pause() throws Exception {
-        if (listener instanceof ManagementSupport) {
-            ((ManagementSupport) listener).pause();
-        } else if (sender instanceof ManagementSupport) {
-            ((ManagementSupport) sender).pause();
+        if (managementSupport != null) {
+            managementSupport.pause();
         }
     }
 
     public void resume() throws Exception {
-        if (listener instanceof ManagementSupport) {
-            ((ManagementSupport) listener).resume();
-        } else if (sender instanceof ManagementSupport) {
-            ((ManagementSupport) sender).resume();
+        if (managementSupport != null) {
+            managementSupport.resume();
         }
     }
 
     public void maintenenceShutdown(long seconds) throws Exception {
-        if (listener instanceof ManagementSupport) {
-            ((ManagementSupport) listener).maintenenceShutdown(seconds * 1000);
-        } else if (sender instanceof ManagementSupport) {
-            ((ManagementSupport) sender).maintenenceShutdown(seconds * 1000);
+        if (managementSupport != null) {
+            managementSupport.maintenenceShutdown(seconds * 1000);
         }
     }
 
     public void resetStatistics() {
-        if (listener != null && listener instanceof ManagementSupport) {
-            ((ManagementSupport) listener).resetStatistics();
-        } else if (sender != null && sender instanceof ManagementSupport) {
-            ((ManagementSupport) sender).resetStatistics();
+        if (managementSupport != null) {
+            managementSupport.resetStatistics();
         }
     }
 
     public long getLastResetTime() {
-        if (listener != null && listener instanceof ManagementSupport) {
-            return ((ManagementSupport) listener).getLastResetTime();
-        } else if (sender != null && sender instanceof ManagementSupport) {
-            return ((ManagementSupport) sender).getLastResetTime();
+        if (managementSupport != null) {
+            return managementSupport.getLastResetTime();
         }
         return -1;
     }
 
     public long getMetricsWindow() {
-        if (listener != null && listener instanceof ManagementSupport) {
-            return System.currentTimeMillis() - ((ManagementSupport) listener).getLastResetTime();
-        } else if (sender != null && sender instanceof ManagementSupport) {
-            return System.currentTimeMillis() - ((ManagementSupport) sender).getLastResetTime();
+        if (managementSupport != null) {
+            return System.currentTimeMillis() - managementSupport.getLastResetTime();
         }
         return -1;
     }    
