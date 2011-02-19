@@ -468,7 +468,7 @@
     </reporting>
 
     <properties>
-        <axis2.version>SNAPSHOT</axis2.version>
+        <axis2.version>1.7.0-SNAPSHOT</axis2.version>
         <failIfNoTests>false</failIfNoTests>
     </properties>
 
