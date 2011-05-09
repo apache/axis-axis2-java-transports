@@ -28,7 +28,7 @@
     <fileSets>
         <fileSet>
             <directory>../..</directory>
-            <outputDirectory>axis2-transports-${pom.version}-src</outputDirectory>
+            <outputDirectory>axis2-transports-${project.version}-src</outputDirectory>
             <includes>
                 <include>NOTICE</include>
                 <include>LICENSE</include>

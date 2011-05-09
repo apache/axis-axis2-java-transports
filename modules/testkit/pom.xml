@@ -52,7 +52,7 @@
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-transport-base</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -173,9 +173,9 @@
                         <configuration>
                             <docletArtifacts>
                                 <docletArtifact>
-                                    <groupId>${pom.groupId}</groupId>
-                                    <artifactId>${pom.artifactId}</artifactId>
-                                    <version>${pom.version}</version>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>${project.artifactId}</artifactId>
+                                    <version>${project.version}</version>
                                 </docletArtifact>
                             </docletArtifacts>
                             <doclet>org.apache.axis2.transport.testkit.doclet.ResourceInfoDoclet</doclet>
@@ -196,9 +196,9 @@
                 <configuration>
                     <docletArtifacts>
                         <docletArtifact>
-                            <groupId>${pom.groupId}</groupId>
-                            <artifactId>${pom.artifactId}</artifactId>
-                            <version>${pom.version}</version>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>${project.artifactId}</artifactId>
+                            <version>${project.version}</version>
                         </docletArtifact>
                     </docletArtifacts>
                     <doclet>org.apache.axis2.transport.testkit.doclet.TestkitJavadocDoclet</doclet>
