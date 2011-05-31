@@ -19,7 +19,9 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
         <groupId>org.apache</groupId>
         <artifactId>apache</artifactId>
@@ -141,9 +143,9 @@
     </developers>
 
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/axis/axis2/java/transports/branches/1.6</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/transports/branches/1.6</developerConnection>
-        <url>http://svn.apache.org/viewvc/axis/axis2/java/transports/branches/1.6</url>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/axis/axis2/java/transports/trunk</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/transports/trunk</developerConnection>
+        <url>http://svn.apache.org/viewvc/axis/axis2/java/transports/trunk</url>
     </scm>
 
     <modules>
@@ -181,12 +183,14 @@
                                 </goals>
                                 <configuration>
                                     <tasks>
-                                        <taskdef classpathref="maven.runtime.classpath" resource="tasks.properties" />
+                                        <taskdef classpathref="maven.runtime.classpath" resource="tasks.properties"/>
                                         <mkdir dir="${project.build.directory}/site/cobertura" />
-                                        <cobertura-report format="html" datafile="target/cobertura.ser" destdir="${project.build.directory}/cobertura">
-                                            <fileset dir="modules/base/src/main/java" />
-                                            <fileset dir="modules/jms/src/main/java" />
-                                            <fileset dir="modules/mail/src/main/java" />
+                                        <cobertura-report format="html"
+                                                          datafile="target/cobertura.ser"
+                                                          destdir="${project.build.directory}/cobertura">
+                                            <fileset dir="modules/base/src/main/java"/>
+                                            <fileset dir="modules/jms/src/main/java"/>
+                                            <fileset dir="modules/mail/src/main/java"/>
                                         </cobertura-report>
                                     </tasks>
                                 </configuration>

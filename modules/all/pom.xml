@@ -17,7 +17,8 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.apache.axis2</groupId>
@@ -34,9 +35,9 @@
     <name>Apache Axis2 - Transport - All</name>
 
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/axis/axis2/java/transports/branches/1.6/modules/all</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/transports/branches/1.6/modules/all</developerConnection>
-        <url>http://svn.apache.org/viewvc/axis/axis2/java/transports/branches/1.6/modules/all</url>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/axis/axis2/java/transports/trunk/modules/all</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/transports/trunk/modules/all</developerConnection>
+        <url>http://svn.apache.org/viewvc/axis/axis2/java/transports/trunk/modules/all</url>
     </scm>
 
     <profiles>
@@ -45,7 +46,7 @@
             <activation>
                 <property>
                     <name>release</name>
-                    <value />
+                    <value/>
                 </property>
             </activation>
             <build>
@@ -94,11 +95,11 @@
                                 </goals>
                                 <configuration>
                                     <tasks>
-                                        <taskdef classpathref="maven.runtime.classpath" resource="tasks.properties" />
-                                        <mkdir dir="target/classes" />
+                                        <taskdef classpathref="maven.runtime.classpath" resource="tasks.properties"/>
+                                        <mkdir dir="target/classes"/>
                                         <cobertura-instrument datafile="../../target/cobertura.ser">
                                             <fileset dir="target/classes">
-                                                <exclude name="org/apache/axis2/transport/testkit/**/*.class" />
+                                                <exclude name="org/apache/axis2/transport/testkit/**/*.class"/>
                                             </fileset>
                                         </cobertura-instrument>
                                     </tasks>
