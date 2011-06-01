@@ -22,21 +22,21 @@
     <parent>
         <groupId>org.apache.axis2</groupId>
         <artifactId>axis2-transports</artifactId>
-        <version>1.6.0</version>
+        <version>1.6.1-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <groupId>org.apache.axis2</groupId>
     <artifactId>axis2-transport-all</artifactId>
-    <version>1.6.0</version>
+    <version>1.6.1-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <description>Axis2 Transport</description>
     <name>Apache Axis2 - Transport - All</name>
 
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/axis/axis2/java/transports/tags/v1.6.0/modules/all</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/transports/tags/v1.6.0/modules/all</developerConnection>
-        <url>http://svn.apache.org/viewvc/axis/axis2/java/transports/tags/v1.6.0/modules/all</url>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/axis/axis2/java/transports/branches/1.6/modules/all</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/transports/branches/1.6/modules/all</developerConnection>
+        <url>http://svn.apache.org/viewvc/axis/axis2/java/transports/branches/1.6/modules/all</url>
     </scm>
 
     <profiles>
