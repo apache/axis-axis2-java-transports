@@ -100,10 +100,6 @@ public abstract class AbstractTransportListenerEx<E extends ProtocolEndpoint>
 
     @Override
     public EndpointReference[] getEPRsForService(String serviceName, String ip) throws AxisFault {
-        //Strip out the operation name
-        if (serviceName.indexOf('/') != -1) {
-            serviceName = serviceName.substring(0, serviceName.indexOf('/'));
-        }
         // strip out the endpoint name if present
         if (serviceName.indexOf('.') != -1) {
             serviceName = serviceName.substring(0, serviceName.indexOf('.'));
