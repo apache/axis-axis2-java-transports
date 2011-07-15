@@ -32,7 +32,6 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.ds.WrappedTextNodeOMDataSourceFromDataSource;
 import org.apache.axiom.om.ds.WrappedTextNodeOMDataSourceFromReader;
-import org.apache.axiom.om.impl.llom.OMSourcedElementImpl;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.builder.BuilderUtil;
 import org.apache.axis2.context.MessageContext;
@@ -80,8 +79,8 @@ public class PlainTextBuilder implements TextMessageBuilder, DataSourceMessageBu
         } catch (UnsupportedEncodingException ex) {
             throw new AxisFault("Unsupported encoding: " + charSetEnc, ex);
         }
-        return new OMSourcedElementImpl(wrapperQName, factory,
-                new WrappedTextNodeOMDataSourceFromReader(wrapperQName, reader));
+        return factory.createOMElement(new WrappedTextNodeOMDataSourceFromReader(wrapperQName,
+                reader), wrapperQName);
     }
 
     public OMElement processDocument(Reader reader,
@@ -90,8 +89,8 @@ public class PlainTextBuilder implements TextMessageBuilder, DataSourceMessageBu
         
         OMFactory factory = OMAbstractFactory.getOMFactory();
         QName wrapperQName = getWrapperQName(msgContext);
-        return new OMSourcedElementImpl(wrapperQName, factory,
-                new WrappedTextNodeOMDataSourceFromReader(wrapperQName, reader));
+        return factory.createOMElement(new WrappedTextNodeOMDataSourceFromReader(wrapperQName,
+                reader), wrapperQName);
     }
 
     public OMElement processDocument(String content,
@@ -110,7 +109,7 @@ public class PlainTextBuilder implements TextMessageBuilder, DataSourceMessageBu
         OMFactory factory = OMAbstractFactory.getOMFactory();
         Charset cs = Charset.forName(BuilderUtil.getCharSetEncoding(contentType));
         QName wrapperQName = getWrapperQName(msgContext);
-        return new OMSourcedElementImpl(wrapperQName, factory,
-                new WrappedTextNodeOMDataSourceFromDataSource(wrapperQName, dataSource, cs));
+        return factory.createOMElement(new WrappedTextNodeOMDataSourceFromDataSource(wrapperQName,
+                dataSource, cs), wrapperQName);
     }
 }
