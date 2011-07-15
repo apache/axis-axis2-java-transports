@@ -28,7 +28,6 @@ import java.util.List;
 
 import javax.activation.DataHandler;
 import javax.mail.internet.ContentType;
-import javax.xml.stream.XMLStreamReader;
 
 import junit.framework.Assert;
 
@@ -36,10 +35,8 @@ import org.apache.axiom.attachments.Attachments;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.OMText;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.axiom.om.util.StAXUtils;
+import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.impl.builder.StAXSOAPModelBuilder;
 import org.apache.axis2.transport.base.BaseConstants;
 import org.apache.axis2.transport.testkit.message.RESTMessage.Parameter;
 
@@ -121,16 +118,16 @@ public interface MessageDecoder<T,U> {
             ByteArrayInputStream in = new ByteArrayInputStream(message);
             if (type == XMLMessage.Type.SWA) {
                 Attachments attachments = new Attachments(in, contentType.toString());
-                XMLStreamReader reader = StAXUtils.createXMLStreamReader(attachments.getSOAPPartInputStream());
-                OMElement payload = new StAXSOAPModelBuilder(reader).getSOAPEnvelope().getBody().getFirstElement();
+                OMElement payload = OMXMLBuilderFactory.createSOAPModelBuilder(
+                        attachments.getSOAPPartInputStream(), null).getSOAPEnvelope().getBody().getFirstElement();
                 return new XMLMessage(payload, type, attachments);
             } else {
-                XMLStreamReader reader = StAXUtils.createXMLStreamReader(in, contentType.getParameter("charset"));
+                String charset = contentType.getParameter("charset");
                 OMElement payload;
                 if (type == XMLMessage.Type.POX) {
-                    payload = new StAXOMBuilder(reader).getDocumentElement();
+                    payload = OMXMLBuilderFactory.createOMBuilder(in, charset).getDocumentElement();
                 } else {
-                    payload = new StAXSOAPModelBuilder(reader).getSOAPEnvelope().getBody().getFirstElement();
+                    payload = OMXMLBuilderFactory.createSOAPModelBuilder(in, charset).getSOAPEnvelope().getBody().getFirstElement();
                 }
                 return new XMLMessage(payload, type);
             }
@@ -145,12 +142,11 @@ public interface MessageDecoder<T,U> {
             if (type == null) {
                 throw new Exception("Unrecognized content type " + contentType);
             }
-            XMLStreamReader reader = StAXUtils.createXMLStreamReader(new StringReader(message));
             OMElement payload;
             if (type == XMLMessage.Type.POX) {
-                payload = new StAXOMBuilder(reader).getDocumentElement();
+                payload = OMXMLBuilderFactory.createOMBuilder(new StringReader(message)).getDocumentElement();
             } else {
-                payload = new StAXSOAPModelBuilder(reader).getSOAPEnvelope().getBody().getFirstElement();
+                payload = OMXMLBuilderFactory.createSOAPModelBuilder(new StringReader(message)).getSOAPEnvelope().getBody().getFirstElement();
             }
             return new XMLMessage(payload, type);
         }
