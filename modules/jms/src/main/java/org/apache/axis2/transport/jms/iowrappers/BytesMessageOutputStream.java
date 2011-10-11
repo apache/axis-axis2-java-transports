@@ -41,7 +41,7 @@ public class BytesMessageOutputStream extends OutputStream {
         try {
             message.writeBytes(b, off, len);
         } catch (JMSException ex) {
-            new JMSExceptionWrapper(ex);
+            throw new JMSExceptionWrapper(ex);
         }
     }
 
