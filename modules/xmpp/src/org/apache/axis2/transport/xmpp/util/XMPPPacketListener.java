@@ -28,10 +28,10 @@ import java.util.concurrent.Executor;
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
 
+import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMException;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFactory;
-import org.apache.axiom.soap.impl.llom.soap11.SOAP11Factory;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.EndpointReference;
@@ -285,7 +285,7 @@ public class XMPPPacketListener implements PacketListener {
 			msgCtx.setServerSide(true);
 			
 			//TODO : need to support SOAP12 as well
-			SOAPFactory soapFactory = new SOAP11Factory();
+			SOAPFactory soapFactory = OMAbstractFactory.getSOAP11Factory();
 			envelope = BuilderUtil.buildsoapMessage(msgCtx, parameterMap,
                     soapFactory);
 			//TODO : improve error handling & messages
