@@ -433,6 +433,15 @@ public class MailTransportSender extends AbstractTransportSender
             mimeMultiPart.addBodyPart(mimeBodyPart1);
             mimeMultiPart.addBodyPart(mimeBodyPart2);
             message.setContent(mimeMultiPart);
+
+            String fileName = (String) msgContext.getProperty(
+                    MailConstants.TRANSPORT_FORMAT_ATTACHMENT_FILE);
+            if (fileName != null) {
+                mimeBodyPart2.setFileName(fileName);
+            } else {
+                mimeBodyPart2.setFileName("attachment");
+            }
+
             mainPart = mimeBodyPart2;
         } else {
             mainPart = message;

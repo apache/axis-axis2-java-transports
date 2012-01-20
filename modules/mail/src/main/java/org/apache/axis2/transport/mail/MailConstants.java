@@ -60,6 +60,7 @@ public class MailConstants {
     public static final String TRANSPORT_MAIL_FORMAT = "transport.mail.Format";
     public static final String TRANSPORT_FORMAT_TEXT = "Text";
     public static final String TRANSPORT_FORMAT_MP   = "Multipart";
+    public static final String TRANSPORT_FORMAT_ATTACHMENT_FILE   = "AttachmentFile";
 
     public static final String TRANSPORT_MAIL_FOLDER           = "transport.mail.Folder";
     public static final String TRANSPORT_MAIL_CONTENT_TYPE     = "transport.mail.ContentType";
