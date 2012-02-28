@@ -144,6 +144,9 @@ public class ServiceTaskManager {
     /** The JMS Connection shared between multiple polling tasks - when enabled (reccomended) */
     private Connection sharedConnection = null;
 
+    /** Is this error triggers a JMS onException ?*/
+    private volatile boolean isOnExceptionError = false;
+
     /**
      * Start or re-start the Task Manager by shutting down any existing worker tasks and
      * re-creating them. However, if this is STM is PAUSED, a start request is ignored.
@@ -464,9 +467,13 @@ public class ServiceTaskManager {
                 synchronized(pollingTasks) {
                     pollingTasks.remove(this);
                 }
-                
-                // My time is up, so if I am going away, create another
-                scheduleNewTaskIfAppropriate();
+
+                // if this is a JMS onException, ServiceTaskManager#onException will schedule
+                // a new polling task
+                if (!isOnExceptionError) {
+                    // My time is up, so if I am going away, create another
+                    scheduleNewTaskIfAppropriate();
+                }
             }
 
         }
@@ -592,6 +599,8 @@ public class ServiceTaskManager {
          */
         public void onException(JMSException j) {
 
+            isOnExceptionError = true;
+
             if (!isSTMActive()) {
                 requestShutdown();
                 return;
@@ -631,9 +640,9 @@ public class ServiceTaskManager {
                 }
 
                 if (!connected) {
+                    retryDuration = (long) (retryDuration * reconnectionProgressionFactor);
                     log.error("Reconnection attempt : " + (r++) + " for service : " + serviceName +
                         " failed. Next retry in " + (retryDuration/1000) + "seconds");
-                    retryDuration = (long) (retryDuration * reconnectionProgressionFactor);
                     if (retryDuration > maxReconnectDuration) {
                         retryDuration = maxReconnectDuration;
                     }
@@ -641,6 +650,10 @@ public class ServiceTaskManager {
                     try {
                         Thread.sleep(retryDuration);
                     } catch (InterruptedException ignore) {}
+                } else {
+                    isOnExceptionError = false;
+                    log.info("Reconnection attempt: " + r + " for service: " + serviceName +
+                            " was successful!");
                 }
 
             } while (!isSTMActive() || getConnectedTaskCount() < concurrentConsumers);
