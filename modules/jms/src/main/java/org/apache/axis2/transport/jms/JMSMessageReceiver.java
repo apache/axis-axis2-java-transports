@@ -156,7 +156,12 @@ public class JMSMessageReceiver {
         // set the JMS Message ID as the Message ID of the MessageContext
         try {
             msgContext.setMessageID(message.getJMSMessageID());
-            msgContext.setProperty(JMSConstants.JMS_COORELATION_ID, message.getJMSMessageID());
+            String jmsCorrelationID = message.getJMSCorrelationID();
+            if (jmsCorrelationID != null && jmsCorrelationID.length() > 0) {
+                msgContext.setProperty(JMSConstants.JMS_COORELATION_ID, jmsCorrelationID);
+            } else {
+                msgContext.setProperty(JMSConstants.JMS_COORELATION_ID, message.getJMSMessageID());
+            }
         } catch (JMSException ignore) {}
 
         String soapAction = JMSUtils.getProperty(message, BaseConstants.SOAPACTION);

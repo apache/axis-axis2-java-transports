@@ -226,7 +226,12 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
             } catch (JMSException ignore) {}
 
             try {
-                correlationId = message.getJMSMessageID();
+                String jmsCorrelationID = message.getJMSCorrelationID();
+                if (jmsCorrelationID != null && jmsCorrelationID.length() > 0) {
+                    correlationId = jmsCorrelationID;
+                } else {
+                    correlationId = message.getJMSMessageID();
+                }
             } catch(JMSException ignore) {}
 
             // We assume here that the response uses the same message property to
