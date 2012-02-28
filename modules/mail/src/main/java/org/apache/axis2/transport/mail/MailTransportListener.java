@@ -494,6 +494,15 @@ public class MailTransportListener extends AbstractPollingTransportListener<Poll
         // save original mail message id message context MessageID
         msgContext.setMessageID(outInfo.getRequestMessageID());
 
+        //Set the Sent date and received date.
+        if(message.getSentDate() != null) {
+            Calendar sentDate = Calendar.getInstance();
+            sentDate.setTime(message.getSentDate());
+            msgContext.setProperty(MailConstants.MAIL_SENT_DATE,sentDate);
+        }
+
+        msgContext.setProperty(MailConstants.MAIL_RECEIVED_DATE,Calendar.getInstance());
+
         // set the message payload to the message context
         InputStream in = messagePart.getInputStream();
         try {

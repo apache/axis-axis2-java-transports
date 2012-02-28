@@ -97,5 +97,8 @@ public class MailConstants {
     /** @see org.apache.axis2.transport.mail.WSMimeMessage */
     public static final String MAIL_HEADER_X_MESSAGE_ID= "X-Message-ID";
     public static final String TRANSPORT_MAIL_CUSTOM_HEADERS     = "transport.mail.custom.headers";
-    
+
+    public static final String MAIL_SENT_DATE = "sent-date";
+    public static final String MAIL_RECEIVED_DATE = "received-date";
+
 }
