@@ -85,8 +85,9 @@ public class BaseUtils {
         if (serviceName != null) {
             try {
                 AxisService service = axisCfg.getService(serviceName);
-                axisCfg.getFaultyServices().put(service.getName(), msg);
-
+                if (service != null) {
+                    axisCfg.getFaultyServices().put(service.getName(), msg);
+                }
             } catch (AxisFault axisFault) {
                 log.warn("Error marking service : " + serviceName + " as faulty", axisFault);
             }
