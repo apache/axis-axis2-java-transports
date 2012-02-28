@@ -192,23 +192,19 @@ public class JMSMessageReceiver {
             msgContext.setProperty(BaseConstants.USER_TRANSACTION, ut);
         }
 
-        try {
-            jmsListener.handleIncomingMessage(
+        jmsListener.handleIncomingMessage(
                 msgContext,
                 JMSUtils.getTransportHeaders(message),
                 soapAction,
                 contentTypeInfo.getContentType());
 
-        } finally {
-
-            Object o = msgContext.getProperty(BaseConstants.SET_ROLLBACK_ONLY);
-            if (o != null) {
-                if ((o instanceof Boolean && ((Boolean) o)) ||
+        Object o = msgContext.getProperty(BaseConstants.SET_ROLLBACK_ONLY);
+        if (o != null) {
+            if ((o instanceof Boolean && ((Boolean) o)) ||
                     (o instanceof String && Boolean.valueOf((String) o))) {
-                    return false;
-                }
+                return false;
             }
-            return true;
         }
+        return true;
     }
 }
