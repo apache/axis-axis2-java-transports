@@ -709,7 +709,7 @@ public class JMSUtils extends BaseUtils {
         } catch (NameNotFoundException e) {
             try {
                 return JMSUtils.lookup(context, Destination.class,
-                    (JMSConstants.DESTINATION_TYPE_TOPIC.equals(destinationType) ?
+                    (JMSConstants.DESTINATION_TYPE_TOPIC.equalsIgnoreCase(destinationType) ?
                         "dynamicTopics/" : "dynamicQueues/") + destinationName);
             } catch (NamingException x) {
                 log.warn("Cannot locate destination : " + destinationName);

@@ -228,7 +228,7 @@ public class JMSEndpoint extends ProtocolEndpoint {
             }
         } else {
             log.debug("JMS reply destination type not given. default queue");
-            destinationType = JMSConstants.QUEUE;
+            replyDestinationType = JMSConstants.DESTINATION_TYPE_QUEUE;
         }
         
         jndiReplyDestinationName = ParamUtils.getOptionalParam(service,
