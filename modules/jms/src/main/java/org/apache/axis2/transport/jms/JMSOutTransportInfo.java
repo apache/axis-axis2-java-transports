@@ -332,8 +332,12 @@ public class JMSOutTransportInfo implements OutTransportInfo {
         } else if (JMSConstants.DESTINATION_TYPE_TOPIC.equals(destinationType)) {
             destType = JMSConstants.TOPIC;
             tConFac = (TopicConnectionFactory) connectionFactory;
-        }
-
+        } else{
+        	//treat jmsdestination type=queue(default is queue)
+        	 destType = JMSConstants.QUEUE;
+             qConFac = (QueueConnectionFactory) connectionFactory;
+        }        
+        
         Connection connection = null;
         if (user != null && pass != null) {
             if (qConFac != null) {
