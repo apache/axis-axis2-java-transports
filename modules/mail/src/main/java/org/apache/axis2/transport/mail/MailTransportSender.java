@@ -502,4 +502,15 @@ public class MailTransportSender extends AbstractTransportSender
         }
         return message.getMessageID();
     }
+
+    @Override
+    public void stop() {
+        super.stop();
+        metrics.reset();
+        smtpUsername = null;
+        smtpPassword = null;
+        smtpBccAddresses = null;
+        smtpFromAddress = null;
+        session = null;
+    }    
 }
