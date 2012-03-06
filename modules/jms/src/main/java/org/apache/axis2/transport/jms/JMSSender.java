@@ -88,7 +88,11 @@ public class JMSSender extends AbstractTransportSender implements ManagementSupp
             if (jmsConnectionFactoryName != null) {
                 return connFacManager.getJMSConnectionFactory(jmsConnectionFactoryName);
             } else {
-                return connFacManager.getJMSConnectionFactory(props);
+                JMSConnectionFactory fac = connFacManager.getJMSConnectionFactory(props);
+                if (fac == null) {
+                    fac = connFacManager.getJMSConnectionFactory(JMSConstants.DEFAULT_CONFAC_NAME);
+                }
+                return  fac;
             }
         } else {
             return null;
