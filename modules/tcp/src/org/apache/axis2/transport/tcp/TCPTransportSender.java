@@ -26,11 +26,19 @@ import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.OutTransportInfo;
 import org.apache.axis2.transport.TransportUtils;
+import org.apache.axis2.transport.MessageFormatter;
 import org.apache.axis2.transport.base.AbstractTransportSender;
+import org.apache.axis2.transport.base.BaseUtils;
 import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.om.OMOutputFormat;
 
 import java.io.IOException;
-import java.net.*;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -48,10 +56,15 @@ public class TCPTransportSender extends AbstractTransportSender {
             Socket socket = openTCPConnection(targetEPR, timeout);
             msgContext.setProperty(TCPConstants.TCP_OUTPUT_SOCKET, socket);
 
+            String contentType = params.get("contentType");
+            if (contentType == null) {
+                contentType = TCPConstants.TCP_DEFAULT_CONTENT_TYPE;
+            }
+
             try {
-                TransportUtils.writeMessage(msgContext, socket.getOutputStream());
+                writeOut(msgContext, socket, contentType);
                 if (!msgContext.getOptions().isUseSeparateListener() && !msgContext.isServerSide()){
-                    waitForReply(msgContext, socket, params.get("contentType"));
+                    waitForReply(msgContext, socket, contentType);
                 }
             } catch (IOException e) {
                 handleException("Error while sending a TCP request", e);
@@ -60,13 +73,24 @@ public class TCPTransportSender extends AbstractTransportSender {
         } else if (outTransportInfo != null && (outTransportInfo instanceof TCPOutTransportInfo)) {
             TCPOutTransportInfo outInfo = (TCPOutTransportInfo) outTransportInfo;
             try {
-                TransportUtils.writeMessage(msgContext, outInfo.getSocket().getOutputStream());
+                writeOut(msgContext, outInfo.getSocket(), outInfo.getContentType());
             } catch (IOException e) {
                 handleException("Error while sending a TCP response", e);
             } finally {
                 closeConnection(outInfo.getSocket());
             }
         }
+    }
+
+    private void writeOut(MessageContext msgContext, Socket socket,
+                          String contentType) throws IOException {
+        MessageFormatter messageFormatter = TransportUtils.getMessageFormatter(msgContext);
+        OMOutputFormat format = BaseUtils.getOMOutputFormat(msgContext);
+        format.setContentType(contentType);
+        byte[] payload = messageFormatter.getBytes(msgContext, format);
+        OutputStream out = socket.getOutputStream();
+        out.write(payload);
+        out.flush();
     }
 
     @Override
@@ -83,10 +107,6 @@ public class TCPTransportSender extends AbstractTransportSender {
         if (!(msgContext.getAxisOperation() instanceof OutInAxisOperation) &&
                 msgContext.getProperty(org.apache.axis2.Constants.PIGGYBACK_MESSAGE) == null) {
             return;
-        }
-
-        if (contentType == null) {
-            contentType = TCPConstants.TCP_DEFAULT_CONTENT_TYPE;
         }
 
         try {
