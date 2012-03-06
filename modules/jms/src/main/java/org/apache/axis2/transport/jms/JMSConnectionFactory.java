@@ -106,7 +106,7 @@ public class JMSConnectionFactory {
     }
 
     /**
-     * Digest, the cache value iff specified
+     * Digest the cache value if specified
      */
     private void digestCacheLevel() {
 
@@ -119,6 +119,8 @@ public class JMSConnectionFactory {
             this.cacheLevel = JMSConstants.CACHE_CONNECTION;
         } else if ("session".equals(val)){
             this.cacheLevel = JMSConstants.CACHE_SESSION;
+        } else if ("consumer".equals(val)) {
+            this.cacheLevel = JMSConstants.CACHE_CONSUMER;
         } else if ("producer".equals(val)) {
             this.cacheLevel = JMSConstants.CACHE_PRODUCER;
         } else if (val != null) {
