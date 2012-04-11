@@ -234,8 +234,7 @@ public class AxisServiceTracker {
         if (services == null) {
             throw new IllegalStateException();
         }
-        // TODO: This is very bad, but AxisConfiguration has no removeObserver method!
-        config.getObserversList().remove(observer);
+        config.removeObserver(observer);
         for (AxisService service : services) {
             listener.serviceRemoved(service);
         }
