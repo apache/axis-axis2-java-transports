@@ -31,7 +31,6 @@ import org.apache.axiom.attachments.ByteArrayDataSource;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.util.UUIDGenerator;
 import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.transport.testkit.channel.AsyncChannel;
 import org.apache.axis2.transport.testkit.client.AsyncTestClient;

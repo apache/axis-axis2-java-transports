@@ -34,7 +34,7 @@ import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.axiom.om.util.UUIDGenerator;
+import org.apache.axiom.util.UIDGenerator;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -273,7 +273,7 @@ public abstract class AbstractTransportListener implements TransportListener {
         msgCtx.setTransportOut(transportOut);
         msgCtx.setTransportIn(transportIn);
         msgCtx.setServerSide(true);
-        msgCtx.setMessageID(UUIDGenerator.getUUID());
+        msgCtx.setMessageID(UIDGenerator.generateURNString());
 
         // There is a discrepency in what I thought, Axis2 spawns a nes threads to
         // send a message is this is TRUE - and I want it to be the other way

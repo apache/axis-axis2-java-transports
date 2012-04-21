@@ -31,7 +31,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.util.ByteArrayDataSource;
 
-import org.apache.axiom.om.util.UUIDGenerator;
+import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.transport.testkit.client.ClientOptions;
 import org.apache.axis2.transport.testkit.client.TestClient;
 import org.apache.axis2.transport.testkit.name.Name;
@@ -67,7 +67,7 @@ public abstract class MailClient implements TestClient {
     }
 
     protected String sendMessage(ContentType contentType, byte[] message) throws Exception {
-        String msgId = UUIDGenerator.getUUID();
+        String msgId = UIDGenerator.generateUID() + "@localhost";
         MimeMessage msg = new MimeMessage(session);
         msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(channel.getRecipient().getAddress()));
         msg.setFrom(new InternetAddress(channel.getSender().getAddress()));

@@ -22,7 +22,7 @@ package org.apache.axis2.transport.mail;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.apache.axiom.om.util.UUIDGenerator;
+import org.apache.axiom.util.UIDGenerator;
 import org.apache.commons.io.output.CountingOutputStream;
 
 import javax.mail.internet.MimeMessage;
@@ -52,8 +52,8 @@ public class WSMimeMessage extends MimeMessage {
         // we can over come gmail problem by setting the message id as follows with a valid gmail address
         // <xxxx@gmail.com> this can be achived by appending from address at the end of uuid
 	    if (getHeader(MailConstants.MAIL_HEADER_MESSAGE_ID) == null) {
-            String uuid = "<" + UUIDGenerator.getUUID().replaceAll(":",".") + fromAddress +">";
-            setHeader(MailConstants.MAIL_HEADER_MESSAGE_ID, uuid);
+            String id = "<" + UIDGenerator.generateUID() + fromAddress +">";
+            setHeader(MailConstants.MAIL_HEADER_MESSAGE_ID, id);
         }
     }
 

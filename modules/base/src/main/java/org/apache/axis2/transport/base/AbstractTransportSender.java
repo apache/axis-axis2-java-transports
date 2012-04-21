@@ -33,7 +33,7 @@ import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.description.WSDL2Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.axiom.om.util.UUIDGenerator;
+import org.apache.axiom.util.UIDGenerator;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -185,7 +185,7 @@ public abstract class AbstractTransportSender extends AbstractHandler implements
         responseMsgCtx.setTransportOut(transportOut);
         responseMsgCtx.setTransportIn(transportIn);
 
-        responseMsgCtx.setMessageID(UUIDGenerator.getUUID());
+        responseMsgCtx.setMessageID(UIDGenerator.generateURNString());
 
         responseMsgCtx.setDoingREST(outMsgCtx.isDoingREST());
         responseMsgCtx.setProperty(

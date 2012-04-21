@@ -22,7 +22,7 @@ import java.io.OutputStream;
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 
-import org.apache.axiom.attachments.SizeAwareDataSource;
+import org.apache.axiom.ext.activation.SizeAwareDataSource;
 
 /**
  * Data source implementation wrapping a JMS {@link BytesMessage}.

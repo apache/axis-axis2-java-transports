@@ -20,16 +20,18 @@
 package org.apache.axis2.transport.testkit.message;
 
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.io.StringWriter;
 
 import javax.activation.DataHandler;
 import javax.mail.internet.ContentType;
 
+import org.apache.axiom.attachments.Attachments;
 import org.apache.axiom.attachments.ByteArrayDataSource;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMOutputFormat;
-import org.apache.axiom.om.impl.MIMEOutputUtils;
+import org.apache.axiom.om.impl.OMMultipartWriter;
 import org.apache.axiom.soap.SOAP12Constants;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFactory;
@@ -87,9 +89,15 @@ public interface MessageEncoder<T,U> {
             if (message.getType() == XMLMessage.Type.SWA) {
                 outputFormat.setMimeBoundary(options.getMimeBoundary());
                 outputFormat.setRootContentId(options.getRootContentId());
-                StringWriter writer = new StringWriter();
-                message.getMessageElement().serializeAndConsume(writer);
-                MIMEOutputUtils.writeSOAPWithAttachmentsMessage(writer, baos, message.getAttachments(), outputFormat);
+                OMMultipartWriter mpw = new OMMultipartWriter(baos, outputFormat);
+                OutputStream out = mpw.writeRootPart();
+                message.getMessageElement().serializeAndConsume(out);
+                out.close();
+                Attachments attachments = message.getAttachments();
+                for (String id : attachments.getAllContentIDs()) {
+                    mpw.writePart(attachments.getDataHandler(id), id);
+                }
+                mpw.complete();
             } else {
                 message.getMessageElement().serializeAndConsume(baos, outputFormat);
             }
