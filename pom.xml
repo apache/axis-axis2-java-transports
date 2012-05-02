@@ -157,7 +157,6 @@
         <module>modules/sms</module>
         <module>modules/testkit</module>
         <module>modules/all</module>
-        <module>modules/samples/https-sample</module>
     </modules>
 
     <profiles>
@@ -269,6 +268,16 @@
                    </plugin>
                 </plugins>
             </build>
+        </profile>
+            <profiles>
+        <profile>
+            <!-- This profile needs to be activated when doing the release:prepare
+                 (by adding -Peverything) to make sure that the release plugin updates
+                 the version numbers of all relevant submodules.  -->
+            <id>everything</id>
+            <modules>
+                <module>modules/samples/https-sample</module>
+            </modules>
         </profile>
     </profiles>
 
