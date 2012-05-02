@@ -157,6 +157,7 @@
         <module>modules/sms</module>
         <module>modules/testkit</module>
         <module>modules/all</module>
+        <module>modules/samples/https-sample</module>
     </modules>
 
     <profiles>
