@@ -269,7 +269,6 @@
                 </plugins>
             </build>
         </profile>
-            <profiles>
         <profile>
             <!-- This profile needs to be activated when doing the release:prepare
                  (by adding -Peverything) to make sure that the release plugin updates
