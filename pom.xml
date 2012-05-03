@@ -276,6 +276,7 @@
             <id>everything</id>
             <modules>
                 <module>modules/samples/https-sample</module>
+                <module>modules/samples/jms-sample</module>
             </modules>
         </profile>
     </profiles>
