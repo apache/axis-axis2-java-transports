@@ -38,7 +38,7 @@ Running the Sample Client
 
 2.) Run following command.
 
-   "mvn exec:java -Dexec.mainClass="org.apache.axis2.examples.httpsclient.SimpleServiceClient"  -Dexec.classpathScope=runtime"
+   "mvn package exec:java -Dexec.mainClass="org.apache.axis2.examples.httpsclient.SimpleServiceClient"  -Dexec.classpathScope=runtime"
 
 
 3.) You should able to see the response as follows. 
