@@ -123,6 +123,8 @@ public class JMSConnectionFactory {
             this.cacheLevel = JMSConstants.CACHE_CONSUMER;
         } else if ("producer".equals(val)) {
             this.cacheLevel = JMSConstants.CACHE_PRODUCER;
+        } else if ("consumer".equals(val)) {
+            this.cacheLevel = JMSConstants.CACHE_CONSUMER;
         } else if (val != null) {
             throw new AxisJMSException("Invalid cache level : " + val + " for JMS CF : " + name);
         }

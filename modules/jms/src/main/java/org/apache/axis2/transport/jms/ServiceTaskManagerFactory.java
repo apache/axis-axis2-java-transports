@@ -303,6 +303,8 @@ public class ServiceTaskManagerFactory {
             return JMSConstants.CACHE_SESSION;
         } else if ("consumer".equals(val)) {
             return JMSConstants.CACHE_CONSUMER;
+        } else if ("producer".equals(val)) {
+            return JMSConstants.CACHE_PRODUCER;
         } else if (val != null) {
             throw new AxisJMSException("Invalid cache level : " + val);
         }
