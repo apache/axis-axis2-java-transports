@@ -34,8 +34,7 @@ import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.OperationClient;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
-import org.apache.axis2.client.async.AsyncResult;
-import org.apache.axis2.client.async.Callback;
+import org.apache.axis2.client.async.AxisCallback;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.context.MessageContext;
@@ -113,10 +112,10 @@ public class TCPEchoRawXMLTest extends TestCase {
         options.setTransportInProtocol(Constants.TRANSPORT_TCP);
         options.setAction(Constants.AXIS2_NAMESPACE_URI + "/" + operationName.getLocalPart());
 
-        Callback callback = new Callback() {
-            public void onComplete(AsyncResult result) {
+        AxisCallback callback = new AxisCallback() {
+            public void onComplete(MessageContext msgCtx) {
                 try {
-                    result.getResponseEnvelope().serialize(StAXUtils
+                    msgCtx.getEnvelope().serialize(StAXUtils
                             .createXMLStreamWriter(System.out));
                 } catch (XMLStreamException e) {
                     onError(e);
@@ -128,6 +127,18 @@ public class TCPEchoRawXMLTest extends TestCase {
             public void onError(Exception e) {
                 log.info(e.getMessage());
                 finish = true;
+            }
+
+            public void onComplete() {                
+                
+            }
+
+            public void onFault(MessageContext msgCtx) {
+                onComplete(msgCtx);                
+            }
+
+            public void onMessage(MessageContext msgCtx) {
+                onComplete(msgCtx);                
             }
         };
 
