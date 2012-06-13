@@ -4,7 +4,7 @@
         <messageReceivers>
             
            <messageReceiver
-                    mep="http://www.w3.org/2004/08/wsdl/in-out"
+                    mep="http://www.w3.org/ns/wsdl/in-out"
                     class="org.apache.axis2.transport.sms.SimpleInOutMessageReceiver"/>
         </messageReceivers>
         
@@ -19,7 +19,7 @@
         <messageReceivers>
             
            <messageReceiver
-                    mep="http://www.w3.org/2004/08/wsdl/in-out"
+                    mep="http://www.w3.org/ns/wsdl/in-out"
                     class="org.apache.axis2.transport.sms.SimpleInOutMessageReceiver"/>
         </messageReceivers>
         
