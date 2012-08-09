@@ -50,7 +50,7 @@
           <instructions>
             <Bundle-Name>${project.artifactId}</Bundle-Name>
             <Bundle-Vendor>Apache Software Foundation</Bundle-Vendor>
-            <Bundle-Description>${pom.description}</Bundle-Description>
+            <Bundle-Description>${project.description}</Bundle-Description>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Export-Package>
               org.apache.axis2.transport.mail.*;-split-package:=merge-last,
@@ -118,7 +118,7 @@
     <dependency>
       <groupId>org.apache.axis2</groupId>
       <artifactId>axis2-transport-base</artifactId>
-      <version>${version}</version>
+      <version>${project.version}</version>
       <exclusions>
         <!-- We want to choose the JavaMail implementation ourselves -->
         <exclusion>
