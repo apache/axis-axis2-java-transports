@@ -60,6 +60,9 @@ public class JavaNetClient implements AsyncTestClient<byte[]> {
             connection.setDoOutput(true);
             connection.setDoInput(true);
             connection.setRequestProperty("Content-Type", contentType.toString());
+            if(contentType.getBaseType().equals("text/xml")){
+                connection.setRequestProperty("SOAPAction", "");
+            }
             OutputStream out = connection.getOutputStream();
             out.write(message);
             out.close();
