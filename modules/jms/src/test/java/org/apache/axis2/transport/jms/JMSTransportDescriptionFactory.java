@@ -117,7 +117,10 @@ public class JMSTransportDescriptionFactory implements TransportDescriptionFacto
         }
         element.addChild(createParameterElement(JMSConstants.PARAM_CONCURRENT_CONSUMERS,
             Integer.toString(concurrentConsumers)));
-        trpDesc.addParameter(new Parameter(name, element));
+        Parameter parameter = new Parameter();
+        parameter.setName(name);
+        parameter.setParameterElement(element);
+        trpDesc.addParameter(parameter);
     }
     
     private void setupTransport(ParameterInclude trpDesc) throws AxisFault {
