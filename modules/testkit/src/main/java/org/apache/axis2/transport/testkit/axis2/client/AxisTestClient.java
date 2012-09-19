@@ -118,6 +118,8 @@ public class AxisTestClient implements TestClient, MessageExchangeValidator {
             mc.setProperty(BaseConstants.METRICS_COLLECTOR, metrics);
         }
         mepClient.addMessageContext(mc);
+        mepClient.getOptions().setAction("");
+
         mepClient.execute(block);
 //        mepClient.complete(mc);
         return resultMessageLabel == null ? null : mepClient.getMessageContext(resultMessageLabel);
