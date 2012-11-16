@@ -44,13 +44,19 @@ public class JMSTransportTest extends TestCase {
         // Don't execute all possible test combinations:
         //  * Use a single setup to execute tests with all message types.
         //  * Only use a small set of message types for the other setups.
-        suite.addExclude("(!(|(&(broker=qpid)(singleCF=false)(cfOnSender=false)(!(|(destType=topic)(replyDestType=topic))))" +
+        suite.addExclude("(!(|(&(broker=ActiveMQ)(singleCF=false)(cfOnSender=false)(!(|(destType=topic)(replyDestType=topic))))" +
         		             "(&(test=AsyncXML)(messageType=SOAP11)(data=ASCII))" +
         		             "(&(test=EchoXML)(messageType=POX)(data=ASCII))" +
         		             "(test=MinConcurrency)))");
         
         // SYNAPSE-436:
         suite.addExclude("(&(test=EchoXML)(replyDestType=topic)(endpoint=axis))");
+        
+        // Although Qpid is compiled for Java 1.5, it uses classes only present in 1.6.
+        if (System.getProperty("java.version").startsWith("1.5.")) {
+            System.out.println("Excluding Qpid tests; please run the build with Java 1.6 to include them");
+            suite.addExclude("(broker=qpid)");
+        }
 
         // Example to run a few use cases.. please leave these commented out - asankha
         //suite.addExclude("(|(test=AsyncXML)(test=MinConcurrency)(destType=topic)(broker=qpid)(destType=topic)(replyDestType=topic)(client=jms)(endpoint=mock)(cfOnSender=true))");
