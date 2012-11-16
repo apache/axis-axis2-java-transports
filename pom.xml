@@ -147,15 +147,8 @@
     </scm>
 
     <modules>
-        <module>modules/base</module>
         <module>modules/http</module>
-        <module>modules/tcp</module>
-        <module>modules/udp</module>
-        <module>modules/xmpp</module>
-        <module>modules/mail</module>
-        <module>modules/jms</module>
         <module>modules/sms</module>
-        <module>modules/testkit</module>
         <module>modules/all</module>
     </modules>
 
