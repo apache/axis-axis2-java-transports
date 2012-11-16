@@ -316,16 +316,6 @@
 
             <!-- Smack Jabber client libraries to be included -->
             <dependency>
-                <groupId>jivesoftware</groupId>
-                <artifactId>smack</artifactId>
-                <version>3.0.4</version>
-            </dependency>
-            <dependency>
-                <groupId>jivesoftware</groupId>
-                <artifactId>smackx</artifactId>
-                <version>3.0.4</version>
-            </dependency>
-            <dependency>
                 <groupId>commons-lang</groupId>
                 <artifactId>commons-lang</artifactId>
                 <version>2.3</version>
