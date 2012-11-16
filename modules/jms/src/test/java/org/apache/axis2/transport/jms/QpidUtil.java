@@ -21,7 +21,9 @@ package org.apache.axis2.transport.jms;
 
 import org.apache.qpid.AMQException;
 import org.apache.qpid.framing.AMQShortString;
+import org.apache.qpid.server.model.UUIDGenerator;
 import org.apache.qpid.server.queue.AMQQueue;
+import org.apache.qpid.server.queue.AMQQueueFactory;
 import org.apache.qpid.server.queue.QueueRegistry;
 import org.apache.qpid.server.virtualhost.VirtualHost;
 
@@ -29,14 +31,13 @@ public class QpidUtil {
     private QpidUtil() {}
     
     public static void createQueue(VirtualHost virtualHost, AMQShortString exchangeName, String name) throws AMQException {
-        AMQShortString _name = new AMQShortString(name);
         QueueRegistry queueRegistry = virtualHost.getQueueRegistry();
-        if (queueRegistry.getQueue(_name) != null) {
+        if (queueRegistry.getQueue(name) != null) {
             throw new IllegalStateException("Queue " + name + " already exists");
         }
-        AMQQueue queue = new AMQQueue(_name, false, null, false, virtualHost);
+        AMQQueue queue = AMQQueueFactory.createAMQQueueImpl(UUIDGenerator.generateQueueUUID(name, virtualHost.getName()), name, false, null, false, false, virtualHost, null);
         queueRegistry.registerQueue(queue);
-        queue.bind(_name, null, virtualHost.getExchangeRegistry().getExchange(exchangeName));
+        virtualHost.getBindingFactory().addBinding(name, queue, virtualHost.getExchangeRegistry().getExchange(exchangeName), null);
     }
     
     public static void deleteQueue(VirtualHost virtualHost, String name) throws AMQException {

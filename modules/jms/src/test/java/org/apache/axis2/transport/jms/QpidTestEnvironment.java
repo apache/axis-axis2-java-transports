@@ -26,36 +26,45 @@ import javax.jms.Topic;
 import org.apache.axis2.transport.testkit.name.Name;
 import org.apache.axis2.transport.testkit.tests.Setup;
 import org.apache.axis2.transport.testkit.tests.TearDown;
+import org.apache.axis2.transport.testkit.tests.Transient;
+import org.apache.axis2.transport.testkit.util.PortAllocator;
 import org.apache.qpid.AMQException;
 import org.apache.qpid.client.AMQConnectionFactory;
 import org.apache.qpid.client.AMQDestination;
 import org.apache.qpid.client.AMQQueue;
 import org.apache.qpid.client.AMQTopic;
-import org.apache.qpid.client.transport.TransportConnection;
 import org.apache.qpid.exchange.ExchangeDefaults;
-import org.apache.qpid.framing.AMQShortString;
+import org.apache.qpid.server.Broker;
+import org.apache.qpid.server.BrokerOptions;
 import org.apache.qpid.server.registry.ApplicationRegistry;
 import org.apache.qpid.server.virtualhost.VirtualHost;
 
 @Name("qpid")
 public class QpidTestEnvironment extends JMSTestEnvironment {
-    private VirtualHost virtualHost;
+    private @Transient PortAllocator portAllocator;
+    private @Transient Broker broker;
+    private @Transient VirtualHost virtualHost;
+    private int port;
     
     @Setup @SuppressWarnings("unused")
-    private void setUp() throws Exception {
-        TransportConnection.createVMBroker(1);
+    private void setUp(PortAllocator portAllocator) throws Exception {
+        this.portAllocator = portAllocator;
+        port = portAllocator.allocatePort();
+        broker = new Broker();
+        BrokerOptions options = new BrokerOptions();
+        options.setConfigFile("src/test/conf/qpid/config.xml");
+        options.setLogConfigFile("src/test/conf/qpid/log4j.xml");
+        options.addPort(port);
+        broker.startup(options);
         // null means the default virtual host
-        virtualHost = ApplicationRegistry.getInstance(1).getVirtualHostRegistry().getVirtualHost(null);
+        virtualHost = ApplicationRegistry.getInstance().getVirtualHostRegistry().getVirtualHost(null);
+        connectionFactory = new AMQConnectionFactory("amqp://guest:guest@clientid/" + virtualHost.getName() + "?brokerlist='tcp://localhost:" + port + "'");
     }
 
     @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
-        TransportConnection.killVMBroker(1);
-    }
-
-    @Override
-    protected AMQConnectionFactory createConnectionFactory() throws Exception {
-        return new AMQConnectionFactory("vm://:1", "guest", "guest", "fred", "test");
+        broker.shutdown();
+        portAllocator.releasePort(port);
     }
 
     @Override
@@ -72,6 +81,6 @@ public class QpidTestEnvironment extends JMSTestEnvironment {
 
     @Override
     public void deleteDestination(Destination destination) throws Exception {
-        QpidUtil.deleteQueue(virtualHost, ((AMQDestination)destination).getDestinationName().asString());
+        QpidUtil.deleteQueue(virtualHost, ((AMQDestination)destination).getRoutingKey().asString());
     }
 }

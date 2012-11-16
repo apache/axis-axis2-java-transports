@@ -46,18 +46,13 @@ public class ActiveMQTestEnvironment extends JMSTestEnvironment {
         broker.setDataDirectory("target/activemq-data");
         broker.setPersistenceAdapter(new MemoryPersistenceAdapter());
         broker.start();
+        connectionFactory = new ActiveMQConnectionFactory("vm://" + BROKER_NAME);
     }
 
     @TearDown @SuppressWarnings("unused")
     private void tearDown() throws Exception {
         broker.stop();
     }
-
-    @Override
-    protected ActiveMQConnectionFactory createConnectionFactory() throws Exception {
-        return new ActiveMQConnectionFactory("vm://" + BROKER_NAME);
-    }
-
 
     @Override
     public Queue createQueue(String name) {

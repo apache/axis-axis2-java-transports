@@ -25,19 +25,11 @@ import javax.jms.Queue;
 import javax.jms.Topic;
 
 import org.apache.axis2.transport.testkit.name.Key;
-import org.apache.axis2.transport.testkit.tests.Setup;
 import org.apache.axis2.transport.testkit.tests.Transient;
 
 @Key("broker")
 public abstract class JMSTestEnvironment {
-    private @Transient ConnectionFactory connectionFactory;
-    
-    @Setup @SuppressWarnings("unused")
-    private void setUp() throws Exception {
-        connectionFactory = createConnectionFactory();
-    }
-    
-    protected abstract ConnectionFactory createConnectionFactory() throws Exception;
+    protected @Transient ConnectionFactory connectionFactory;
     
     public Destination createDestination(String destinationType, String name) throws Exception {
         if (destinationType.equals(JMSConstants.DESTINATION_TYPE_TOPIC)) {
