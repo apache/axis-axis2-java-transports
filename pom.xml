@@ -147,7 +147,6 @@
     </scm>
 
     <modules>
-        <module>modules/http</module>
         <module>modules/sms</module>
         <module>modules/all</module>
     </modules>
